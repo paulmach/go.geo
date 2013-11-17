@@ -88,8 +88,8 @@ func (l *Line) GeoMidpoint() *Point {
 
 // Bounds returns bound around the line. Simply uses rectangular coordinates.
 func (l *Line) Bounds() *Bound {
-	return NewBound(math.Max(l.A.Y(), l.B.Y()), math.Min(l.A.Y(), l.B.Y()),
-		math.Max(l.A.X(), l.B.X()), math.Min(l.A.X(), l.B.X()))
+	return NewBound(math.Max(l.A.X(), l.B.X()), math.Min(l.A.X(), l.B.X()),
+		math.Max(l.A.Y(), l.B.Y()), math.Min(l.A.Y(), l.B.Y()))
 }
 
 // Reverse swapps the start and end of the line

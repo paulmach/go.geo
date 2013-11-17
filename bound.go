@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -10,10 +11,10 @@ type Bound struct {
 	sw, ne *Point
 }
 
-func NewBound(north, south, east, west float64) *Bound {
+func NewBound(east, west, north, south float64) *Bound {
 	return &Bound{
-		sw: &Point{west, south},
-		ne: &Point{east, north},
+		sw: &Point{math.Min(east, west), math.Min(north, south)},
+		ne: &Point{math.Max(east, west), math.Max(north, south)},
 	}
 }
 
@@ -67,6 +68,11 @@ func (b *Bound) Intersects(bound *Bound) bool {
 		return true
 	}
 
+	// now check the completely inside case, only one consition required
+	if b.Contains(bound.sw) {
+		return true
+	}
+
 	return false
 }
 
@@ -79,7 +85,8 @@ func (b *Bound) Center() *Point {
 }
 
 // Expands in all directions by the amount given. The amount must be
-// in the units of the bounds.
+// in the units of the bounds. Techinally one can pad with negative value,
+// but no error checking is done.
 func (b *Bound) Pad(amount float64) *Bound {
 	b.sw.SetX(b.sw.X() - amount)
 	b.sw.SetY(b.sw.Y() - amount)
@@ -136,7 +143,7 @@ func (b *Bound) Empty() bool {
 	return b.sw.Equals(b.ne)
 }
 
-func (b *Bound) Equal(c *Bound) bool {
+func (b *Bound) Equals(c *Bound) bool {
 	if b.sw.Equals(c.sw) && b.ne.Equals(c.ne) {
 		return true
 	}
@@ -146,4 +153,8 @@ func (b *Bound) Equal(c *Bound) bool {
 
 func (b *Bound) Clone() *Bound {
 	return NewBoundFromPoints(b.sw, b.ne)
+}
+
+func (b *Bound) String() string {
+	return fmt.Sprintf("[[%f, %f], [%f, %f]]", b.sw.X(), b.ne.X(), b.sw.Y(), b.ne.Y())
 }

@@ -232,7 +232,7 @@ func (p *Path) Bounds() *Bound {
 		maxY = math.Max(maxY, v.Y())
 	}
 
-	return NewBound(maxY, minY, maxX, minX)
+	return NewBound(maxX, minX, maxY, minY)
 }
 
 // SetAt updates a position at i along the path.
