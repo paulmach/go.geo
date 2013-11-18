@@ -6,34 +6,34 @@ import (
 
 func TestBoundNew(t *testing.T) {
 	bound := NewBound(5, 0, 3, 0)
-	if !bound.sw.Equals(&Point{0, 0}) {
-		t.Errorf("bound, incorrect sw: expected %v, got %v", &Point{0, 0}, bound.sw)
+	if !bound.sw.Equals(NewPoint(0, 0)) {
+		t.Errorf("bound, incorrect sw: expected %v, got %v", NewPoint(0, 0), bound.sw)
 	}
 
-	if !bound.ne.Equals(&Point{5, 3}) {
-		t.Errorf("bound, incorrect ne: expected %v, got %v", &Point{5, 3}, bound.ne)
+	if !bound.ne.Equals(NewPoint(5, 3)) {
+		t.Errorf("bound, incorrect ne: expected %v, got %v", NewPoint(5, 3), bound.ne)
 	}
 
-	bound = NewBoundFromPoints(&Point{0, 3}, &Point{4, 0})
-	if !bound.sw.Equals(&Point{0, 0}) {
-		t.Errorf("bound, incorrect sw: expected %v, got %v", &Point{0, 0}, bound.sw)
+	bound = NewBoundFromPoints(NewPoint(0, 3), NewPoint(4, 0))
+	if !bound.sw.Equals(NewPoint(0, 0)) {
+		t.Errorf("bound, incorrect sw: expected %v, got %v", NewPoint(0, 0), bound.sw)
 	}
 
-	if !bound.ne.Equals(&Point{4, 3}) {
-		t.Errorf("bound, incorrect ne: expected %v, got %v", &Point{4, 3}, bound.ne)
+	if !bound.ne.Equals(NewPoint(4, 3)) {
+		t.Errorf("bound, incorrect ne: expected %v, got %v", NewPoint(4, 3), bound.ne)
 	}
 }
 
 func TestBoundExtend(t *testing.T) {
 	bound := NewBound(3, 0, 5, 0)
 
-	if b := bound.Clone().Extend(&Point{2, 1}); !b.Equals(bound) {
-		t.Errorf("bound, extend: expected %v, got %v", bound, b)
+	if b := bound.Clone().Extend(NewPoint(2, 1)); !b.Equals(bound) {
+		t.Errorf("bound, extend expected %v, got %v", bound, b)
 	}
 
 	answer := NewBound(6, 0, 5, -1)
-	if b := bound.Clone().Extend(&Point{6, -1}); !b.Equals(answer) {
-		t.Errorf("bound, extend: expected %v, got %v", answer, b)
+	if b := bound.Clone().Extend(NewPoint(6, -1)); !b.Equals(answer) {
+		t.Errorf("bound, extend expected %v, got %v", answer, b)
 	}
 }
 
@@ -41,37 +41,37 @@ func TestBoundContains(t *testing.T) {
 	var p *Point
 	bound := NewBound(2, -2, 1, -1)
 
-	p = &Point{0, 0}
+	p = NewPoint(0, 0)
 	if !bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to be within %v", p, bound)
 	}
 
-	p = &Point{-1, 0}
+	p = NewPoint(-1, 0)
 	if !bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to be within %v", p, bound)
 	}
 
-	p = &Point{2, 1}
+	p = NewPoint(2, 1)
 	if !bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to be within %v", p, bound)
 	}
 
-	p = &Point{0, 3}
+	p = NewPoint(0, 3)
 	if bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to not be within %v", p, bound)
 	}
 
-	p = &Point{0, -3}
+	p = NewPoint(0, -3)
 	if bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to not be within %v", p, bound)
 	}
 
-	p = &Point{3, 0}
+	p = NewPoint(3, 0)
 	if bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to not be within %v", p, bound)
 	}
 
-	p = &Point{-3, 0}
+	p = NewPoint(-3, 0)
 	if bound.Contains(p) {
 		t.Errorf("bound, contains expected %v, to not be within %v", p, bound)
 	}
@@ -117,13 +117,13 @@ func TestBoundCenter(t *testing.T) {
 	var b *Bound
 
 	b = NewBound(0, 1, 2, 3)
-	p = &Point{0.5, 2.5}
+	p = NewPoint(0.5, 2.5)
 	if c := b.Center(); !c.Equals(p) {
 		t.Errorf("bound, center expected %v, got %v", p, c)
 	}
 
 	b = NewBound(0, 0, 2, 2)
-	p = &Point{0, 2}
+	p = NewPoint(0, 2)
 	if c := b.Center(); !c.Equals(p) {
 		t.Errorf("bound, center expected %v, got %v", p, c)
 	}

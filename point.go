@@ -1,11 +1,16 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 )
 
 // A simple X/Y or Lng/Lat 2d point
 type Point [2]float64 // [X, Y] or [Lng, Lat]
+
+func NewPoint(x, y float64) *Point {
+	return &Point{x, y}
+}
 
 // Transform applies a given projection or inverse projection to the current point.
 func (p *Point) Transform(transformer func(*Point) *Point) *Point {
@@ -138,4 +143,8 @@ func (p *Point) Y() float64 {
 func (p *Point) SetY(y float64) *Point {
 	p[1] = y
 	return p
+}
+
+func (p *Point) String() string {
+	return fmt.Sprintf("[%f, %f]", p[0], p[1])
 }
