@@ -6,14 +6,18 @@ import (
 
 // represents the shortest path between A and B
 type Line struct {
-	A, B Point
+	a, b Point
+}
+
+func NewLine(a, b *Point) *Line {
+	return &Line{*a.Clone(), *b.Clone()}
 }
 
 // Transform applies a given projection or inverse projection to the current line.
 // Modifies the line.
 func (l *Line) Transform(projection func(*Point) *Point) *Line {
-	projection(&l.A)
-	projection(&l.B)
+	projection(&l.a)
+	projection(&l.b)
 
 	return l
 }
@@ -22,16 +26,16 @@ func (l *Line) Transform(projection func(*Point) *Point) *Line {
 // the line using standard euclidean geometry, using the units the points are in.
 func (l *Line) DistanceFrom(point *Point) float64 {
 
-	if l.A.Equals(&l.B) {
+	if l.a.Equals(&l.b) {
 		// line is of length 0
-		return l.A.DistanceFrom(point)
+		return l.a.DistanceFrom(point)
 	} else {
-		u := ((point.Y()-l.A.Y())*(l.B.Y()-l.A.Y()) + (point.X()-l.A.X())*(l.B.X()-l.A.X())) / (math.Pow(l.B.Y()-l.A.Y(), 2) + math.Pow(l.B.X()-l.A.X(), 2))
+		u := ((point.Y()-l.a.Y())*(l.b.Y()-l.a.Y()) + (point.X()-l.a.X())*(l.b.X()-l.a.X())) / (math.Pow(l.b.Y()-l.a.Y(), 2) + math.Pow(l.b.X()-l.a.X(), 2))
 
 		if u <= 0 {
-			return l.A.DistanceFrom(point)
+			return l.a.DistanceFrom(point)
 		} else if u >= 1 {
-			return l.B.DistanceFrom(point)
+			return l.b.DistanceFrom(point)
 		} else {
 			return l.Interpolate(u).DistanceFrom(point)
 		}
@@ -40,19 +44,19 @@ func (l *Line) DistanceFrom(point *Point) float64 {
 
 // Distance computes the distance of the line, ie. its length, in euclidian space.
 func (l *Line) Distance() float64 {
-	return l.A.DistanceFrom(&l.B)
+	return l.a.DistanceFrom(&l.b)
 }
 
 // GeoDistance the distance of the line, ie. its length, using spherical geometry.
 func (l *Line) GeoDistance(haversine ...bool) float64 {
-	return l.A.GeoDistanceFrom(&l.B, yesHaversine(haversine))
+	return l.a.GeoDistanceFrom(&l.b, yesHaversine(haversine))
 }
 
 // Interpolate performs a simple linear interpolation, from A to B
 func (l *Line) Interpolate(percent float64) *Point {
 	p := &Point{}
-	p.SetX(l.A.X() + percent*(l.B.X()-l.A.X()))
-	p.SetY(l.A.Y() + percent*(l.B.Y()-l.A.Y()))
+	p.SetX(l.a.X() + percent*(l.b.X()-l.a.X()))
+	p.SetY(l.a.Y() + percent*(l.b.Y()-l.a.Y()))
 
 	// simple
 	return p
@@ -68,16 +72,16 @@ func (l *Line) Midpoint() *Point {
 func (l *Line) GeoMidpoint() *Point {
 	p := &Point{}
 
-	dLng := deg2rad(l.B.Lng() - l.A.Lng())
+	dLng := deg2rad(l.b.Lng() - l.a.Lng())
 
-	aLatRad := deg2rad(l.A.Lat())
-	bLatRad := deg2rad(l.B.Lat())
+	aLatRad := deg2rad(l.a.Lat())
+	bLatRad := deg2rad(l.b.Lat())
 
 	x := math.Cos(bLatRad) * math.Cos(dLng)
 	y := math.Cos(bLatRad) * math.Sin(dLng)
 
 	p.SetLat(math.Atan2(math.Sin(aLatRad)+math.Sin(bLatRad), math.Sqrt((math.Cos(aLatRad)+x)*(math.Cos(aLatRad)+x)+y*y)))
-	p.SetLng(deg2rad(l.A.Lng()) + math.Atan2(y, math.Cos(aLatRad)+x))
+	p.SetLng(deg2rad(l.a.Lng()) + math.Atan2(y, math.Cos(aLatRad)+x))
 
 	// convert back to degrees
 	p.SetLat(rad2deg(p.Lat()))
@@ -88,16 +92,24 @@ func (l *Line) GeoMidpoint() *Point {
 
 // Bounds returns bound around the line. Simply uses rectangular coordinates.
 func (l *Line) Bounds() *Bound {
-	return NewBound(math.Max(l.A.X(), l.B.X()), math.Min(l.A.X(), l.B.X()),
-		math.Max(l.A.Y(), l.B.Y()), math.Min(l.A.Y(), l.B.Y()))
+	return NewBound(math.Max(l.a.X(), l.b.X()), math.Min(l.a.X(), l.b.X()),
+		math.Max(l.a.Y(), l.b.Y()), math.Min(l.a.Y(), l.b.Y()))
 }
 
 // Reverse swapps the start and end of the line
 func (l *Line) Reverse() *Line {
-	l.A, l.B = l.B, l.A
+	l.a, l.b = l.b, l.a
 	return l
 }
 
 func (l *Line) Clone() *Line {
-	return &Line{*l.A.Clone(), *l.B.Clone()}
+	return &Line{*l.a.Clone(), *l.b.Clone()}
+}
+
+func (l *Line) A() *Point {
+	return &l.a
+}
+
+func (l *Line) B() *Point {
+	return &l.b
 }
