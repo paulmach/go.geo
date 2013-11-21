@@ -175,7 +175,7 @@ func encodeNumber(num int) string {
 }
 
 // TotalDistance computes the total distance in the units of the points
-func (p *Path) TotalDistance() float64 {
+func (p *Path) Distance() float64 {
 	sum := 0.0
 
 	loopTo := len(p.points) - 1
@@ -187,7 +187,7 @@ func (p *Path) TotalDistance() float64 {
 }
 
 // GeoTotalDistance computes the total distance using spherical geometry
-func (p *Path) GeoTotalDistance(haversine ...bool) float64 {
+func (p *Path) GeoDistance(haversine ...bool) float64 {
 	yesgeo := yesHaversine(haversine)
 	sum := 0.0
 
@@ -213,7 +213,7 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
-func (p *Path) Bounds() *Bound {
+func (p *Path) Bound() *Bound {
 	if len(p.points) == 0 {
 		return NewBound(0, 0, 0, 0)
 	}
@@ -302,6 +302,20 @@ func (p *Path) Pop() *Point {
 
 func (p *Path) Length() int {
 	return len(p.points)
+}
+
+func (p *Path) Equals(path *Path) bool {
+	if p.Length() != path.Length() {
+		return false
+	}
+
+	for i, v := range p.points {
+		if !v.Equals(&path.points[i]) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (p *Path) Clone() *Path {
