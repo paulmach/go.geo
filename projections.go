@@ -30,44 +30,48 @@ var Mercator = Projecter{
 
 var ScalarMercator struct {
 	Level   uint
-	Project func(lat, lng float64) (x, y uint)
-	Inverse func(x, y uint) (lat, lng float64)
+	Project func(lat, lng float64) (x, y uint64)
+	Inverse func(x, y uint64) (lat, lng float64)
 }
 
 func init() {
 	ScalarMercator.Level = 31
-	ScalarMercator.Project = func(lat, lng float64) (x, y uint) {
-		var factor uint
-		factor = 1 << ScalarMercator.Level
-		maxtiles := float64(factor)
+	ScalarMercator.Project = scalarMercatorProject
+	ScalarMercator.Inverse = scalarMercatorInverse
+}
 
-		lng = lng/360.0 + 0.5
-		x = (uint)(lng * maxtiles)
+func scalarMercatorProject(lat, lng float64) (x, y uint64) {
+	var factor uint64
+	factor = 1 << ScalarMercator.Level
+	maxtiles := float64(factor)
 
-		// bound it because we have a top of the world problem
-		siny := math.Sin(lat * math.Pi / 180.0)
+	lng = lng/360.0 + 0.5
+	x = (uint64)(lng * maxtiles)
 
-		if siny < -0.9999 {
-			lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
-			y = 0
-		} else if siny > 0.9999 {
-			lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
-			y = factor - 1
-		} else {
-			lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
-			y = (uint)(lat * maxtiles)
-		}
+	// bound it because we have a top of the world problem
+	siny := math.Sin(lat * math.Pi / 180.0)
 
-		return
+	if siny < -0.9999 {
+		lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
+		y = 0
+	} else if siny > 0.9999 {
+		lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
+		y = factor - 1
+	} else {
+		lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
+		y = (uint64)(lat * maxtiles)
 	}
 
-	ScalarMercator.Inverse = func(x, y uint) (lat, lng float64) {
-		factor := 1 << ScalarMercator.Level
-		maxtiles := float64(factor)
+	return
+}
 
-		lng = 360.0 * (float64(x)/maxtiles - 0.5)
-		lat = (2.0*math.Atan(math.Exp(math.Pi-(2*math.Pi)*(float64(y))/maxtiles)))*(180.0/math.Pi) - 90.0
+func scalarMercatorInverse(x, y uint64) (lat, lng float64) {
+	var factor uint64
+	factor = 1 << ScalarMercator.Level
+	maxtiles := float64(factor)
 
-		return
-	}
+	lng = 360.0 * (float64(x)/maxtiles - 0.5)
+	lat = (2.0*math.Atan(math.Exp(math.Pi-(2*math.Pi)*(float64(y))/maxtiles)))*(180.0/math.Pi) - 90.0
+
+	return
 }

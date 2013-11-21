@@ -10,17 +10,17 @@ func TestLineNew(t *testing.T) {
 
 	l := NewLine(a, b)
 	if !l.A().Equals(a) {
-		t.Errorf("line, expected %v == %v", l.A, a)
+		t.Errorf("line, expected %v == %v", l.A(), a)
 	}
 
 	if !l.B().Equals(b) {
-		t.Errorf("line, expected %v == %v", l.B, b)
+		t.Errorf("line, expected %v == %v", l.B(), b)
 	}
 
 	// verify there is a clone
 	b.Scale(10)
 	if l.B().Equals(b) {
-		t.Errorf("line, expected %v != %v", l.B, b)
+		t.Errorf("line, expected %v != %v", l.B(), b)
 	}
 }
 

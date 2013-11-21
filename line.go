@@ -29,17 +29,16 @@ func (l *Line) DistanceFrom(point *Point) float64 {
 	if l.a.Equals(&l.b) {
 		// line is of length 0
 		return l.a.DistanceFrom(point)
-	} else {
-		u := ((point.Y()-l.a.Y())*(l.b.Y()-l.a.Y()) + (point.X()-l.a.X())*(l.b.X()-l.a.X())) / (math.Pow(l.b.Y()-l.a.Y(), 2) + math.Pow(l.b.X()-l.a.X(), 2))
-
-		if u <= 0 {
-			return l.a.DistanceFrom(point)
-		} else if u >= 1 {
-			return l.b.DistanceFrom(point)
-		} else {
-			return l.Interpolate(u).DistanceFrom(point)
-		}
 	}
+
+	u := ((point.Y()-l.a.Y())*(l.b.Y()-l.a.Y()) + (point.X()-l.a.X())*(l.b.X()-l.a.X())) / (math.Pow(l.b.Y()-l.a.Y(), 2) + math.Pow(l.b.X()-l.a.X(), 2))
+	if u <= 0 {
+		return l.a.DistanceFrom(point)
+	} else if u >= 1 {
+		return l.b.DistanceFrom(point)
+	}
+
+	return l.Interpolate(u).DistanceFrom(point)
 }
 
 // Distance computes the distance of the line, ie. its length, in euclidian space.
