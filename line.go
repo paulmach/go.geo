@@ -102,6 +102,11 @@ func (l *Line) Reverse() *Line {
 	return l
 }
 
+// direction is irrelevant, ie. true if one is the reverse of the other
+func (l *Line) Equals(line *Line) bool {
+	return (l.a.Equals(&line.a) && l.b.Equals(&line.b)) || (l.a.Equals(&line.b) && l.b.Equals(&line.a))
+}
+
 func (l *Line) Clone() *Line {
 	return &Line{*l.a.Clone(), *l.b.Clone()}
 }
