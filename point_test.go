@@ -20,11 +20,11 @@ func TestPointDistanceFrom(t *testing.T) {
 	p2 := NewPoint(3, 4)
 
 	if d := p1.DistanceFrom(p2); d != 5 {
-		t.Errorf("pont, distanceFrom expected 5, got %f", d)
+		t.Errorf("point, distanceFrom expected 5, got %f", d)
 	}
 
 	if d := p2.DistanceFrom(p1); d != 5 {
-		t.Errorf("pont, distanceFrom expected 5, got %f", d)
+		t.Errorf("point, distanceFrom expected 5, got %f", d)
 	}
 }
 
@@ -174,5 +174,21 @@ func TestPointGettersSetters(t *testing.T) {
 
 	if p.Lat() != 3 {
 		t.Errorf("point, setLng expected Lat to be unchanged")
+	}
+}
+
+func TestPointToArray(t *testing.T) {
+	p := NewPoint(1, 2)
+	if a := p.ToArray(); a != [2]float64{1, 2} {
+		t.Errorf("point, toArray expected %v == %v", a, [2]float64{1, 2})
+	}
+}
+
+func TestPointString(t *testing.T) {
+	p := NewPoint(1, 2)
+
+	answer := "[1.000000, 2.000000]"
+	if s := p.String(); s != answer {
+		t.Errorf("point, string expected %s, got %s", answer, s)
 	}
 }

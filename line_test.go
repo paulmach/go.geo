@@ -47,6 +47,12 @@ func TestLineDistanceFrom(t *testing.T) {
 	if d := l.DistanceFrom(NewPoint(0, 13)); d != answer {
 		t.Errorf("line, distanceFrom expected %f, got %f", answer, d)
 	}
+
+	l = NewLine(NewPoint(0, 0), NewPoint(0, 0))
+	answer = 5
+	if d := l.DistanceFrom(NewPoint(3, 4)); d != answer {
+		t.Errorf("line, distanceFrom expected %f, got %f", answer, d)
+	}
 }
 
 func TestLineDistance(t *testing.T) {
@@ -132,10 +138,24 @@ func TestLineClone(t *testing.T) {
 	l2.B().Scale(15)
 
 	if l1.A().Equals(l2.A()) {
-		t.Errorf("line, expected %v != %v", l1.A(), l2.A())
+		t.Errorf("line, clone expected %v != %v", l1.A(), l2.A())
 	}
 
 	if l2.B().Equals(l1.B()) {
-		t.Errorf("line, expected %v != %v", l2.B(), l1.B())
+		t.Errorf("line, clone expected %v != %v", l2.B(), l1.B())
+	}
+}
+
+func TestLineEquals(t *testing.T) {
+	l1 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
+	l2 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
+
+	if !l1.Equals(l2) || !l2.Equals(l1) {
+		t.Errorf("line, equals expcted %v == %v", l1, l2)
+	}
+
+	l3 := NewLine(NewPoint(3, 4), NewPoint(1, 2))
+	if !l1.Equals(l3) || !l3.Equals(l1) {
+		t.Errorf("line, equals expcted %v == %v", l1, l3)
 	}
 }

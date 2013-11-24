@@ -22,6 +22,12 @@ func TestBoundNew(t *testing.T) {
 	if !bound.ne.Equals(NewPoint(4, 3)) {
 		t.Errorf("bound, incorrect ne: expected %v, got %v", NewPoint(4, 3), bound.ne)
 	}
+
+	bound1 := NewBound(1, 2, 3, 4)
+	bound2 := NewBoundFromPoints(NewPoint(1, 3), NewPoint(2, 4))
+	if !bound1.Equals(bound2) {
+		t.Errorf("bound, expected %v == %v", bound1, bound2)
+	}
 }
 
 func TestBoundExtend(t *testing.T) {
@@ -142,5 +148,56 @@ func TestBoundPad(t *testing.T) {
 	tester = NewBound(0.1, 0.9, 2.1, 2.9)
 	if bound.Pad(-0.1); !bound.Equals(tester) {
 		t.Errorf("bound, pad expected %v, got %v", tester, bound)
+	}
+}
+
+func TestBoundAccessors(t *testing.T) {
+	bound := NewBound(1, 2, 3, 4)
+
+	if !bound.sw.Equals(bound.SouthWest()) || !bound.SouthWest().Equals(bound.sw) {
+		t.Errorf("bound, southwest expected %v == %v", bound.sw, bound.SouthWest())
+	}
+
+	if !bound.ne.Equals(bound.NorthEast()) || !bound.NorthEast().Equals(bound.ne) {
+		t.Errorf("bound, northeast expected %v == %v", bound.ne, bound.NorthEast())
+	}
+}
+
+func TestBoundEquals(t *testing.T) {
+	bound1 := NewBound(1, 2, 3, 4)
+	bound2 := NewBoundFromPoints(NewPoint(1, 3), NewPoint(2, 4))
+	if !bound1.Equals(bound2) || !bound2.Equals(bound1) {
+		t.Errorf("bound, expected %v == %v", bound1, bound2)
+	}
+
+	bound2 = NewBound(1, 2, 4, 4)
+	if bound1.Equals(bound2) || bound2.Equals(bound1) {
+		t.Errorf("bound, expected %v != %v", bound1, bound2)
+	}
+
+	bound2 = NewBound(1, 1, 3, 4)
+	if bound1.Equals(bound2) || bound2.Equals(bound1) {
+		t.Errorf("bound, expected %v != %v", bound1, bound2)
+	}
+}
+
+func TestBoundEmpty(t *testing.T) {
+	bound := NewBound(1, 2, 3, 4)
+	if bound.Empty() {
+		t.Errorf("bound, empty exported false, got true")
+	}
+
+	bound = NewBound(1, 1, 2, 2)
+	if !bound.Empty() {
+		t.Errorf("bound, empty exported true, got false")
+	}
+}
+
+func TestBoundString(t *testing.T) {
+	bound := NewBound(1, 2, 3, 4)
+
+	answer := "[[1.000000, 2.000000], [3.000000, 4.000000]]"
+	if s := bound.String(); s != answer {
+		t.Errorf("bound, string expected %s, got %s", answer, s)
 	}
 }

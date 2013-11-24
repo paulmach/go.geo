@@ -119,6 +119,160 @@ func TestPathBound(t *testing.T) {
 	if b := p.Bound(); !b.Equals(answer) {
 		t.Errorf("path, bound, %v != %v", b, answer)
 	}
+
+	p = NewPath()
+	if !p.Bound().Empty() {
+		t.Errorf("path, bound, expect empty path to have empty bounds")
+	}
+}
+
+func TestPathSetAt(t *testing.T) {
+	path := NewPath()
+	point := NewPoint(1, 2)
+
+	path.Push(NewPoint(2, 3))
+
+	path.SetAt(0, point)
+	if p := path.GetAt(0); !p.Equals(point) {
+		t.Errorf("path, setAt expected %v == %v", p, point)
+	}
+}
+
+func TestPathSetAtPanicIndexOver(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("path, expect setAt to panic if index out of range")
+		}
+	}()
+
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+	p.SetAt(2, NewPoint(3, 4))
+}
+
+func TestPathSetAtPanicIndexUnder(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("path, expect setAt to panic if index out of range")
+		}
+	}()
+
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+	p.SetAt(-1, NewPoint(3, 4))
+}
+
+func TestPathGetAt(t *testing.T) {
+	path := NewPath()
+	point := NewPoint(1, 2)
+
+	path.Push(point)
+
+	if p := path.GetAt(0); !p.Equals(point) {
+		t.Errorf("path, getAt expected %v == %v", p, point)
+	}
+
+	if p := path.GetAt(10); p != nil {
+		t.Errorf("path, expect out of range getAt to be nil")
+	}
+}
+
+func TestPathInsertAt(t *testing.T) {
+	path := NewPath()
+	point1 := NewPoint(1, 2)
+	point2 := NewPoint(3, 4)
+	path.Push(point1)
+
+	path.InsertAt(0, point2)
+	if p := path.GetAt(0); !p.Equals(point2) {
+		t.Errorf("path, insertAt expected %v == %v", p, point2)
+	}
+
+	if p := path.GetAt(1); !p.Equals(point1) {
+		t.Errorf("path, insertAt expected %v == %v", p, point1)
+	}
+
+	point3 := NewPoint(5, 6)
+	path.InsertAt(2, point3)
+	if p := path.GetAt(2); !p.Equals(point3) {
+		t.Errorf("path, insertAt expected %v == %v", p, point3)
+	}
+}
+
+func TestPathInsertAtPanicIndexOver(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("path, expect insertAt to panic if index out of range")
+		}
+	}()
+
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+	p.InsertAt(2, NewPoint(3, 4))
+}
+
+func TestPathInsertAtPanicIndexUnder(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("path, expect insertAt to panic if index out of range")
+		}
+	}()
+
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+	p.InsertAt(-1, NewPoint(3, 4))
+}
+
+func TestPathRemoveAt(t *testing.T) {
+	path := NewPath()
+	point := NewPoint(1, 2)
+
+	path.Push(point)
+	path.RemoveAt(0)
+
+	if path.Length() != 0 {
+		t.Errorf("path, expect removeAt to remove point")
+	}
+}
+
+func TestPathRemoveAtPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("path, expect removeAt to panic if index out of range")
+		}
+	}()
+
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+	p.RemoveAt(2)
+}
+
+func TestPathPush(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(1, 2))
+
+	if p.Length() != 1 {
+		t.Errorf("path, push length 1 != %d", p.Length())
+	}
+
+	answer := NewPoint(1, 2)
+	if a := p.GetAt(0); !a.Equals(answer) {
+		t.Errorf("path, push first expecting %v == %v", a, answer)
+	}
+}
+
+func TestPathPop(t *testing.T) {
+	p := NewPath()
+
+	if p.Pop() != nil {
+		t.Errorf("path, expect empty pop to return nil")
+	}
+
+	p.Push(NewPoint(1, 2))
+	answer := NewPoint(1, 2)
+	if a := p.Pop(); !a.Equals(answer) {
+		t.Errorf("path, pop first expecting %v == %v", a, answer)
+	}
 }
 
 func TestPathEquals(t *testing.T) {
