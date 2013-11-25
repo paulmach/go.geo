@@ -29,7 +29,7 @@ var Mercator = Projecter{
 }
 
 var ScalarMercator struct {
-	Level   uint
+	Level   uint64
 	Project func(lat, lng float64) (x, y uint64)
 	Inverse func(x, y uint64) (lat, lng float64)
 }
