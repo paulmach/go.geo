@@ -92,6 +92,25 @@ func TestLineInterpolate(t *testing.T) {
 	}
 }
 
+func TestLineSide(t *testing.T) {
+	l := NewLine(NewPoint(0, 0), NewPoint(0, 10))
+
+	// colinear
+	if o := l.Side(NewPoint(0, -5)); o != 0 {
+		t.Errorf("point, expected to be colinear, got %d", o)
+	}
+
+	// right
+	if o := l.Side(NewPoint(1, 5)); o != 1 {
+		t.Errorf("point, expected to be on right, got %d", o)
+	}
+
+	// left
+	if o := l.Side(NewPoint(-1, 5)); o != -1 {
+		t.Errorf("point, expected to be on left, got %d", o)
+	}
+}
+
 func TestLineMidpoint(t *testing.T) {
 	var answer *Point
 	l := NewLine(NewPoint(0, 0), NewPoint(10, 20))

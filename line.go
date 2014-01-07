@@ -61,6 +61,19 @@ func (l *Line) Interpolate(percent float64) *Point {
 	return p
 }
 
+// Side return 1 if the point is on the right side, -1 left side and 0 if colinear
+func (l *Line) Side(p *Point) int {
+	val := (l.b.X()-l.a.X())*(p.Y()-l.b.Y()) - (l.b.Y()-l.a.Y())*(p.X()-l.b.X())
+
+	if val < 0 {
+		return 1 // right
+	} else if val > 0 {
+		return -1 // left
+	}
+
+	return 0 // colinear
+}
+
 // Midpoint returns the euclidean midpoint of the line
 func (l *Line) Midpoint() *Point {
 	return l.Interpolate(0.5)
