@@ -213,6 +213,51 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
+// Intersects can take a line or a path to determine if there is an intersection.
+func (p *Path) Intersects(geometry interface{}) bool {
+	switch g := geometry.(type) {
+	case Line:
+		return p.IntersectsLine(&g)
+	case *Line:
+		return p.IntersectsLine(g)
+	case Path:
+		return p.IntersectsPath(&g)
+	case *Path:
+		return p.IntersectsPath(g)
+	default:
+		panic("can only determine intersection with lines and paths")
+	}
+}
+
+// IntersectsPath takes a Path and checks if it intersects with the path.
+func (p *Path) IntersectsPath(path *Path) bool {
+	for i := 0; i < len(p.points)-1; i++ {
+		pLine := NewLine(&p.points[i], &p.points[i+1])
+
+		for j := 0; j < len(path.points)-1; j++ {
+			pathLine := NewLine(&path.points[j], &path.points[j+1])
+
+			if pLine.Intersects(pathLine) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// IntersectsLine takes a Line and checks if it intersects with the path.
+func (p *Path) IntersectsLine(line *Line) bool {
+	for i := 0; i < len(p.points)-1; i++ {
+		pTest := NewLine(&p.points[i], &p.points[i+1])
+		if pTest.Intersects(line) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (p *Path) Bound() *Bound {
 	if len(p.points) == 0 {
 		return NewBound(0, 0, 0, 0)

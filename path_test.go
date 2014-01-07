@@ -108,6 +108,59 @@ func TestPathDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestPathIntersectsPath(t *testing.T) {
+	var path *Path
+	var answer bool
+
+	p := NewPath().Push(NewPoint(0, 0)).Push(NewPoint(1, 1)).Push(NewPoint(2, 2))
+
+	answer = true
+	path = NewPath()
+	path.Push(NewPoint(0, 0.5)).Push(NewPoint(1, 0.5))
+	if b := p.IntersectsPath(path); b != answer {
+		t.Errorf("path, intersectsPath expected %v, got: %v", answer, b)
+	}
+
+	answer = true
+	path = NewPath()
+	path.Push(NewPoint(0, 1)).Push(NewPoint(1, 1))
+	if b := p.IntersectsPath(path); b != answer {
+		t.Errorf("path, intersectsPath expected %v, got: %v", answer, b)
+	}
+
+	answer = false
+	path = NewPath()
+	path.Push(NewPoint(0, 1)).Push(NewPoint(0, 2))
+	if b := p.IntersectsPath(path); b != answer {
+		t.Errorf("path, intersectsPath expected %v, got: %v", answer, b)
+	}
+}
+
+func TestPathIntersectsLine(t *testing.T) {
+	var line *Line
+	var answer bool
+
+	p := NewPath().Push(NewPoint(0, 0)).Push(NewPoint(1, 1)).Push(NewPoint(2, 2))
+
+	answer = true
+	line = NewLine(NewPoint(0, 0.5), NewPoint(1, 0.5))
+	if b := p.IntersectsLine(line); b != answer {
+		t.Errorf("path, intersectsLine expected %v, got: %v", answer, b)
+	}
+
+	answer = true
+	line = NewLine(NewPoint(0, 1), NewPoint(1, 1))
+	if b := p.IntersectsLine(line); b != answer {
+		t.Errorf("path, intersectsLine expected %v, got: %v", answer, b)
+	}
+
+	answer = false
+	line = NewLine(NewPoint(0, 1), NewPoint(0, 2))
+	if b := p.IntersectsLine(line); b != answer {
+		t.Errorf("path, intersectsLine expected %v, got: %v", answer, b)
+	}
+}
+
 func TestPathBound(t *testing.T) {
 	p := NewPath()
 	p.Push(NewPoint(0.5, .2))
