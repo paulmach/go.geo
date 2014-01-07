@@ -20,6 +20,8 @@ Development is currently focused on my needs. But pull requests are welcome.
 <br />
 [![Build Status](https://travis-ci.org/paulmach/go.geo.png?branch=master)](https://travis-ci.org/paulmach/go.geo)
 &nbsp; &nbsp;
+[![Coverage Status](https://coveralls.io/repos/paulmach/go.geo/badge.png?branch=master)](https://coveralls.io/r/paulmach/go.geo?branch=master)
+&nbsp; &nbsp;
 [![Godoc Reference](https://godoc.org/github.com/paulmach/go.geo?status.png)](https://godoc.org/github.com/paulmach/go.geo)
 
 ## Exposed objects
