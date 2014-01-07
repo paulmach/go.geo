@@ -227,6 +227,8 @@ func (p *Path) Intersects(geometry interface{}) bool {
 	default:
 		panic("can only determine intersection with lines and paths")
 	}
+
+	return false // unreachable
 }
 
 // IntersectsPath takes a Path and checks if it intersects with the path.
