@@ -111,6 +111,81 @@ func TestLineSide(t *testing.T) {
 	}
 }
 
+func TestLineIntersection(t *testing.T) {
+	var answer *Point
+	l := NewLine(NewPoint(0, 0), NewPoint(1, 1))
+
+	answer = nil
+	if p := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(2, 1))); p != nil {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = nil
+	if p := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(3, 1))); p != nil {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = InfinityPoint
+	if p := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 2))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = NewPoint(1, 1)
+	if p := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 3))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = NewPoint(0, 0)
+	if p := l.Intersection(NewLine(NewPoint(1, 10), NewPoint(0, 0))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = NewPoint(0.5, 0.5)
+	if p := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(1, 0))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = NewPoint(0.5, 0.5)
+	if p := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(2, -1))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+
+	answer = NewPoint(0.5, 0.5)
+	if p := l.Intersection(NewLine(NewPoint(0.5, 0.5), NewPoint(2, -1))); !p.Equals(answer) {
+		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	}
+}
+
+func TestLineIntersects(t *testing.T) {
+	var answer bool
+	l := NewLine(NewPoint(0, 0), NewPoint(1, 1))
+
+	answer = false
+	if p := l.Intersects(NewLine(NewPoint(1, 0), NewPoint(2, 1))); p != answer {
+		t.Errorf("line, intersects expected %v, got %v", answer, p)
+	}
+
+	answer = true
+	if p := l.Intersects(NewLine(NewPoint(1, 0), NewPoint(0, 1))); p != answer {
+		t.Errorf("line, intersects expected %v, got %v", answer, p)
+	}
+
+	answer = true
+	if p := l.Intersects(NewLine(NewPoint(1, 1), NewPoint(2, 1))); p != answer {
+		t.Errorf("line, intersects expected %v, got %v", answer, p)
+	}
+
+	answer = true
+	l2 := NewLine(NewPoint(0.5, 0.5), NewPoint(2, 2))
+	if p := l.Intersects(l2); p != answer {
+		t.Errorf("line, intersects expected %v, got %v", answer, p)
+	}
+
+	if p := l2.Intersects(l); p != answer {
+		t.Errorf("line, intersects expected %v, got %v", answer, p)
+	}
+}
+
 func TestLineMidpoint(t *testing.T) {
 	var answer *Point
 	l := NewLine(NewPoint(0, 0), NewPoint(10, 20))

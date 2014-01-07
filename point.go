@@ -7,6 +7,7 @@ import (
 
 // A simple X/Y or Lng/Lat 2d point
 type Point [2]float64 // [X, Y] or [Lng, Lat]
+var InfinityPoint = &Point{math.Inf(1), math.Inf(1)}
 
 func NewPoint(x, y float64) *Point {
 	return &Point{x, y}

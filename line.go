@@ -74,6 +74,67 @@ func (l *Line) Side(p *Point) int {
 	return 0 // colinear
 }
 
+// Intersection finds the intersection of the two lines or nil,
+// if the lines are colinear will return NewPoint(math.Inf(1), math.Inf(1)) == InfinityPoint
+func (l1 *Line) Intersection(l2 *Line) *Point {
+	den := (l2.b.Y()-l2.a.Y())*(l1.b.X()-l1.a.X()) - (l2.b.X()-l2.a.X())*(l1.b.Y()-l1.a.Y())
+	U1 := (l2.b.X()-l2.a.X())*(l1.a.Y()-l2.a.Y()) - (l2.b.Y()-l2.a.Y())*(l1.a.X()-l2.a.X())
+	U2 := (l1.b.X()-l1.a.X())*(l1.a.Y()-l2.a.Y()) - (l1.b.Y()-l1.a.Y())*(l1.a.X()-l2.a.X())
+
+	if den == 0 {
+		// colinear, all bets are off
+		if U1 == 0 && U2 == 0 {
+			return InfinityPoint
+		}
+
+		return nil
+	}
+
+	if U1/den < 0 || U1/den > 1 || U2/den < 0 || U2/den > 1 {
+		return nil
+	}
+
+	return l1.Interpolate(U1 / den)
+}
+
+// Intersects will return true if the lines are colinear AND intersect.
+// Based on: http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+func (l1 *Line) Intersects(l2 *Line) bool {
+	s1 := l1.Side(l2.A())
+	s2 := l1.Side(l2.B())
+	s3 := l2.Side(l1.A())
+	s4 := l2.Side(l1.B())
+
+	if s1 != s2 && s3 != s4 {
+		return true
+	}
+
+	// Special Cases
+	// l1 and l2.a colinear, check if l2.a is on l1
+	if s1 == 0 && l1.Bounds().Contains(l2.A()) {
+		return true
+	}
+
+	// l1 and l2.b colinear, check if l2.b is on l1
+	if s2 == 0 && l1.Bounds().Contains(l2.B()) {
+		return true
+	}
+
+	// TODO: are these next two tests redudant give the test above
+
+	// l2 and l1.a colinear, check if l1.a is on l2
+	if s3 == 0 && l2.Bounds().Contains(l1.A()) {
+		return true
+	}
+
+	// l2 and l1.b colinear, check if l1.b is on l2
+	if s4 == 0 && l2.Bounds().Contains(l1.B()) {
+		return true
+	}
+
+	return false
+}
+
 // Midpoint returns the euclidean midpoint of the line
 func (l *Line) Midpoint() *Point {
 	return l.Interpolate(0.5)
