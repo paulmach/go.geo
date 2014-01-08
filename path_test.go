@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"bytes"
 	"math"
 	"math/rand"
 	"testing"
@@ -122,7 +123,7 @@ func TestPathIntersection(t *testing.T) {
 func TestPathIntersectionPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("invalid geometry should panic")
+			t.Error("path, intersection invalid geometry should panic")
 		}
 	}()
 
@@ -202,7 +203,7 @@ func TestPathIntersects(t *testing.T) {
 func TestPathIntersectsPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("invalid geometry should panic")
+			t.Error("path, intersects invalid geometry should panic")
 		}
 	}()
 
@@ -277,7 +278,7 @@ func TestPathBound(t *testing.T) {
 
 	p = NewPath()
 	if !p.Bound().Empty() {
-		t.Errorf("path, bound, expect empty path to have empty bounds")
+		t.Error("path, bound, expect empty path to have empty bounds")
 	}
 }
 
@@ -296,7 +297,7 @@ func TestPathSetAt(t *testing.T) {
 func TestPathSetAtPanicIndexOver(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("path, expect setAt to panic if index out of range")
+			t.Error("path, expect setAt to panic if index out of range")
 		}
 	}()
 
@@ -308,7 +309,7 @@ func TestPathSetAtPanicIndexOver(t *testing.T) {
 func TestPathSetAtPanicIndexUnder(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("path, expect setAt to panic if index out of range")
+			t.Error("path, expect setAt to panic if index out of range")
 		}
 	}()
 
@@ -328,7 +329,7 @@ func TestPathGetAt(t *testing.T) {
 	}
 
 	if p := path.GetAt(10); p != nil {
-		t.Errorf("path, expect out of range getAt to be nil")
+		t.Error("path, expect out of range getAt to be nil")
 	}
 }
 
@@ -357,7 +358,7 @@ func TestPathInsertAt(t *testing.T) {
 func TestPathInsertAtPanicIndexOver(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("path, expect insertAt to panic if index out of range")
+			t.Error("path, expect insertAt to panic if index out of range")
 		}
 	}()
 
@@ -369,7 +370,7 @@ func TestPathInsertAtPanicIndexOver(t *testing.T) {
 func TestPathInsertAtPanicIndexUnder(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("path, expect insertAt to panic if index out of range")
+			t.Error("path, expect insertAt to panic if index out of range")
 		}
 	}()
 
@@ -386,14 +387,14 @@ func TestPathRemoveAt(t *testing.T) {
 	path.RemoveAt(0)
 
 	if path.Length() != 0 {
-		t.Errorf("path, expect removeAt to remove point")
+		t.Error("path, expect removeAt to remove point")
 	}
 }
 
 func TestPathRemoveAtPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("path, expect removeAt to panic if index out of range")
+			t.Error("path, expect removeAt to panic if index out of range")
 		}
 	}()
 
@@ -420,7 +421,7 @@ func TestPathPop(t *testing.T) {
 	p := NewPath()
 
 	if p.Pop() != nil {
-		t.Errorf("path, expect empty pop to return nil")
+		t.Error("path, expect empty pop to return nil")
 	}
 
 	p.Push(NewPoint(1, 2))
@@ -442,17 +443,17 @@ func TestPathEquals(t *testing.T) {
 	p2.Push(NewPoint(1, 10))
 
 	if !p1.Equals(p2) {
-		t.Errorf("path, equals paths should be equal")
+		t.Error("path, equals paths should be equal")
 	}
 
 	p3 := p2.Clone().SetAt(1, NewPoint(0, 0))
 	if p1.Equals(p3) {
-		t.Errorf("path, equals paths should not be equal")
+		t.Error("path, equals paths should not be equal")
 	}
 
 	p2.Pop()
 	if p2.Equals(p1) {
-		t.Errorf("path, equals paths should not be equal")
+		t.Error("path, equals paths should not be equal")
 	}
 }
 
@@ -470,10 +471,25 @@ func TestPathClone(t *testing.T) {
 
 	p2 = p1.Clone()
 	if p1 == p2 {
-		t.Errorf("path, clone should return different pointers")
+		t.Error("path, clone should return different pointers")
 	}
 
 	if !p2.Equals(p1) {
-		t.Errorf("path, clone paths should be equal")
+		t.Error("path, clone paths should be equal")
+	}
+}
+
+func TestPathWriteOffFile(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(0.5, .2))
+	p.Push(NewPoint(1, 0))
+
+	expected := "OFF\n3 0 0\n0.000000 0.000000 0\n0.500000 0.200000 0\n1.000000 0.000000 0\n"
+	result := bytes.NewBufferString("")
+	p.WriteOffFile(result)
+
+	if result.String() != expected {
+		t.Errorf("path, writeOffFile not right, %v != %v", expected, result.String())
 	}
 }

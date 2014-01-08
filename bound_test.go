@@ -184,12 +184,12 @@ func TestBoundEquals(t *testing.T) {
 func TestBoundEmpty(t *testing.T) {
 	bound := NewBound(1, 2, 3, 4)
 	if bound.Empty() {
-		t.Errorf("bound, empty exported false, got true")
+		t.Error("bound, empty exported false, got true")
 	}
 
 	bound = NewBound(1, 1, 2, 2)
 	if !bound.Empty() {
-		t.Errorf("bound, empty exported true, got false")
+		t.Error("bound, empty exported true, got false")
 	}
 }
 

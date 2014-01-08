@@ -78,4 +78,13 @@ func TestScalarMercator(t *testing.T) {
 			t.Errorf("Scalar Mercator, longitude miss match: %f != %f", p.Lng(), city[1])
 		}
 	}
+
+	// test polar regions
+	if _, y := ScalarMercator.Project(89.9, 0); y != (1<<ScalarMercator.Level)-1 {
+		t.Error("Scalar Mercator, top of the world error")
+	}
+
+	if _, y := ScalarMercator.Project(-89.9, 0); y != 0 {
+		t.Error("Scalar Mercator, bottom of the world error")
+	}
 }

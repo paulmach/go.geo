@@ -220,7 +220,7 @@ func TestLineReverse(t *testing.T) {
 	l := NewLine(a, b).Reverse()
 
 	if !l.A().Equals(b) || !l.B().Equals(a) {
-		t.Errorf("line, reverse did not work")
+		t.Error("line, reverse did not work")
 	}
 }
 

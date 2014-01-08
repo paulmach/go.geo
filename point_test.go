@@ -143,7 +143,7 @@ func TestPointGettersSetters(t *testing.T) {
 	}
 
 	if p.Y() != 0 {
-		t.Errorf("point, setX expected Y to be unchanged")
+		t.Error("point, setX expected Y to be unchanged")
 	}
 
 	p = NewPoint(1, 0)
@@ -153,7 +153,7 @@ func TestPointGettersSetters(t *testing.T) {
 	}
 
 	if p.X() != 1 {
-		t.Errorf("point, setY expected X to be unchanged")
+		t.Error("point, setY expected X to be unchanged")
 	}
 
 	p = NewPoint(2, 0)
@@ -163,7 +163,7 @@ func TestPointGettersSetters(t *testing.T) {
 	}
 
 	if p.Lng() != 2 {
-		t.Errorf("point, setLat expected Lng to be unchanged")
+		t.Error("point, setLat expected Lng to be unchanged")
 	}
 
 	p = NewPoint(0, 3)
@@ -173,7 +173,7 @@ func TestPointGettersSetters(t *testing.T) {
 	}
 
 	if p.Lat() != 3 {
-		t.Errorf("point, setLng expected Lat to be unchanged")
+		t.Error("point, setLng expected Lat to be unchanged")
 	}
 }
 
