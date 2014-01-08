@@ -213,6 +213,67 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
+// Intersection calls IntersectionPath or IntersectionLine depending on the
+// type of the provided geometry.
+func (p *Path) Intersection(geometry interface{}) ([]*Point, [][2]int) {
+	switch g := geometry.(type) {
+	case Line:
+		return p.IntersectionLine(&g)
+	case *Line:
+		return p.IntersectionLine(g)
+	case Path:
+		return p.IntersectionPath(&g)
+	case *Path:
+		return p.IntersectionPath(g)
+	default:
+		panic("can only determine intersection with lines and paths")
+	}
+
+	return nil, nil // unreachable
+}
+
+// IntersectionPath returns a slice of points and a slice of tuples [i, j] where i is the segment
+// in parent path and j is the segment in the given path that intersect to form the given point.
+// Slices will be empty if there is no intersection.
+func (p *Path) IntersectionPath(path *Path) ([]*Point, [][2]int) {
+	// TODO: done some sort of line sweep here if p.Lenght() is big enough
+	points := make([]*Point, 0)
+	indexes := make([][2]int, 0)
+
+	for i := 0; i < len(p.points)-1; i++ {
+		pLine := NewLine(&p.points[i], &p.points[i+1])
+
+		for j := 0; j < len(path.points)-1; j++ {
+			pathLine := NewLine(&path.points[j], &path.points[j+1])
+
+			if point := pLine.Intersection(pathLine); point != nil {
+				points = append(points, point)
+				indexes = append(indexes, [2]int{i, j})
+			}
+		}
+	}
+
+	return points, indexes
+}
+
+// IntersectionLine returns a slice of points and a slice of tuples [i, 0] where i is the segment
+// in path that intersects with the line at the given point.
+// Slices will be empty if there is no intersection.
+func (p *Path) IntersectionLine(line *Line) ([]*Point, [][2]int) {
+	points := make([]*Point, 0)
+	indexes := make([][2]int, 0)
+
+	for i := 0; i < len(p.points)-1; i++ {
+		pTest := NewLine(&p.points[i], &p.points[i+1])
+		if point := pTest.Intersection(line); point != nil {
+			points = append(points, point)
+			indexes = append(indexes, [2]int{i, 0})
+		}
+	}
+
+	return points, indexes
+}
+
 // Intersects can take a line or a path to determine if there is an intersection.
 func (p *Path) Intersects(geometry interface{}) bool {
 	switch g := geometry.(type) {
@@ -233,6 +294,7 @@ func (p *Path) Intersects(geometry interface{}) bool {
 
 // IntersectsPath takes a Path and checks if it intersects with the path.
 func (p *Path) IntersectsPath(path *Path) bool {
+	// TODO: done some sort of line sweep here if p.Lenght() is big enough
 	for i := 0; i < len(p.points)-1; i++ {
 		pLine := NewLine(&p.points[i], &p.points[i+1])
 

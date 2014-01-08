@@ -108,6 +108,86 @@ func TestPathDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestPathIntersection(t *testing.T) {
+	path := NewPath()
+
+	// these shouldn't panic
+	path.Intersection(NewPath())
+	path.Intersection(*NewPath())
+
+	path.Intersection(NewLine(NewPoint(0, 0), NewPoint(1, 1)))
+	path.Intersection(*NewLine(NewPoint(0, 0), NewPoint(1, 1)))
+}
+
+func TestPathIntersectionPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("invalid geometry should panic")
+		}
+	}()
+
+	// these should panic
+	NewPath().Intersection(NewPoint(0, 0))
+}
+
+func TestPathIntersectionPath(t *testing.T) {
+	var path *Path
+	var answer *Point
+
+	p := NewPath().Push(NewPoint(0, 0)).Push(NewPoint(1, 1)).Push(NewPoint(2, 2))
+
+	answer = NewPoint(0.5, 0.5)
+	path = NewPath()
+	path.Push(NewPoint(0, 0.5)).Push(NewPoint(1, 0.5))
+	if p, i := p.IntersectionPath(path); !p[0].Equals(answer) || i[0][0] != 0 || i[0][1] != 0 || len(p) != 1 || len(i) != 1 {
+		t.Errorf("path, intersectionPath expected %v, got: %v, %v", answer, p, i)
+	}
+
+	answer = NewPoint(1.5, 1.5)
+	path = NewPath()
+	path.Push(NewPoint(0, 1.5)).Push(NewPoint(2, 1.5))
+	if p, i := p.IntersectionPath(path); !p[0].Equals(answer) || i[0][0] != 1 || i[0][1] != 0 || len(p) != 1 || len(i) != 1 {
+		t.Errorf("path, intersectionPath expected %v, got: %v, %v", answer, p, i)
+	}
+
+	answer = NewPoint(1.5, 1.5)
+	path = NewPath()
+	path.Push(NewPoint(0, 1.5)).Push(NewPoint(1, 1.5)).Push(NewPoint(2, 1.5))
+	if p, i := p.IntersectionPath(path); !p[0].Equals(answer) || i[0][0] != 1 || i[0][1] != 1 || len(p) != 1 || len(i) != 1 {
+		t.Errorf("path, intersectionPath expected %v, got: %v, %v", answer, p, i)
+	}
+
+	path = NewPath()
+	path.Push(NewPoint(0, 1.5)).Push(NewPoint(1, 1.5))
+	if p, i := p.IntersectionPath(path); len(p) != 0 || len(i) != 0 {
+		t.Errorf("path, intersectionPath expected none, got: %v, %v", p, i)
+	}
+}
+
+func TestPathIntersectionLine(t *testing.T) {
+	var line *Line
+	var answer *Point
+
+	p := NewPath().Push(NewPoint(0, 0)).Push(NewPoint(1, 1)).Push(NewPoint(2, 2))
+
+	answer = NewPoint(0.5, 0.5)
+	line = NewLine(NewPoint(0, 0.5), NewPoint(1, 0.5))
+	if p, i := p.IntersectionLine(line); !p[0].Equals(answer) || i[0][0] != 0 || i[0][1] != 0 || len(p) != 1 || len(i) != 1 {
+		t.Errorf("path, intersectionLine expected %v, got: %v, %v", answer, p, i)
+	}
+
+	answer = NewPoint(1.5, 1.5)
+	line = NewLine(NewPoint(0, 1.5), NewPoint(2, 1.5))
+	if p, i := p.IntersectionLine(line); !p[0].Equals(answer) || i[0][0] != 1 || i[0][1] != 0 || len(p) != 1 || len(i) != 1 {
+		t.Errorf("path, intersectionLine expected %v, got: %v, %v", answer, p, i)
+	}
+
+	line = NewLine(NewPoint(0, 1.5), NewPoint(1, 1.5))
+	if p, i := p.IntersectionLine(line); len(p) != 0 || len(i) != 0 {
+		t.Errorf("path, intersectionLine expected none, got: %v, %v", p, i)
+	}
+}
+
 func TestPathIntersectsPath(t *testing.T) {
 	var path *Path
 	var answer bool
