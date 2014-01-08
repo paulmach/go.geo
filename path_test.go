@@ -188,6 +188,28 @@ func TestPathIntersectionLine(t *testing.T) {
 	}
 }
 
+func TestPathIntersects(t *testing.T) {
+	path := NewPath()
+
+	// these shouldn't panic
+	path.Intersects(NewPath())
+	path.Intersects(*NewPath())
+
+	path.Intersects(NewLine(NewPoint(0, 0), NewPoint(1, 1)))
+	path.Intersects(*NewLine(NewPoint(0, 0), NewPoint(1, 1)))
+}
+
+func TestPathIntersectsPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("invalid geometry should panic")
+		}
+	}()
+
+	// these should panic
+	NewPath().Intersects(NewPoint(0, 0))
+}
+
 func TestPathIntersectsPath(t *testing.T) {
 	var path *Path
 	var answer bool
