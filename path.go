@@ -360,7 +360,7 @@ func (p *Path) GetAt(i int) *Point {
 		return nil
 	}
 
-	return &p.points[i]
+	return p.points[i].Clone()
 }
 
 // InsertAt inserts a Point at i along the path.

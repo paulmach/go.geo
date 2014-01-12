@@ -331,6 +331,10 @@ func TestPathGetAt(t *testing.T) {
 	if p := path.GetAt(10); p != nil {
 		t.Error("path, expect out of range getAt to be nil")
 	}
+
+	if p := path.GetAt(0).SetX(100); p == path.GetAt(0) {
+		t.Error("path, expect getAt to clone value")
+	}
 }
 
 func TestPathInsertAt(t *testing.T) {
