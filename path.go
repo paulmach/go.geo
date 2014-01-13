@@ -438,12 +438,25 @@ func (p *Path) Clone() *Path {
 // in MeshLab or something like that. You should close the
 // writer yourself after this function returns.
 // http://segeval.cs.princeton.edu/public/off_format.html
-func (p *Path) WriteOffFile(w io.Writer) {
+func (p *Path) WriteOffFile(w io.Writer, rgb ...[3]int) {
+	r := 170
+	g := 170
+	b := 170
+
+	if len(rgb) != 0 {
+		r = rgb[0][0]
+		g = rgb[0][1]
+		b = rgb[0][2]
+	}
 
 	w.Write([]byte("OFF\n"))
-	w.Write([]byte(fmt.Sprintf("%d 0 0\n", p.Length())))
+	w.Write([]byte(fmt.Sprintf("%d %d 0\n", p.Length(), p.Length()-2)))
 
 	for i := range p.points {
 		w.Write([]byte(fmt.Sprintf("%f %f 0\n", p.points[i][0], p.points[i][1])))
+	}
+
+	for i := 0; i < len(p.points)-2; i++ {
+		w.Write([]byte(fmt.Sprintf("3 %d %d %d %d %d %d\n", i, i+1, i+2, r, g, b)))
 	}
 }

@@ -489,11 +489,19 @@ func TestPathWriteOffFile(t *testing.T) {
 	p.Push(NewPoint(0.5, .2))
 	p.Push(NewPoint(1, 0))
 
-	expected := "OFF\n3 0 0\n0.000000 0.000000 0\n0.500000 0.200000 0\n1.000000 0.000000 0\n"
+	expected := "OFF\n3 1 0\n0.000000 0.000000 0\n0.500000 0.200000 0\n1.000000 0.000000 0\n3 0 1 2 170 170 170\n"
 	result := bytes.NewBufferString("")
 	p.WriteOffFile(result)
 
-	if result.String() != expected {
-		t.Errorf("path, writeOffFile not right, %v != %v", expected, result.String())
+	if off := result.String(); off != expected {
+		t.Errorf("path, writeOffFile not right, %v != %v", expected, off)
+	}
+
+	expected = "OFF\n3 1 0\n0.000000 0.000000 0\n0.500000 0.200000 0\n1.000000 0.000000 0\n3 0 1 2 1 2 3\n"
+	result = bytes.NewBufferString("")
+	p.WriteOffFile(result, [3]int{1, 2, 3})
+
+	if off := result.String(); off != expected {
+		t.Errorf("path, writeOffFile not right, %v != %v", expected, off)
 	}
 }
