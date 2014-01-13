@@ -25,7 +25,6 @@ var cities = [][2]float64{
 	{41.66700, -72.83300}, {35.45000, 139.45000}}
 
 func TestMercator(t *testing.T) {
-
 	for _, city := range cities {
 		p := &Point{}
 
@@ -42,6 +41,123 @@ func TestMercator(t *testing.T) {
 		if math.Abs(p.Lng()-city[1]) > epsilon {
 			t.Errorf("Mercator, longitude miss match: %f != %f", p.Lng(), city[1])
 		}
+	}
+}
+
+func TestTransverseMercator(t *testing.T) {
+	tested := 0
+
+	for _, city := range cities {
+		p := &Point{}
+
+		p.SetLat(city[0])
+		p.SetLng(city[1])
+
+		if math.Abs(p.Lng()) > 10 {
+			continue
+		}
+
+		TransverseMercator.Project(p)
+		TransverseMercator.Inverse(p)
+
+		if math.Abs(p.Lat()-city[0]) > epsilon {
+			t.Errorf("TransverseMercator, latitude miss match: %f != %f", p.Lat(), city[0])
+		}
+
+		if math.Abs(p.Lng()-city[1]) > epsilon {
+			t.Errorf("TransverseMercator, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
+
+		tested++
+	}
+
+	if tested == 0 {
+		t.Error("TransverseMercator, no points tested")
+	}
+}
+
+func TestBuildTransverseMercator(t *testing.T) {
+	for _, city := range cities {
+		p := &Point{}
+
+		p.SetLat(city[0])
+		p.SetLng(city[1])
+
+		offset := math.Floor(p.Lng()/10.0) * 10.0
+		projector := BuildTransverseMercator(offset)
+
+		projector.Project(p)
+		projector.Inverse(p)
+
+		if math.Abs(p.Lat()-city[0]) > epsilon {
+			t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), city[0])
+		}
+
+		if math.Abs(p.Lng()-city[1]) > epsilon {
+			t.Errorf("BuildTransverseMercator, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
+	}
+
+	// test anti-meridian from right
+	projector := BuildTransverseMercator(-178.0)
+
+	test := NewPoint(-175.0, 30)
+
+	p := test.Clone()
+	projector.Project(p)
+	projector.Inverse(p)
+
+	if math.Abs(p.Lat()-test.Lat()) > epsilon {
+		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
+	}
+
+	if math.Abs(p.Lng()-test.Lng()) > epsilon {
+		t.Errorf("BuildTransverseMercator, longitude miss match: %f != %f", p.Lng(), test.Lat())
+	}
+
+	test = NewPoint(179.0, 30)
+
+	p = test.Clone()
+	projector.Project(p)
+	projector.Inverse(p)
+
+	if math.Abs(p.Lat()-test.Lat()) > epsilon {
+		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
+	}
+
+	if math.Abs(p.Lng()-test.Lng()) > epsilon {
+		t.Errorf("BuildTransverseMercator, longitude miss match: %f != %f", p.Lng(), test.Lat())
+	}
+
+	// test anti-meridian from left
+	projector = BuildTransverseMercator(178.0)
+
+	test = NewPoint(175.0, 30)
+
+	p = test.Clone()
+	projector.Project(p)
+	projector.Inverse(p)
+
+	if math.Abs(p.Lat()-test.Lat()) > epsilon {
+		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
+	}
+
+	if math.Abs(p.Lng()-test.Lng()) > epsilon {
+		t.Errorf("BuildTransverseMercator, longitude miss match: %f != %f", p.Lng(), test.Lat())
+	}
+
+	test = NewPoint(-179.0, 30)
+
+	p = test.Clone()
+	projector.Project(p)
+	projector.Inverse(p)
+
+	if math.Abs(p.Lat()-test.Lat()) > epsilon {
+		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
+	}
+
+	if math.Abs(p.Lng()-test.Lng()) > epsilon {
+		t.Errorf("BuildTransverseMercator, longitude miss match: %f != %f", p.Lng(), test.Lat())
 	}
 }
 
