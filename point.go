@@ -92,6 +92,11 @@ func (p *Point) Scale(factor float64) *Point {
 	return p
 }
 
+// x1*x2 + y1*y2
+func (p *Point) Dot(v *Point) float64 {
+	return p[0]*v[0] + p[1]*v[1]
+}
+
 func (p *Point) ToArray() [2]float64 {
 	return [2]float64(*p)
 }

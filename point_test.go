@@ -96,6 +96,27 @@ func TestPointScale(t *testing.T) {
 	}
 }
 
+func TestDot(t *testing.T) {
+	p1 := NewPoint(0, 0)
+
+	p2 := NewPoint(1, 2)
+	answer := 0.0
+	if d := p1.Dot(p2); d != answer {
+		t.Errorf("point, dot expteced %v == %v", d, answer)
+	}
+
+	p1 = NewPoint(4, 5)
+	answer = 14.0
+	if d := p1.Dot(p2); d != answer {
+		t.Errorf("point, dot expteced %v == %v", d, answer)
+	}
+
+	// reverse version
+	if d := p2.Dot(p1); d != answer {
+		t.Errorf("point, dot expteced %v == %v", d, answer)
+	}
+}
+
 func TestPointClone(t *testing.T) {
 	p1 := NewPoint(1, 0)
 	p2 := NewPoint(1, 2)
