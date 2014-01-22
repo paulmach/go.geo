@@ -14,7 +14,7 @@ func NewPoint(x, y float64) *Point {
 }
 
 // Transform applies a given projection or inverse projection to the current point.
-func (p *Point) Transform(transformer func(*Point) *Point) *Point {
+func (p *Point) Transform(transformer func(*Point)) *Point {
 	transformer(p)
 	return p
 }

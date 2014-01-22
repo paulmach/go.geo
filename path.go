@@ -21,7 +21,7 @@ func NewPath() *Path {
 
 // Transform applies a given projection or inverse projection to all
 // the points in the path.
-func (p *Path) Transform(projection func(*Point) *Point) *Path {
+func (p *Path) Transform(projection func(*Point)) *Path {
 	for i := range p.points {
 		projection(&p.points[i])
 	}
