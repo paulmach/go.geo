@@ -354,19 +354,19 @@ func (p *Path) SetAt(index int, point *Point) *Path {
 	return p
 }
 
-// GetAt returns a clone of the Point at i. Returns nil if index is out of range.
-func (p *Path) GetAt(i int) *Point {
-	if i >= len(p.points) || i < 0 {
-		return nil
-	}
+// GetCloneAt returns a clone of the Point at i. Returns nil if index is out of range.
+// func (p *Path) GetCloneAt(i int) *Point {
+// 	if i >= len(p.points) || i < 0 {
+// 		return nil
+// 	}
 
-	return p.points[i].Clone()
-}
+// 	return p.points[i].Clone()
+// }
 
-// GetPointerAt returns the pointer to the Point in the page.
+// GetAt returns the pointer to the Point in the page.
 // This function is good for modifying values inplace.
 // Returns nil if index is out of range.
-func (p *Path) GetPointerAt(i int) *Point {
+func (p *Path) GetAt(i int) *Point {
 	if i >= len(p.points) || i < 0 {
 		return nil
 	}
