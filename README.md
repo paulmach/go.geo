@@ -58,6 +58,10 @@ If you want to create a copy, all the objects support he `Clone` method.
 	p2 := p1.Clone().SetY(30)
 	p1.Equals(p2) // == false
 
+I'm not sure if modifying the original object is the right choice for this library,
+but some simple tests showed that making a copy each time was significantly slower.
+So, **remember to Clone() your objects**.
+
 ## Examples
 
 // TODO
