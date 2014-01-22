@@ -66,6 +66,12 @@ func TestPointNormalize(t *testing.T) {
 	if p.Normalize(); !p.Equals(answer) {
 		t.Errorf("point, normalize expect %v == %v", p, answer)
 	}
+
+	p = NewPoint(0, 0)
+	answer = NewPoint(0, 0)
+	if p.Normalize(); !p.Equals(answer) {
+		t.Errorf("point, normalize expect %v == %v", p, answer)
+	}
 }
 
 func TestPointScale(t *testing.T) {

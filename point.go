@@ -78,6 +78,13 @@ func (p *Point) Subtract(point *Point) *Point {
 func (p *Point) Normalize() *Point {
 	dist := p.DistanceFrom(&Point{})
 
+	if dist == 0 {
+		p[0] = 0
+		p[1] = 0
+
+		return p
+	}
+
 	p[0] /= dist
 	p[1] /= dist
 
