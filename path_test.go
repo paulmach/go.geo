@@ -332,8 +332,35 @@ func TestPathGetAt(t *testing.T) {
 		t.Error("path, expect out of range getAt to be nil")
 	}
 
-	if p := path.GetAt(0).SetX(100); p == path.GetAt(0) {
+	if p := path.GetAt(-1); p != nil {
+		t.Error("path, expect negative index getAt to be nil")
+	}
+
+	if p := path.GetAt(0).SetX(100); p.Equals(path.GetAt(0)) {
 		t.Error("path, expect getAt to clone value")
+	}
+}
+
+func TestPathGetPointerAt(t *testing.T) {
+	path := NewPath()
+	point := NewPoint(1, 2)
+
+	path.Push(point)
+
+	if p := path.GetPointerAt(0); !p.Equals(point) {
+		t.Errorf("path, getPointerAt expected %v == %v", p, point)
+	}
+
+	if p := path.GetPointerAt(10); p != nil {
+		t.Error("path, expect out of range getPointerAt to be nil")
+	}
+
+	if p := path.GetPointerAt(-1); p != nil {
+		t.Error("path, expect negative index getPointerAt to be nil")
+	}
+
+	if p := path.GetPointerAt(0).SetX(100); !p.Equals(path.GetAt(0)) {
+		t.Error("path, expect getPointerAt to clone value")
 	}
 }
 
