@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"math"
@@ -10,7 +11,10 @@ import (
 type Surface struct {
 	Bound         *Bound
 	Width, Height int
-	Grid          [][]float64 // x,y
+
+	// represents the underlying data, as [x][y]
+	// where x in [0:Width] and y in [0:Height]
+	Grid [][]float64 // x,y
 }
 
 func NewSurface(bound *Bound, width, height int) *Surface {
@@ -84,34 +88,20 @@ func (s *Surface) GradientAt(point *Point) *Point {
 		return &Point{}
 	}
 
-	var w1, w2 float64
+	// horizontal
+	delta := s.Bound.Width() / float64(s.Width-1) / 5.0
 
-	// find height and width
-	w := (point[0] - s.Bound.sw[0]) / s.Bound.Width() * float64(s.Width-1)
-	h := (point[1] - s.Bound.sw[1]) / s.Bound.Height() * float64(s.Height-1)
+	x1 := s.ValueAt(point.Clone().Add(NewPoint(-delta, 0)))
+	x2 := s.ValueAt(point.Clone().Add(NewPoint(delta, 0)))
 
-	xi := int(math.Floor(w))
-	yi := int(math.Floor(h))
+	horizontal := NewPoint((x1-x2)/(2*delta), 0)
 
 	// vertical
-	h -= math.Floor(h)
+	delta = s.Bound.Height() / float64(s.Height-1)
+	y1 := s.ValueAt(point.Clone().Add(NewPoint(0, -delta)))
+	y2 := s.ValueAt(point.Clone().Add(NewPoint(0, delta)))
 
-	w1 = s.Grid[xi][yi]*w + s.Grid[xi+1][yi]*(1-w)
-	w2 = s.Grid[xi][yi+1]*w + s.Grid[xi+1][yi+1]*(1-w)
-
-	vertical := &Point{1, 0}
-	vertical.Scale(w2 - w1)
-
-	// horizontal
-	w -= math.Floor(w)
-
-	w1 = s.Grid[xi][yi]*w + s.Grid[xi][yi+1]*(1-w)
-	w2 = s.Grid[xi][yi+1]*w + s.Grid[xi+1][yi+1]*(1-w)
-
-	horizontal := &Point{1, 0}
-	horizontal.Scale(w2 - w1)
-
-	return &Point{}
+	return horizontal.SetY((y1 - y2) / (2 * delta))
 }
 
 // WriteOffFile writes an Object File Format representation of
@@ -121,11 +111,12 @@ func (s *Surface) GradientAt(point *Point) *Point {
 // http://segeval.cs.princeton.edu/public/off_format.html
 func (s *Surface) WriteOffFile(w io.Writer) {
 	facesCount := 0
-	faces := ""
+	var faces bytes.Buffer
 
 	for i := 0; i < s.Width-1; i += 1 {
 		for j := i % 2; j < s.Height-1; j += 2 {
-			faces += fmt.Sprintf("4 %d %d %d %d\n", i*s.Height+j, i*s.Height+j+1, (i+1)*s.Height+j+1, (i+1)*s.Height+j)
+			face := fmt.Sprintf("4 %d %d %d %d\n", i*s.Height+j, i*s.Height+j+1, (i+1)*s.Height+j+1, (i+1)*s.Height+j)
+			faces.WriteString(face)
 			facesCount++
 		}
 	}
@@ -141,5 +132,5 @@ func (s *Surface) WriteOffFile(w io.Writer) {
 		}
 	}
 
-	w.Write([]byte(faces))
+	w.Write(faces.Bytes())
 }
