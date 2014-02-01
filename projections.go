@@ -83,8 +83,8 @@ var TransverseMercator = Projecter{
 
 var ScalarMercator struct {
 	Level   uint64
-	Project func(lat, lng float64) (x, y uint64)
-	Inverse func(x, y uint64) (lat, lng float64)
+	Project func(lat, lng float64, level ...uint64) (x, y uint64)
+	Inverse func(x, y uint64, level ...uint64) (lat, lng float64)
 }
 
 func init() {
@@ -93,9 +93,14 @@ func init() {
 	ScalarMercator.Inverse = scalarMercatorInverse
 }
 
-func scalarMercatorProject(lat, lng float64) (x, y uint64) {
+func scalarMercatorProject(lng, lat float64, level ...uint64) (x, y uint64) {
 	var factor uint64
-	factor = 1 << ScalarMercator.Level
+	l := ScalarMercator.Level
+	if len(level) != 0 {
+		l = level[0]
+	}
+
+	factor = 1 << l
 	maxtiles := float64(factor)
 
 	lng = lng/360.0 + 0.5
@@ -118,9 +123,14 @@ func scalarMercatorProject(lat, lng float64) (x, y uint64) {
 	return
 }
 
-func scalarMercatorInverse(x, y uint64) (lat, lng float64) {
+func scalarMercatorInverse(x, y uint64, level ...uint64) (lng, lat float64) {
 	var factor uint64
-	factor = 1 << ScalarMercator.Level
+	l := ScalarMercator.Level
+	if len(level) != 0 {
+		l = level[0]
+	}
+
+	factor = 1 << l
 	maxtiles := float64(factor)
 
 	lng = 360.0 * (float64(x)/maxtiles - 0.5)

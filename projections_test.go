@@ -180,8 +180,8 @@ func TestScalarMercator(t *testing.T) {
 		p.SetLat(city[0])
 		p.SetLng(city[1])
 
-		x, y := ScalarMercator.Project(p.Lat(), p.Lng())
-		lat, lng := ScalarMercator.Inverse(x, y)
+		x, y := ScalarMercator.Project(p.Lng(), p.Lat())
+		lng, lat := ScalarMercator.Inverse(x, y)
 
 		p.SetLat(lat)
 		p.SetLng(lng)
@@ -196,11 +196,11 @@ func TestScalarMercator(t *testing.T) {
 	}
 
 	// test polar regions
-	if _, y := ScalarMercator.Project(89.9, 0); y != (1<<ScalarMercator.Level)-1 {
+	if _, y := ScalarMercator.Project(0, 89.9); y != (1<<ScalarMercator.Level)-1 {
 		t.Error("Scalar Mercator, top of the world error")
 	}
 
-	if _, y := ScalarMercator.Project(-89.9, 0); y != 0 {
+	if _, y := ScalarMercator.Project(0, -89.9); y != 0 {
 		t.Error("Scalar Mercator, bottom of the world error")
 	}
 }
