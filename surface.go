@@ -10,14 +10,14 @@ import (
 // Surface is kind of the 2d version of path.
 type Surface struct {
 	Bound         *Bound
-	Width, Height int
+	Width, Height uint32
 
 	// represents the underlying data, as [x][y]
 	// where x in [0:Width] and y in [0:Height]
 	Grid [][]float64 // x,y
 }
 
-func NewSurface(bound *Bound, width, height int) *Surface {
+func NewSurface(bound *Bound, width, height uint32) *Surface {
 	s := &Surface{
 		Bound:  bound.Clone(),
 		Width:  width,
@@ -38,8 +38,8 @@ func NewSurface(bound *Bound, width, height int) *Surface {
 // given the size and bounds of the surface.
 // x in [0, s.Width()-1]
 // y in [0, s.Height()-1]
-func (s *Surface) PointAt(x, y int) *Point {
-	if x < 0 || x >= s.Width || y < 0 || y >= s.Height {
+func (s *Surface) PointAt(x, y uint32) *Point {
+	if x >= s.Width || y >= s.Height {
 		return nil
 	}
 
@@ -84,13 +84,13 @@ func (s *Surface) ValueAt(point *Point) float64 {
 }
 
 func (s *Surface) GradientAt(point *Point) *Point {
-	if !s.Bound.Contains(point) {
+	delta := s.Bound.Width() / float64(s.Width-1) / 5.0
+
+	if !s.Bound.Clone().Pad(delta).Contains(point) {
 		return &Point{}
 	}
 
 	// horizontal
-	delta := s.Bound.Width() / float64(s.Width-1) / 5.0
-
 	x1 := s.ValueAt(point.Clone().Add(NewPoint(-delta, 0)))
 	x2 := s.ValueAt(point.Clone().Add(NewPoint(delta, 0)))
 
@@ -110,10 +110,12 @@ func (s *Surface) GradientAt(point *Point) *Point {
 // writer yourself after this function returns.
 // http://segeval.cs.princeton.edu/public/off_format.html
 func (s *Surface) WriteOffFile(w io.Writer) {
+	var i, j uint32
+
 	facesCount := 0
 	var faces bytes.Buffer
 
-	for i := 0; i < s.Width-1; i += 1 {
+	for i = 0; i < s.Width-1; i += 1 {
 		for j := i % 2; j < s.Height-1; j += 2 {
 			face := fmt.Sprintf("4 %d %d %d %d\n", i*s.Height+j, i*s.Height+j+1, (i+1)*s.Height+j+1, (i+1)*s.Height+j)
 			faces.WriteString(face)
@@ -125,10 +127,10 @@ func (s *Surface) WriteOffFile(w io.Writer) {
 	w.Write([]byte(fmt.Sprintf("%d %d 0\n", s.Height*s.Width, facesCount)))
 
 	// vertexes
-	for i := 0; i < s.Width; i++ {
-		for j := 0; j < s.Height; j++ {
+	for i = 0; i < s.Width; i++ {
+		for j = 0; j < s.Height; j++ {
 			p := s.PointAt(i, j)
-			w.Write([]byte(fmt.Sprintf("%f %f %f\n", p[0], p[1], s.Grid[i][j])))
+			w.Write([]byte(fmt.Sprintf("%.8f %.8f %.8f\n", p[0], p[1], s.Grid[i][j])))
 		}
 	}
 
