@@ -36,6 +36,12 @@ func TestPathEncode(t *testing.T) {
 			}
 		}
 	}
+
+	// empty path
+	path := NewPath()
+	if path.Encode() != "" {
+		t.Errorf("path, encode empty path should be empty string")
+	}
 }
 
 func TestPathEncodeDecode(t *testing.T) {
