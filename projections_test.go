@@ -174,6 +174,7 @@ func TestScalarMercator(t *testing.T) {
 		t.Errorf("Scalar Mercator, longitude should be 0: %f", lng)
 	}
 
+	// default level
 	for _, city := range cities {
 		p := &Point{}
 
@@ -182,6 +183,28 @@ func TestScalarMercator(t *testing.T) {
 
 		x, y := ScalarMercator.Project(p.Lng(), p.Lat())
 		lng, lat := ScalarMercator.Inverse(x, y)
+
+		p.SetLat(lat)
+		p.SetLng(lng)
+
+		if math.Abs(p.Lat()-city[0]) > epsilon {
+			t.Errorf("Scalar Mercator, latitude miss match: %f != %f", p.Lat(), city[0])
+		}
+
+		if math.Abs(p.Lng()-city[1]) > epsilon {
+			t.Errorf("Scalar Mercator, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
+	}
+
+	// provided level
+	for _, city := range cities {
+		p := &Point{}
+
+		p.SetLat(city[0])
+		p.SetLng(city[1])
+
+		x, y := ScalarMercator.Project(p.Lng(), p.Lat(), 30)
+		lng, lat := ScalarMercator.Inverse(x, y, 30)
 
 		p.SetLat(lat)
 		p.SetLng(lng)
