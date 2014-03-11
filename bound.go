@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// A Bound represents and enclosed "box" in the 2d Euclidean or Cartesian plane.
+// A Bound represents an enclosed "box" in the 2d Euclidean or Cartesian plane.
 // It does not know anything about the anti-meridian.
 type Bound struct {
 	sw, ne *Point
@@ -45,7 +45,7 @@ func (b *Bound) Extend(point *Point) *Bound {
 	return b
 }
 
-// Contains figures out if the point is within the bounds.
+// Contains determines if the point is within the bound.
 // On the boundary is considered in.
 func (b *Bound) Contains(point *Point) bool {
 
@@ -76,6 +76,7 @@ func (b *Bound) Intersects(bound *Bound) bool {
 	return false
 }
 
+// Center returns the center of the bound.
 func (b *Bound) Center() *Point {
 	p := &Point{}
 	p.SetX((b.ne.X() + b.sw.X()) / 2.0)
@@ -108,13 +109,13 @@ func (b *Bound) Width() float64 {
 }
 
 // GeoHeight returns the approximate height in meters.
-// Only applies if the data is Lat/Lng degrees.
+// Only applies if the data is Lng/Lat degrees.
 func (b *Bound) GeoHeight() float64 {
 	return 111131.75 * b.Height()
 }
 
 // GeoWidth returns the approximate width in meters.
-// Only applies if the data is Lat/Lng degrees.
+// Only applies if the data is Lng/Lat degrees.
 func (b *Bound) GeoWidth(haversine ...bool) float64 {
 	c := b.Center()
 

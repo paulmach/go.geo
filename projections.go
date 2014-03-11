@@ -81,6 +81,8 @@ var TransverseMercator = Projecter{
 	},
 }
 
+// ScalarMercator projects converts from lng/lat float64 to x,y uint64.
+// This is similar to Google's world coordinates.
 var ScalarMercator struct {
 	Level   uint64
 	Project func(lat, lng float64, level ...uint64) (x, y uint64)

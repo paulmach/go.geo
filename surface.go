@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-// Surface is kind of the 2d version of path.
+// Surface is the 2d version of path.
 type Surface struct {
 	Bound         *Bound
 	Width, Height uint32
@@ -83,6 +83,7 @@ func (s *Surface) ValueAt(point *Point) float64 {
 	return w1*(1-h) + w2*h
 }
 
+// Warning: used by no official test coverage.
 func (s *Surface) GradientAt(point *Point) *Point {
 	delta := s.Bound.Width() / float64(s.Width-1) / 5.0
 
@@ -130,7 +131,8 @@ func (s *Surface) WriteOffFile(w io.Writer) {
 	for i = 0; i < s.Width; i++ {
 		for j = 0; j < s.Height; j++ {
 			p := s.PointAt(i, j)
-			w.Write([]byte(fmt.Sprintf("%.8f %.8f %.8f\n", p[0], p[1], s.Grid[i][j])))
+			// weirdness is to things will be colored correctly in meshlab 1.3.2-OS X
+			w.Write([]byte(fmt.Sprintf("%.8f %.8f %.8f\n", p[0], p[1], s.Grid[(s.Width-1)-i][j])))
 		}
 	}
 

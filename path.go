@@ -29,7 +29,7 @@ func (p *Path) Transform(projection func(*Point)) *Path {
 	return p
 }
 
-// Reduce the path using Douglas Peuckered to the given threshold.
+// Reduce the path using Douglas Peucker to the given threshold.
 // Modifies the existing path.
 func (p *Path) Reduce(threshold float64) *Path {
 	mask := make([]byte, p.Length())
@@ -121,7 +121,7 @@ func Decode(encoded string, factor ...int) *Path {
 	return p
 }
 
-// Encode with Google polyline encode the path into a string.
+// Google polyline Encode the path into a string.
 // Factor defaults to 1.0e5, the same used by Google for polyline encoding.
 func (p *Path) Encode(factor ...int) string {
 	f := 1.0e5
@@ -174,7 +174,7 @@ func encodeNumber(num int) string {
 	return result
 }
 
-// TotalDistance computes the total distance in the units of the points
+// Distance computes the total distance in the units of the points.
 func (p *Path) Distance() float64 {
 	sum := 0.0
 
@@ -186,7 +186,7 @@ func (p *Path) Distance() float64 {
 	return sum
 }
 
-// GeoTotalDistance computes the total distance using spherical geometry
+// GeoDistance computes the total distance using spherical geometry.
 func (p *Path) GeoDistance(haversine ...bool) float64 {
 	yesgeo := yesHaversine(haversine)
 	sum := 0.0
@@ -322,6 +322,7 @@ func (p *Path) IntersectsLine(line *Line) bool {
 	return false
 }
 
+// Bounds returns bound around the path. Simply uses rectangular coordinates.
 func (p *Path) Bound() *Bound {
 	if len(p.points) == 0 {
 		return NewBound(0, 0, 0, 0)
@@ -353,15 +354,6 @@ func (p *Path) SetAt(index int, point *Point) *Path {
 	p.points[index] = *point
 	return p
 }
-
-// GetCloneAt returns a clone of the Point at i. Returns nil if index is out of range.
-// func (p *Path) GetCloneAt(i int) *Point {
-// 	if i >= len(p.points) || i < 0 {
-// 		return nil
-// 	}
-
-// 	return p.points[i].Clone()
-// }
 
 // GetAt returns the pointer to the Point in the page.
 // This function is good for modifying values inplace.
@@ -404,11 +396,13 @@ func (p *Path) RemoveAt(index int) *Path {
 	return p
 }
 
+// Push appends a point to the end of the path.
 func (p *Path) Push(point *Point) *Path {
 	p.points = append(p.points, *point)
 	return p
 }
 
+// Pop removes and returns the last it.
 func (p *Path) Pop() *Point {
 	if len(p.points) == 0 {
 		return nil
@@ -420,10 +414,13 @@ func (p *Path) Pop() *Point {
 	return &x
 }
 
+// Length returns the number of points in the path.
 func (p *Path) Length() int {
 	return len(p.points)
 }
 
+// Equals compares two paths. Returns true if lengths are the same
+// and all points are Equal.
 func (p *Path) Equals(path *Path) bool {
 	if p.Length() != path.Length() {
 		return false

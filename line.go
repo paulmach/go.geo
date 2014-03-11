@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// represents the shortest path between A and B
+// Line represents the shortest path between A and B
 type Line struct {
 	a, b Point
 }
@@ -61,7 +61,7 @@ func (l *Line) Interpolate(percent float64) *Point {
 	return p
 }
 
-// Side return 1 if the point is on the right side, -1 left side and 0 if colinear
+// Side returns 1 if the point is on the right side, -1 left side and 0 if colinear
 func (l *Line) Side(p *Point) int {
 	val := (l.b.X()-l.a.X())*(p.Y()-l.b.Y()) - (l.b.Y()-l.a.Y())*(p.X()-l.b.X())
 
@@ -169,13 +169,13 @@ func (l *Line) Bounds() *Bound {
 		math.Max(l.a.Y(), l.b.Y()), math.Min(l.a.Y(), l.b.Y()))
 }
 
-// Reverse swapps the start and end of the line
+// Reverse swaps the start and end of the line
 func (l *Line) Reverse() *Line {
 	l.a, l.b = l.b, l.a
 	return l
 }
 
-// direction is irrelevant, ie. true if one is the reverse of the other
+// Direction is irrelevant, ie. true if one is the reverse of the other.
 func (l *Line) Equals(line *Line) bool {
 	return (l.a.Equals(&line.a) && l.b.Equals(&line.b)) || (l.a.Equals(&line.b) && l.b.Equals(&line.a))
 }
