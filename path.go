@@ -71,6 +71,62 @@ func (p *Path) workerReduce(start, end int, threshold float64, mask []byte) {
 	}
 }
 
+// Resample converts the path into count-1 evanly spaced segments.
+func (p *Path) Resample(totalPoints int) *Path {
+	// degenerate case
+	if len(p.points) <= 1 {
+		return p
+	}
+
+	if totalPoints <= 0 {
+		p.points = make([]Point, 0)
+		return p
+	}
+
+	points := make([]Point, 1, totalPoints)
+	points[0] = p.points[0] // start stays the same
+
+	// location on the original line
+	prevIndex := 0
+	prevDistance := 0.0
+
+	// first distance we're looking for
+	step := 1
+	totalDistance := p.Distance()
+	currentDistance := totalDistance * float64(step) / float64(totalPoints-1)
+
+	for {
+		currentLine := NewLine(&p.points[prevIndex], &p.points[prevIndex+1])
+		currentLineDistance := currentLine.Distance()
+		nextDistance := prevDistance + currentLineDistance
+
+		for currentDistance <= nextDistance {
+			// need to add a point
+			percent := (currentDistance - prevDistance) / currentLineDistance
+			points = append(points, *currentLine.Interpolate(percent))
+
+			// move to the next distance we want
+			step++
+			currentDistance = totalDistance * float64(step) / float64(totalPoints-1)
+		}
+
+		// past the current point in the original line, so move to the next one
+		prevIndex++
+		prevDistance = nextDistance
+
+		if prevIndex == len(p.points)-1 {
+			break
+		}
+	}
+
+	// end stays the same, to handele round off errors
+	if totalPoints != 1 { // for 1, we want the first point
+		points[totalPoints-1] = p.points[len(p.points)-1]
+	}
+	p.points = points
+	return p
+}
+
 // Decode is the inverse of Encode. It takes a string encoding of path
 // and returns the actual path it represents. Factor defaults to 1.0e5,
 // the same used by Google for polyline encoding.

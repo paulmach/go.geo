@@ -22,6 +22,44 @@ func TestPathReduce(t *testing.T) {
 	}
 }
 
+func TestPathResample(t *testing.T) {
+	p := NewPath()
+	p.Resample(10) // should not panic
+
+	p.Push(NewPoint(0, 0)).Resample(10) // should not panic
+
+	p.Push(NewPoint(1.5, 1.5))
+	p.Push(NewPoint(2, 2))
+
+	// resample to 0?
+	result := p.Clone().Resample(0)
+	if result.Length() != 0 {
+		t.Error("path, resample down to zero should be empty line")
+	}
+
+	// resample to 1
+	result = p.Clone().Resample(1)
+	answer := NewPath().Push(NewPoint(0, 0))
+	if !result.Equals(answer) {
+		t.Error("path, resample down to 1 should be first point")
+	}
+
+	result = p.Clone().Resample(2)
+	answer = NewPath().Push(NewPoint(0, 0)).Push(NewPoint(2, 2))
+	if !result.Equals(answer) {
+		t.Error("path, resample downsampling")
+	}
+
+	result = p.Clone().Resample(5)
+	answer = NewPath()
+	answer.Push(NewPoint(0, 0)).Push(NewPoint(0.5, 0.5))
+	answer.Push(NewPoint(1, 1)).Push(NewPoint(1.5, 1.5))
+	answer.Push(NewPoint(2, 2))
+	if !result.Equals(answer) {
+		t.Error("path, resample upsampling")
+	}
+}
+
 func TestPathEncode(t *testing.T) {
 	for loop := 0; loop < 100; loop++ {
 		p := NewPath()
