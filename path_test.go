@@ -27,7 +27,6 @@ func TestPathResample(t *testing.T) {
 	p.Resample(10) // should not panic
 
 	p.Push(NewPoint(0, 0)).Resample(10) // should not panic
-
 	p.Push(NewPoint(1.5, 1.5))
 	p.Push(NewPoint(2, 2))
 
@@ -57,6 +56,15 @@ func TestPathResample(t *testing.T) {
 	answer.Push(NewPoint(2, 2))
 	if !result.Equals(answer) {
 		t.Error("path, resample upsampling")
+		t.Error(result)
+		t.Error(answer)
+	}
+
+	// round off error case, triggered on my laptop
+	p1 := NewPath().Push(NewPoint(-88.145243, 42.321059)).Push(NewPoint(-88.145232, 42.325902))
+	p1.Resample(109)
+	if p1.Length() != 109 {
+		t.Errorf("path, resample incorrect length, expected 109, got %d", p1.Length())
 	}
 }
 

@@ -108,6 +108,9 @@ func (p *Path) Resample(totalPoints int) *Path {
 			// move to the next distance we want
 			step++
 			currentDistance = totalDistance * float64(step) / float64(totalPoints-1)
+			if step == totalPoints-1 { // weird round off error on my machine
+				currentDistance = totalDistance
+			}
 		}
 
 		// past the current point in the original line, so move to the next one
