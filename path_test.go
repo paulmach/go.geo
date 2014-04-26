@@ -7,6 +7,37 @@ import (
 	"testing"
 )
 
+func TestPathSetPoints(t *testing.T) {
+	p := NewPath()
+
+	points := make([]Point, 3)
+	points[0] = *NewPoint(0, 0)
+	points[1] = *NewPoint(1, 1)
+	points[1] = *NewPoint(2, 2)
+
+	p.SetPoints(points)
+	if p.Length() != 3 {
+		t.Error("path, set point length doesn't match")
+	}
+}
+
+func TestPathGetPoints(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(0.5, .2))
+	p.Push(NewPoint(1, 0))
+
+	points := p.GetPoints()
+	if len(points) != 3 {
+		t.Error("path, get point length doesn't match")
+	}
+
+	expected := NewPoint(0.5, 0.2)
+	if !points[1].Equals(expected) {
+		t.Error("path, get point points not equal, expected %d, got %d", expected, points[1])
+	}
+}
+
 func TestPathReduce(t *testing.T) {
 	p := NewPath()
 	p.Push(NewPoint(0, 0))

@@ -19,6 +19,19 @@ func NewPath() *Path {
 	return p
 }
 
+// SetPoints allows you to set the complete pointset yourself.
+// Note that the input is an array of points (not pointers to points)
+func (p *Path) SetPoints(points []Point) *Path {
+	p.points = points
+	return p
+}
+
+// GetPoints the raw points storred with the path
+// Note the output is an array of Points (not pointers to points)
+func (p *Path) GetPoints() []Point {
+	return p.points
+}
+
 // Transform applies a given projection or inverse projection to all
 // the points in the path.
 func (p *Path) Transform(projection func(*Point)) *Path {
