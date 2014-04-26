@@ -601,3 +601,50 @@ func TestPathWriteOffFile(t *testing.T) {
 		t.Errorf("path, writeOffFile not right, %v != %v", expected, off)
 	}
 }
+
+func TestPathProject(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(6, 8))
+	p.Push(NewPoint(12, 0))
+
+	result := p.Project(NewPoint(3, 4))
+	expected := 5.0
+	if result != expected {
+		t.Errorf("Expected %f, got %f", expected, result)
+	}
+
+	// coincident with start point
+	result = p.Project(NewPoint(0, 0))
+	expected = 0.0
+	if result != expected {
+		t.Errorf("Expected %f, got %f", expected, result)
+	}
+
+	// coincident with end point
+	result = p.Project(NewPoint(12, 0))
+	expected = 20.0
+	if result != expected {
+		t.Errorf("Expected %f, got %f", expected, result)
+	}
+
+	// closest point on path
+	result = p.Project(NewPoint(-1, -1))
+	expected = 0.0
+	if result != expected {
+		t.Errorf("Expected %f, got %f", expected, result)
+	}
+}
+
+func TestPathProjectNormalized(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(6, 8))
+	p.Push(NewPoint(12, 0))
+
+	result := p.ProjectNormalized(NewPoint(3, 4))
+	expected := 0.25
+	if result != expected {
+		t.Errorf("Expected %f, got %f", expected, result)
+	}
+}

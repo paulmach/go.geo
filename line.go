@@ -191,3 +191,32 @@ func (l *Line) A() *Point {
 func (l *Line) B() *Point {
 	return &l.b
 }
+
+// Projection of a point onto a line segment.
+func (l *Line) Project(point *Point) float64 {
+	if point.Equals(l.A()) {
+		return 0.0
+	}
+	if point.Equals(l.B()) {
+		return 1.0
+	}
+	dx := l.B().X() - l.A().X()
+	dy := l.B().Y() - l.A().Y()
+	sq := dx*dx + dy*dy
+	p := ((point.X()-l.A().X())*dx + (point.Y()-l.A().Y())*dy) / sq
+	return p
+}
+
+// The distance to the point on this line that is the closest to
+// the given point.
+func (l *Line) Measure(point *Point) float64 {
+	projFactor := l.Project(point)
+	if projFactor <= 0.0 {
+		return 0.0
+	}
+	if projFactor <= 1.0 {
+		return projFactor * l.Distance()
+	}
+	// projFactor is > 1
+	return l.Distance()
+}

@@ -545,3 +545,23 @@ func (p *Path) WriteOffFile(w io.Writer, rgb ...[3]int) {
 		w.Write([]byte(fmt.Sprintf("3 %d %d %d %d %d %d\n", i, i+1, i+2, r, g, b)))
 	}
 }
+
+func (p *Path) Project(point *Point) float64 {
+	minDistance := math.Inf(1)
+	measure := math.Inf(-1)
+	sum := 0.0
+	for i := 0; i < len(p.points)-1; i++ {
+		seg := NewLine(&p.points[i], &p.points[i+1])
+		distanceToLine := seg.DistanceFrom(point)
+		if distanceToLine < minDistance {
+			minDistance = distanceToLine
+			measure = sum + seg.Measure(point)
+		}
+		sum += seg.Distance()
+	}
+	return measure
+}
+
+func (p *Path) ProjectNormalized(point *Point) float64 {
+	return p.Project(point) / p.Distance()
+}
