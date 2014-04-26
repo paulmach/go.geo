@@ -20,6 +20,15 @@ func TestPathReduce(t *testing.T) {
 	if l := p.Clone().Reduce(0.3).Length(); l != 2 {
 		t.Errorf("path, reduce to incorrect number of points, expected 3, got %d", l)
 	}
+
+	p = NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(0, 1))
+	p.Push(NewPoint(0, 2))
+
+	if l := p.Clone().Reduce(0.0).Length(); l != 2 {
+		t.Errorf("path, reduce should remove coliniar points")
+	}
 }
 
 func TestPathResample(t *testing.T) {

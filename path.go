@@ -33,6 +33,8 @@ func (p *Path) Transform(projection func(*Point)) *Path {
 // Modifies the existing path.
 func (p *Path) Reduce(threshold float64) *Path {
 	mask := make([]byte, p.Length())
+	mask[0] = 1
+	mask[p.Length()-1] = 1
 
 	p.workerReduce(0, p.Length()-1, threshold, mask)
 
@@ -49,23 +51,26 @@ func (p *Path) Reduce(threshold float64) *Path {
 }
 
 func (p *Path) workerReduce(start, end int, threshold float64, mask []byte) {
-	mask[start] = 1
-	mask[end] = 1
+	if end-start <= 1 {
+		return
+	}
 
 	l := Line{p.points[start], p.points[end]}
 
 	maxDist := 0.0
-	maxIndex := 0
+	maxIndex := start + 1
 	for i := start + 1; i < end; i++ {
 		dist := l.DistanceFrom(&p.points[i])
 
-		if dist > maxDist {
+		if dist >= maxDist {
 			maxDist = dist
 			maxIndex = i
 		}
 	}
 
 	if maxDist > threshold {
+		mask[maxIndex] = 1
+
 		p.workerReduce(start, maxIndex, threshold, mask)
 		p.workerReduce(maxIndex, end, threshold, mask)
 	}
