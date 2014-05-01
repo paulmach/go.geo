@@ -254,34 +254,34 @@ func TestLineEquals(t *testing.T) {
 	}
 }
 
-func TestLineProject(t *testing.T) {
+func TestLineProjectionFactor(t *testing.T) {
 	l1 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 
-	proj := l1.Project(NewPoint(1, 2))
+	proj := l1.ProjectionFactor(NewPoint(1, 2))
 	expected := 0.0
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
 	}
 
-	proj = l1.Project(NewPoint(3, 4))
+	proj = l1.ProjectionFactor(NewPoint(3, 4))
 	expected = 1.0
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
 	}
 
-	proj = l1.Project(NewPoint(2, 3))
+	proj = l1.ProjectionFactor(NewPoint(2, 3))
 	expected = 0.5
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
 	}
 
-	proj = l1.Project(NewPoint(5, 6))
+	proj = l1.ProjectionFactor(NewPoint(5, 6))
 	expected = 2.0
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
 	}
 
-	proj = l1.Project(NewPoint(-1, 0))
+	proj = l1.ProjectionFactor(NewPoint(-1, 0))
 	expected = -1.0
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
@@ -289,7 +289,7 @@ func TestLineProject(t *testing.T) {
 
 	// point off of line
 	l2 := NewLine(NewPoint(1, 1), NewPoint(3, 3))
-	proj = l2.Project(NewPoint(1, 2))
+	proj = l2.ProjectionFactor(NewPoint(1, 2))
 	expected = 0.25
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)

@@ -193,7 +193,7 @@ func (l *Line) B() *Point {
 }
 
 // Projection of a point onto a line segment.
-func (l *Line) Project(point *Point) float64 {
+func (l *Line) ProjectionFactor(point *Point) float64 {
 	if point.Equals(l.A()) {
 		return 0.0
 	}
@@ -210,7 +210,7 @@ func (l *Line) Project(point *Point) float64 {
 // The distance to the point on this line that is the closest to
 // the given point.
 func (l *Line) Measure(point *Point) float64 {
-	projFactor := l.Project(point)
+	projFactor := l.ProjectionFactor(point)
 	if projFactor <= 0.0 {
 		return 0.0
 	}
