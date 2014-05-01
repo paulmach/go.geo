@@ -40,8 +40,20 @@ func TestPathGetPoints(t *testing.T) {
 
 func TestPathReduce(t *testing.T) {
 	p := NewPath()
+	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
+		t.Errorf("path, reduce should return same path if of length 0")
+	}
+
 	p.Push(NewPoint(0, 0))
+	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
+		t.Errorf("path, reduce should return same path if of length 1")
+	}
+
 	p.Push(NewPoint(0.5, .2))
+	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
+		t.Errorf("path, reduce should return same path if of length 2")
+	}
+
 	p.Push(NewPoint(1, 0))
 
 	if l := p.Clone().Reduce(0.1).Length(); l != 3 {

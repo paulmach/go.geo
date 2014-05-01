@@ -45,6 +45,10 @@ func (p *Path) Transform(projection func(*Point)) *Path {
 // Reduce the path using Douglas Peucker to the given threshold.
 // Modifies the existing path.
 func (p *Path) Reduce(threshold float64) *Path {
+	if p.Length() <= 2 {
+		return p
+	}
+
 	mask := make([]byte, p.Length())
 	mask[0] = 1
 	mask[p.Length()-1] = 1
