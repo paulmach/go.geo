@@ -21,37 +21,37 @@ func TestPathSetPoints(t *testing.T) {
 	}
 }
 
-func TestPathGetPoints(t *testing.T) {
+func TestPathPoints(t *testing.T) {
 	p := NewPath()
 	p.Push(NewPoint(0, 0))
 	p.Push(NewPoint(0.5, .2))
 	p.Push(NewPoint(1, 0))
 
-	points := p.GetPoints()
+	points := p.Points()
 	if len(points) != 3 {
 		t.Error("path, get point length doesn't match")
 	}
 
 	expected := NewPoint(0.5, 0.2)
 	if !points[1].Equals(expected) {
-		t.Error("path, get point points not equal, expected %d, got %d", expected, points[1])
+		t.Errorf("path, get point points not equal, expected %v, got %v", expected, points[1])
 	}
 }
 
 func TestPathReduce(t *testing.T) {
 	p := NewPath()
 	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Errorf("path, reduce should return same path if of length 0")
+		t.Error("path, reduce should return same path if of length 0")
 	}
 
 	p.Push(NewPoint(0, 0))
 	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Errorf("path, reduce should return same path if of length 1")
+		t.Error("path, reduce should return same path if of length 1")
 	}
 
 	p.Push(NewPoint(0.5, .2))
 	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Errorf("path, reduce should return same path if of length 2")
+		t.Error("path, reduce should return same path if of length 2")
 	}
 
 	p.Push(NewPoint(1, 0))
@@ -70,7 +70,7 @@ func TestPathReduce(t *testing.T) {
 	p.Push(NewPoint(0, 2))
 
 	if l := p.Clone().Reduce(0.0).Length(); l != 2 {
-		t.Errorf("path, reduce should remove coliniar points")
+		t.Error("path, reduce should remove coliniar points")
 	}
 }
 
@@ -138,7 +138,7 @@ func TestPathEncode(t *testing.T) {
 	// empty path
 	path := NewPath()
 	if path.Encode() != "" {
-		t.Errorf("path, encode empty path should be empty string")
+		t.Error("path, encode empty path should be empty string")
 	}
 }
 

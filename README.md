@@ -38,6 +38,15 @@ All objects are defined in a 2D context.
 * **Surface** is used to assign values to points in a 2D area, such as elevation.
 	*This object is still being developed and is experimental*
 
+### Reducers
+
+The reducers sub-package includes implementations for 
+[Douglas-Peucker](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm),
+[Visvalingam](http://bost.ocks.org/mike/simplify/) 
+and
+[Radial](http://psimpl.sourceforge.net/radial-distance.html) 
+polyline reduction algorithms. See the [reducers godoc](http://godoc.org/github.com/paulmach/go.geo/reducers) for more information.
+
 ## Library conventions
 
 There are two big conventions that developers should be aware of:
@@ -71,13 +80,13 @@ of exported functions. Below are a few usage examples.
 	// lng/lat data, in this case, is encoded at 6 decimal place precision
 	path := geo.Decode("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
 	
-	// reduce using Douglas-Peucker to the given threshold.
+	// reduce using the Douglas Peucker line reducer from the reducers sub-package.
 	// Note the threshold distance is in the coordinates of the points,
 	// which in this case is degrees.
-	p.Reduce(1.0e-5)
+	reducedPath := reducers.DouglasPeucker(path, 1.0e-5)
 	
 	// encode with the default/typical 5 decimal place precision
-	encodedString := p.Encode() 
+	encodedString := reducedPath.Encode() 
 
 ### Path, line intersection
 

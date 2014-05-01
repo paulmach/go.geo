@@ -7,11 +7,11 @@ import (
 func TestPointNew(t *testing.T) {
 	p := NewPoint(1, 2)
 	if p.X() != 1 || p.Lng() != 1 {
-		t.Errorf("point, expected 1, got %d", p.X())
+		t.Errorf("point, expected 1, got %f", p.X())
 	}
 
 	if p.Y() != 2 || p.Lat() != 2 {
-		t.Errorf("point, expected 2, got %d", p.Y())
+		t.Errorf("point, expected 2, got %f", p.Y())
 	}
 }
 

@@ -20,15 +20,15 @@ func NewPath() *Path {
 }
 
 // SetPoints allows you to set the complete pointset yourself.
-// Note that the input is an array of Points (not pointers to points)
+// Note that the input is an array of Points (not pointers to points).
 func (p *Path) SetPoints(points []Point) *Path {
 	p.points = points
 	return p
 }
 
-// GetPoints returns the raw points stored with the path.
-// Note the output is an array of Points (not pointers to points)
-func (p *Path) GetPoints() []Point {
+// Points returns the raw points storred with the path
+// Note the output is an array of Points (not pointers to points).
+func (p *Path) Points() []Point {
 	return p.points
 }
 
@@ -44,6 +44,7 @@ func (p *Path) Transform(projection func(*Point)) *Path {
 
 // Reduce the path using Douglas-Peucker to the given threshold.
 // Modifies the existing path.
+// ALERT: this method is now depricated. Use the reducers sub-package.
 func (p *Path) Reduce(threshold float64) *Path {
 	if p.Length() <= 2 {
 		return p
@@ -539,10 +540,14 @@ func (p *Path) Equals(path *Path) bool {
 	return true
 }
 
+// Clone returns a new copy of the path.
 func (p *Path) Clone() *Path {
-	n := NewPath()
-	n.points = append(n.points, p.points[:]...)
-	return n
+	points := make([]Point, len(p.points))
+	copy(points, p.points)
+
+	return &Path{
+		points: points,
+	}
 }
 
 // WriteOffFile writes an Object File Format representation of
