@@ -51,8 +51,8 @@ func (l *Line) GeoDistance(haversine ...bool) float64 {
 	return l.a.GeoDistanceFrom(&l.b, yesHaversine(haversine))
 }
 
-// ProjectionFactor the factor to multiply the line by to be nearest the given point.
-func (l *Line) ProjectionFactor(point *Point) float64 {
+// Project the factor to multiply the line by to be nearest the given point.
+func (l *Line) Project(point *Point) float64 {
 	if point.Equals(l.A()) {
 		return 0.0
 	}
@@ -68,7 +68,7 @@ func (l *Line) ProjectionFactor(point *Point) float64 {
 
 // Measure the distance to the point on this line nearest the given point.
 func (l *Line) Measure(point *Point) float64 {
-	projFactor := l.ProjectionFactor(point)
+	projFactor := l.Project(point)
 	if projFactor <= 0.0 {
 		return 0.0
 	}

@@ -290,9 +290,9 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
-// Project computes the measure along this path that is closest to the
+// Measure computes the measure along this path that is closest to the
 // given point.
-func (p *Path) Project(point *Point) float64 {
+func (p *Path) Measure(point *Point) float64 {
 	minDistance := math.Inf(1)
 	measure := math.Inf(-1)
 	sum := 0.0
@@ -308,10 +308,10 @@ func (p *Path) Project(point *Point) float64 {
 	return measure
 }
 
-// ProjectNormalized computes the measure along this path closest to the given point,
+// Project computes the measure along this path closest to the given point,
 // normalized to the length of the path.
-func (p *Path) ProjectNormalized(point *Point) float64 {
-	return p.Project(point) / p.Distance()
+func (p *Path) Project(point *Point) float64 {
+	return p.Measure(point) / p.Distance()
 }
 
 // Intersection calls IntersectionPath or IntersectionLine depending on the
