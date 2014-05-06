@@ -294,6 +294,30 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
+// Measure computes the measure along this path that is closest to the
+// given point.
+func (p *Path) Measure(point *Point) float64 {
+	minDistance := math.Inf(1)
+	measure := math.Inf(-1)
+	sum := 0.0
+	for i := 0; i < len(p.points)-1; i++ {
+		seg := NewLine(&p.points[i], &p.points[i+1])
+		distanceToLine := seg.DistanceFrom(point)
+		if distanceToLine < minDistance {
+			minDistance = distanceToLine
+			measure = sum + seg.Measure(point)
+		}
+		sum += seg.Distance()
+	}
+	return measure
+}
+
+// Project computes the measure along this path closest to the given point,
+// normalized to the length of the path.
+func (p *Path) Project(point *Point) float64 {
+	return p.Measure(point) / p.Distance()
+}
+
 // Intersection calls IntersectionPath or IntersectionLine depending on the
 // type of the provided geometry.
 func (p *Path) Intersection(geometry interface{}) ([]*Point, [][2]int) {

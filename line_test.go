@@ -55,6 +55,48 @@ func TestLineDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestLineProject(t *testing.T) {
+	l1 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
+
+	proj := l1.Project(NewPoint(1, 2))
+	expected := 0.0
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+
+	proj = l1.Project(NewPoint(3, 4))
+	expected = 1.0
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+
+	proj = l1.Project(NewPoint(2, 3))
+	expected = 0.5
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+
+	proj = l1.Project(NewPoint(5, 6))
+	expected = 2.0
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+
+	proj = l1.Project(NewPoint(-1, 0))
+	expected = -1.0
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+
+	// point off of line
+	l2 := NewLine(NewPoint(1, 1), NewPoint(3, 3))
+	proj = l2.Project(NewPoint(1, 2))
+	expected = 0.25
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
+}
+
 func TestLineDistance(t *testing.T) {
 	l := NewLine(NewPoint(0, 0), NewPoint(3, 4))
 	if d := l.Distance(); d != 5 {
