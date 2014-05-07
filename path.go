@@ -20,13 +20,13 @@ func NewPath() *Path {
 }
 
 // SetPoints allows you to set the complete pointset yourself.
-// Note that the input is an array of points (not pointers to points)
+// Note that the input is an array of Points (not pointers to points)
 func (p *Path) SetPoints(points []Point) *Path {
 	p.points = points
 	return p
 }
 
-// GetPoints the raw points storred with the path
+// GetPoints returns the raw points stored with the path.
 // Note the output is an array of Points (not pointers to points)
 func (p *Path) GetPoints() []Point {
 	return p.points
@@ -42,7 +42,7 @@ func (p *Path) Transform(projection func(*Point)) *Path {
 	return p
 }
 
-// Reduce the path using Douglas Peucker to the given threshold.
+// Reduce the path using Douglas-Peucker to the given threshold.
 // Modifies the existing path.
 func (p *Path) Reduce(threshold float64) *Path {
 	if p.Length() <= 2 {
@@ -93,7 +93,7 @@ func (p *Path) workerReduce(start, end int, threshold float64, mask []byte) {
 	}
 }
 
-// Resample converts the path into count-1 evanly spaced segments.
+// Resample converts the path into count-1 evenly spaced segments.
 func (p *Path) Resample(totalPoints int) *Path {
 	// degenerate case
 	if len(p.points) <= 1 {
@@ -144,7 +144,7 @@ func (p *Path) Resample(totalPoints int) *Path {
 		}
 	}
 
-	// end stays the same, to handele round off errors
+	// end stays the same, to handle round off errors
 	if totalPoints != 1 { // for 1, we want the first point
 		points[totalPoints-1] = p.points[len(p.points)-1]
 	}
@@ -294,8 +294,7 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
-// Measure computes the measure along this path that is closest to the
-// given point.
+// Measure computes the distance along this path to the point nearest the given point.
 func (p *Path) Measure(point *Point) float64 {
 	minDistance := math.Inf(1)
 	measure := math.Inf(-1)
@@ -338,7 +337,7 @@ func (p *Path) Intersection(geometry interface{}) ([]*Point, [][2]int) {
 }
 
 // IntersectionPath returns a slice of points and a slice of tuples [i, j] where i is the segment
-// in parent path and j is the segment in the given path that intersect to form the given point.
+// in the parent path and j is the segment in the given path that intersect to form the given point.
 // Slices will be empty if there is no intersection.
 func (p *Path) IntersectionPath(path *Path) ([]*Point, [][2]int) {
 	// TODO: done some sort of line sweep here if p.Lenght() is big enough
@@ -427,7 +426,7 @@ func (p *Path) IntersectsLine(line *Line) bool {
 	return false
 }
 
-// Bounds returns bound around the path. Simply uses rectangular coordinates.
+// Bounds returns a bound around the path. Simply uses rectangular coordinates.
 func (p *Path) Bound() *Bound {
 	if len(p.points) == 0 {
 		return NewBound(0, 0, 0, 0)
@@ -461,7 +460,7 @@ func (p *Path) SetAt(index int, point *Point) *Path {
 }
 
 // GetAt returns the pointer to the Point in the page.
-// This function is good for modifying values inplace.
+// This function is good for modifying values in place.
 // Returns nil if index is out of range.
 func (p *Path) GetAt(i int) *Point {
 	if i >= len(p.points) || i < 0 {
@@ -507,7 +506,7 @@ func (p *Path) Push(point *Point) *Path {
 	return p
 }
 
-// Pop removes and returns the last it.
+// Pop removes and returns the last point.
 func (p *Path) Pop() *Point {
 	if len(p.points) == 0 {
 		return nil

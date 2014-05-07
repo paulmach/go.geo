@@ -30,17 +30,17 @@ All objects are defined in a 2D context.
 	projection of that point, or a vector.
 * **Line** represents the shortest distance between two points in Euclidean space. 
 	In many cases the path object is more useful.
-* **Path** represents a set of points representing a path in the 2D plain. 
+* **Path** represents a set of points representing a path in the 2D plane.
 	Functions for converting to/from
 	[Google's polyline encoding](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) are included.
-* **Bound** represents a rectangular 2d area defined by North, South, East, West values.
+* **Bound** represents a rectangular 2D area defined by North, South, East, West values.
 	Computable for Line and Path objects, used by the Surface object.
 * **Surface** is used to assign values to points in a 2D area, such as elevation.
 	*This object is still being developed and is experimental*
 
 ## Library conventions
 
-There are two big conventions that developers should be aware off; 
+There are two big conventions that developers should be aware of:
 **functions are chainable** and **operations modify the original object.**
 For example:
 
@@ -48,7 +48,7 @@ For example:
 	p.SetX(10).Add(geo.NewPoint(10, 10))
 	p.Equals(geo.NewPoint(20, 10))  // == true
 
-If you want to create a copy, all the objects support the `Clone` method.
+If you want to create a copy, all objects support the `Clone` method.
 
 	p1 := geo.NewPoint(10, 10)
 	p2 := p1.SetY(20)
@@ -57,8 +57,8 @@ If you want to create a copy, all the objects support the `Clone` method.
 	p2 := p1.Clone().SetY(30)
 	p1.Equals(p2) // == false
 
-This conventions puts extra load on the programmer,  
-but tests showed making a copy every time was significantly slower.
+These conventions put extra load on the programmer,
+but tests showed that making a copy every time was significantly slower.
 So, **remember to explicitly Clone() your objects**.
 
 ## Examples
@@ -71,7 +71,7 @@ of exported functions. Below are a few usage examples.
 	// lng/lat data, in this case, is encoded at 6 decimal place precision
 	path := geo.Decode("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
 	
-	// reduce using Douglas Peucker to the given threshold.
+	// reduce using Douglas-Peucker to the given threshold.
 	// Note the threshold distance is in the coordinates of the points,
 	// which in this case is degrees.
 	p.Reduce(1.0e-5)
@@ -100,7 +100,7 @@ of exported functions. Below are a few usage examples.
 ## Surface
 
 A surface object is defined by a bound (lng/lat georegion for example) and a width and height 
-defining the number of descrete points in the bound. This allows for access such as:
+defining the number of discrete points in the bound. This allows for access such as:
 
 	surface.Grid[x][y]         // the value at a location in the grid
 	surface.GetPoint(x, y)     // the point, which will be in the space as surface.bound,
@@ -109,7 +109,7 @@ defining the number of descrete points in the bound. This allows for access such
 	surface.GradientAt(*point) // the gradient of the surface a any point in the bounds,
 	                           // returns a point object which should be treated as a vector
 
-A couple things about how the bound area is descritized in the grid:
+A couple things about how the bound area is discretized in the grid:
  
 	* surface.Grid[0][0]
 		corresponds to the surface.Bound.SouthWest() location, or bottom left corner or the bound

@@ -24,8 +24,8 @@ var Mercator = Projecter{
 	},
 }
 
-// BuildTransverseMercator builds a transverse mercator projection
-// that automatically recenter the longitude around the provided centerLng.
+// BuildTransverseMercator builds a transverse Mercator projection
+// that automatically recenters the longitude around the provided centerLng.
 // Works correctly around the anti-meridian.
 // http://en.wikipedia.org/wiki/Transverse_Mercator_projection
 func BuildTransverseMercator(centerLng float64) Projecter {
@@ -60,8 +60,8 @@ func BuildTransverseMercator(centerLng float64) Projecter {
 	}
 }
 
-// This default Transverse Mercator projector will only work well +-10 degrees around
-// longitude 0. Use this if you've already precentered your points.
+// This default transverse Mercator projector will only work well +-10 degrees around
+// longitude 0. Use this if you've already pre-centered your points.
 var TransverseMercator = Projecter{
 	Project: func(p *Point) {
 		radLat := deg2rad(p.Lat())
@@ -81,7 +81,7 @@ var TransverseMercator = Projecter{
 	},
 }
 
-// ScalarMercator projects converts from lng/lat float64 to x,y uint64.
+// ScalarMercator converts from lng/lat float64 to x,y uint64.
 // This is similar to Google's world coordinates.
 var ScalarMercator struct {
 	Level   uint64

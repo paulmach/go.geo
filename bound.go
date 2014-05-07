@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// A Bound represents an enclosed "box" in the 2d Euclidean or Cartesian plane.
+// A Bound represents an enclosed "box" in the 2D Euclidean or Cartesian plane.
 // It does not know anything about the anti-meridian.
 type Bound struct {
 	sw, ne *Point
@@ -46,7 +46,7 @@ func (b *Bound) Extend(point *Point) *Bound {
 }
 
 // Contains determines if the point is within the bound.
-// On the boundary is considered in.
+// Points on the boundary are considered within.
 func (b *Bound) Contains(point *Point) bool {
 
 	if point.Y() < b.sw.Y() || b.ne.Y() < point.Y() {
@@ -61,14 +61,14 @@ func (b *Bound) Contains(point *Point) bool {
 }
 
 // Intersects determines if two bounds intersect.
-// True if they are touching.
+// Returns true if they are touching.
 func (b *Bound) Intersects(bound *Bound) bool {
 	if bound.Contains(b.sw) || bound.Contains(b.ne) ||
 		bound.Contains(b.SouthEast()) || bound.Contains(b.NorthWest()) {
 		return true
 	}
 
-	// now check the completely inside case, only one consition required
+	// now check the completely inside case, only one condition required
 	if b.Contains(bound.sw) {
 		return true
 	}
@@ -86,7 +86,7 @@ func (b *Bound) Center() *Point {
 }
 
 // Expands in all directions by the amount given. The amount must be
-// in the units of the bounds. Techinally one can pad with negative value,
+// in the units of the bounds. Technically one can pad with negative value,
 // but no error checking is done.
 func (b *Bound) Pad(amount float64) *Bound {
 	b.sw.SetX(b.sw.X() - amount)
@@ -98,12 +98,12 @@ func (b *Bound) Pad(amount float64) *Bound {
 	return b
 }
 
-// Height returns just the difference in the points' Y/Latitude
+// Height returns just the difference in the point's Y/Latitude.
 func (b *Bound) Height() float64 {
 	return b.ne.Y() - b.sw.Y()
 }
 
-// Width returns just the difference in the points' X/Longitude
+// Width returns just the difference in the point's X/Longitude.
 func (b *Bound) Width() float64 {
 	return b.ne.X() - b.sw.X()
 }
