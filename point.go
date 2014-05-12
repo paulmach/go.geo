@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// A simple X/Y or Lng/Lat 2d point
+// A simple X/Y or Lng/Lat 2d point.
 type Point [2]float64 // [X, Y] or [Lng, Lat]
 var InfinityPoint = &Point{math.Inf(1), math.Inf(1)}
 
@@ -19,7 +19,7 @@ func (p *Point) Transform(transformer func(*Point)) *Point {
 	return p
 }
 
-// DistanceFrom returns the euclidean distance between the points.
+// DistanceFrom returns the Euclidean distance between the points.
 func (p *Point) DistanceFrom(point *Point) float64 {
 	d0 := (point[0] - p[0])
 	d1 := (point[1] - p[1])
@@ -58,7 +58,7 @@ func (p *Point) BearingTo(point *Point) float64 {
 	return rad2deg(math.Atan2(y, x))
 }
 
-// Add a point to the given point
+// Add a point to the given point.
 func (p *Point) Add(point *Point) *Point {
 	p[0] += point[0]
 	p[1] += point[1]
@@ -66,7 +66,7 @@ func (p *Point) Add(point *Point) *Point {
 	return p
 }
 
-// Subtract a point from the given point
+// Subtract a point from the given point.
 func (p *Point) Subtract(point *Point) *Point {
 	p[0] -= point[0]
 	p[1] -= point[1]
@@ -75,7 +75,7 @@ func (p *Point) Subtract(point *Point) *Point {
 }
 
 // Normalize treats the point as a vector and
-// scales it such that its distance from [0,0] is 1
+// scales it such that its distance from [0,0] is 1.
 func (p *Point) Normalize() *Point {
 	dist := p.DistanceFrom(&Point{})
 
@@ -92,7 +92,7 @@ func (p *Point) Normalize() *Point {
 	return p
 }
 
-// Scale each component of the point
+// Scale each component of the point.
 func (p *Point) Scale(factor float64) *Point {
 	p[0] *= factor
 	p[1] *= factor

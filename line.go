@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// Line represents the shortest path between A and B
+// Line represents the shortest path between A and B.
 type Line struct {
 	a, b Point
 }
@@ -23,7 +23,7 @@ func (l *Line) Transform(projection func(*Point) *Point) *Line {
 }
 
 // DistanceFrom does NOT use geodesic geometry. It finds the distance from
-// the line using standard euclidean geometry, using the units the points are in.
+// the line using standard Euclidean geometry, using the units the points are in.
 func (l *Line) DistanceFrom(point *Point) float64 {
 
 	if l.a.Equals(&l.b) {
@@ -41,17 +41,17 @@ func (l *Line) DistanceFrom(point *Point) float64 {
 	return l.Interpolate(u).DistanceFrom(point)
 }
 
-// Distance computes the distance of the line, ie. its length, in euclidian space.
+// Distance computes the distance of the line, ie. its length, in Euclidian space.
 func (l *Line) Distance() float64 {
 	return l.a.DistanceFrom(&l.b)
 }
 
-// GeoDistance the distance of the line, ie. its length, using spherical geometry.
+// GeoDistance computes the distance of the line, ie. its length, using spherical geometry.
 func (l *Line) GeoDistance(haversine ...bool) float64 {
 	return l.a.GeoDistanceFrom(&l.b, yesHaversine(haversine))
 }
 
-// Project the factor to multiply the line by to be nearest the given point.
+// Project computes the factor to multiply the line by to be nearest the given point.
 func (l *Line) Project(point *Point) float64 {
 	if point.Equals(l.A()) {
 		return 0.0
@@ -66,7 +66,7 @@ func (l *Line) Project(point *Point) float64 {
 	return p
 }
 
-// Measure the distance to the point on this line nearest the given point.
+// Measure computes the distance along this line to the point nearest the given point.
 func (l *Line) Measure(point *Point) float64 {
 	projFactor := l.Project(point)
 	if projFactor <= 0.0 {
@@ -79,7 +79,7 @@ func (l *Line) Measure(point *Point) float64 {
 	return l.Distance()
 }
 
-// Interpolate performs a simple linear interpolation, from A to B
+// Interpolate performs a simple linear interpolation, from A to B.
 func (l *Line) Interpolate(percent float64) *Point {
 	p := &Point{}
 	p.SetX(l.a.X() + percent*(l.b.X()-l.a.X()))
@@ -89,7 +89,7 @@ func (l *Line) Interpolate(percent float64) *Point {
 	return p
 }
 
-// Side returns 1 if the point is on the right side, -1 left side and 0 if colinear
+// Side returns 1 if the point is on the right side, -1 if on the left side, and 0 if collinear.
 func (l *Line) Side(p *Point) int {
 	val := (l.b.X()-l.a.X())*(p.Y()-l.b.Y()) - (l.b.Y()-l.a.Y())*(p.X()-l.b.X())
 
@@ -99,18 +99,18 @@ func (l *Line) Side(p *Point) int {
 		return -1 // left
 	}
 
-	return 0 // colinear
+	return 0 // collinear
 }
 
 // Intersection finds the intersection of the two lines or nil,
-// if the lines are colinear will return NewPoint(math.Inf(1), math.Inf(1)) == InfinityPoint
+// if the lines are collinear will return NewPoint(math.Inf(1), math.Inf(1)) == InfinityPoint
 func (l1 *Line) Intersection(l2 *Line) *Point {
 	den := (l2.b.Y()-l2.a.Y())*(l1.b.X()-l1.a.X()) - (l2.b.X()-l2.a.X())*(l1.b.Y()-l1.a.Y())
 	U1 := (l2.b.X()-l2.a.X())*(l1.a.Y()-l2.a.Y()) - (l2.b.Y()-l2.a.Y())*(l1.a.X()-l2.a.X())
 	U2 := (l1.b.X()-l1.a.X())*(l1.a.Y()-l2.a.Y()) - (l1.b.Y()-l1.a.Y())*(l1.a.X()-l2.a.X())
 
 	if den == 0 {
-		// colinear, all bets are off
+		// collinear, all bets are off
 		if U1 == 0 && U2 == 0 {
 			return InfinityPoint
 		}
@@ -125,7 +125,7 @@ func (l1 *Line) Intersection(l2 *Line) *Point {
 	return l1.Interpolate(U1 / den)
 }
 
-// Intersects will return true if the lines are colinear AND intersect.
+// Intersects will return true if the lines are collinear AND intersect.
 // Based on: http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 func (l1 *Line) Intersects(l2 *Line) bool {
 	s1 := l1.Side(l2.A())
@@ -138,24 +138,24 @@ func (l1 *Line) Intersects(l2 *Line) bool {
 	}
 
 	// Special Cases
-	// l1 and l2.a colinear, check if l2.a is on l1
+	// l1 and l2.a collinear, check if l2.a is on l1
 	if s1 == 0 && l1.Bounds().Contains(l2.A()) {
 		return true
 	}
 
-	// l1 and l2.b colinear, check if l2.b is on l1
+	// l1 and l2.b collinear, check if l2.b is on l1
 	if s2 == 0 && l1.Bounds().Contains(l2.B()) {
 		return true
 	}
 
 	// TODO: are these next two tests redudant give the test above
 
-	// l2 and l1.a colinear, check if l1.a is on l2
+	// l2 and l1.a collinear, check if l1.a is on l2
 	if s3 == 0 && l2.Bounds().Contains(l1.A()) {
 		return true
 	}
 
-	// l2 and l1.b colinear, check if l1.b is on l2
+	// l2 and l1.b collinear, check if l1.b is on l2
 	if s4 == 0 && l2.Bounds().Contains(l1.B()) {
 		return true
 	}
@@ -163,7 +163,7 @@ func (l1 *Line) Intersects(l2 *Line) bool {
 	return false
 }
 
-// Midpoint returns the euclidean midpoint of the line
+// Midpoint returns the Euclidean midpoint of the line.
 func (l *Line) Midpoint() *Point {
 	return l.Interpolate(0.5)
 }
@@ -191,19 +191,19 @@ func (l *Line) GeoMidpoint() *Point {
 	return p
 }
 
-// Bounds returns bound around the line. Simply uses rectangular coordinates.
+// Bounds returns a bound around the line. Simply uses rectangular coordinates.
 func (l *Line) Bounds() *Bound {
 	return NewBound(math.Max(l.a.X(), l.b.X()), math.Min(l.a.X(), l.b.X()),
 		math.Max(l.a.Y(), l.b.Y()), math.Min(l.a.Y(), l.b.Y()))
 }
 
-// Reverse swaps the start and end of the line
+// Reverse swaps the start and end of the line.
 func (l *Line) Reverse() *Line {
 	l.a, l.b = l.b, l.a
 	return l
 }
 
-// Direction is irrelevant, ie. true if one is the reverse of the other.
+// Line equality is irrespective of direction, i.e. true if one is the reverse of the other.
 func (l *Line) Equals(line *Line) bool {
 	return (l.a.Equals(&line.a) && l.b.Equals(&line.b)) || (l.a.Equals(&line.b) && l.b.Equals(&line.a))
 }
