@@ -93,7 +93,7 @@ func (p *Path) workerReduce(start, end int, threshold float64, mask []byte) {
 	}
 }
 
-// Resample converts the path into count-1 evenly spaced segments.
+// Resample converts the path into totalPoints-1 evenly spaced segments.
 func (p *Path) Resample(totalPoints int) *Path {
 	// degenerate case
 	if len(p.points) <= 1 {
@@ -300,7 +300,7 @@ func (p *Path) Measure(point *Point) float64 {
 	measure := math.Inf(-1)
 	sum := 0.0
 	for i := 0; i < len(p.points)-1; i++ {
-		seg := NewLine(&p.points[i], &p.points[i+1])
+		seg := &Line{p.points[i], p.points[i+1]}
 		distanceToLine := seg.DistanceFrom(point)
 		if distanceToLine < minDistance {
 			minDistance = distanceToLine

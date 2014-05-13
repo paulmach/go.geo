@@ -31,7 +31,7 @@ func (l *Line) DistanceFrom(point *Point) float64 {
 		return l.a.DistanceFrom(point)
 	}
 
-	u := ((point.Y()-l.a.Y())*(l.b.Y()-l.a.Y()) + (point.X()-l.a.X())*(l.b.X()-l.a.X())) / (math.Pow(l.b.Y()-l.a.Y(), 2) + math.Pow(l.b.X()-l.a.X(), 2))
+	u := l.Project(point)
 	if u <= 0 {
 		return l.a.DistanceFrom(point)
 	} else if u >= 1 {
@@ -51,22 +51,25 @@ func (l *Line) GeoDistance(haversine ...bool) float64 {
 	return l.a.GeoDistanceFrom(&l.b, yesHaversine(haversine))
 }
 
-// Project computes the factor to multiply the line by to be nearest the given point.
+// Project returns the normalized distance of the point on the line nearest the given point.
+// Returned values maybe the outside of [0,1]. This function is the opposite of Interpolate.
 func (l *Line) Project(point *Point) float64 {
-	if point.Equals(l.A()) {
+	if point.Equals(&l.a) {
 		return 0.0
 	}
-	if point.Equals(l.B()) {
+
+	if point.Equals(&l.b) {
 		return 1.0
 	}
-	dx := l.B().X() - l.A().X()
-	dy := l.B().Y() - l.A().Y()
-	sq := dx*dx + dy*dy
-	p := ((point.X()-l.A().X())*dx + (point.Y()-l.A().Y())*dy) / sq
-	return p
+
+	dx := l.b[0] - l.a[0]
+	dy := l.b[1] - l.a[1]
+	return ((point[0]-l.a[0])*dx + (point[1]-l.a[1])*dy) / (dx*dx + dy*dy)
 }
 
-// Measure computes the distance along this line to the point nearest the given point.
+// Measure returns the distance along the line to the point nearest the given point.
+// Treats the line as a line segment such that is the nearest point is an endpoint of the line,
+// the function will return 0 or 1 as appropriate.
 func (l *Line) Measure(point *Point) float64 {
 	projFactor := l.Project(point)
 	if projFactor <= 0.0 {
@@ -80,10 +83,11 @@ func (l *Line) Measure(point *Point) float64 {
 }
 
 // Interpolate performs a simple linear interpolation, from A to B.
+// This function is the opposite of Project.
 func (l *Line) Interpolate(percent float64) *Point {
 	p := &Point{}
-	p.SetX(l.a.X() + percent*(l.b.X()-l.a.X()))
-	p.SetY(l.a.Y() + percent*(l.b.Y()-l.a.Y()))
+	p.SetX(l.a[0] + percent*(l.b[0]-l.a[0]))
+	p.SetY(l.a[1] + percent*(l.b[1]-l.a[1]))
 
 	// simple
 	return p
@@ -91,7 +95,7 @@ func (l *Line) Interpolate(percent float64) *Point {
 
 // Side returns 1 if the point is on the right side, -1 if on the left side, and 0 if collinear.
 func (l *Line) Side(p *Point) int {
-	val := (l.b.X()-l.a.X())*(p.Y()-l.b.Y()) - (l.b.Y()-l.a.Y())*(p.X()-l.b.X())
+	val := (l.b[0]-l.a[0])*(p[1]-l.b[1]) - (l.b[1]-l.a[1])*(p[0]-l.b[0])
 
 	if val < 0 {
 		return 1 // right
@@ -105,9 +109,9 @@ func (l *Line) Side(p *Point) int {
 // Intersection finds the intersection of the two lines or nil,
 // if the lines are collinear will return NewPoint(math.Inf(1), math.Inf(1)) == InfinityPoint
 func (l1 *Line) Intersection(l2 *Line) *Point {
-	den := (l2.b.Y()-l2.a.Y())*(l1.b.X()-l1.a.X()) - (l2.b.X()-l2.a.X())*(l1.b.Y()-l1.a.Y())
-	U1 := (l2.b.X()-l2.a.X())*(l1.a.Y()-l2.a.Y()) - (l2.b.Y()-l2.a.Y())*(l1.a.X()-l2.a.X())
-	U2 := (l1.b.X()-l1.a.X())*(l1.a.Y()-l2.a.Y()) - (l1.b.Y()-l1.a.Y())*(l1.a.X()-l2.a.X())
+	den := (l2.b[1]-l2.a[1])*(l1.b[0]-l1.a[0]) - (l2.b[0]-l2.a[0])*(l1.b[1]-l1.a[1])
+	U1 := (l2.b[0]-l2.a[0])*(l1.a[1]-l2.a[1]) - (l2.b[1]-l2.a[1])*(l1.a[0]-l2.a[0])
+	U2 := (l1.b[0]-l1.a[0])*(l1.a[1]-l2.a[1]) - (l1.b[1]-l1.a[1])*(l1.a[0]-l2.a[0])
 
 	if den == 0 {
 		// collinear, all bets are off
@@ -128,10 +132,10 @@ func (l1 *Line) Intersection(l2 *Line) *Point {
 // Intersects will return true if the lines are collinear AND intersect.
 // Based on: http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 func (l1 *Line) Intersects(l2 *Line) bool {
-	s1 := l1.Side(l2.A())
-	s2 := l1.Side(l2.B())
-	s3 := l2.Side(l1.A())
-	s4 := l2.Side(l1.B())
+	s1 := l1.Side(&l2.a)
+	s2 := l1.Side(&l2.b)
+	s3 := l2.Side(&l1.a)
+	s4 := l2.Side(&l1.b)
 
 	if s1 != s2 && s3 != s4 {
 		return true
@@ -139,24 +143,25 @@ func (l1 *Line) Intersects(l2 *Line) bool {
 
 	// Special Cases
 	// l1 and l2.a collinear, check if l2.a is on l1
-	if s1 == 0 && l1.Bounds().Contains(l2.A()) {
+	if s1 == 0 && l1.Bounds().Contains(&l2.a) {
 		return true
 	}
 
 	// l1 and l2.b collinear, check if l2.b is on l1
-	if s2 == 0 && l1.Bounds().Contains(l2.B()) {
+	if s2 == 0 && l1.Bounds().Contains(&l2.b) {
 		return true
 	}
 
-	// TODO: are these next two tests redudant give the test above
+	// TODO: are these next two tests redudant give the test above.
+	// Thinking yes if there is round off magic.
 
 	// l2 and l1.a collinear, check if l1.a is on l2
-	if s3 == 0 && l2.Bounds().Contains(l1.A()) {
+	if s3 == 0 && l2.Bounds().Contains(&l1.a) {
 		return true
 	}
 
 	// l2 and l1.b collinear, check if l1.b is on l2
-	if s4 == 0 && l2.Bounds().Contains(l1.B()) {
+	if s4 == 0 && l2.Bounds().Contains(&l1.b) {
 		return true
 	}
 
@@ -193,8 +198,8 @@ func (l *Line) GeoMidpoint() *Point {
 
 // Bounds returns a bound around the line. Simply uses rectangular coordinates.
 func (l *Line) Bounds() *Bound {
-	return NewBound(math.Max(l.a.X(), l.b.X()), math.Min(l.a.X(), l.b.X()),
-		math.Max(l.a.Y(), l.b.Y()), math.Min(l.a.Y(), l.b.Y()))
+	return NewBound(math.Max(l.a[0], l.b[0]), math.Min(l.a[0], l.b[0]),
+		math.Max(l.a[1], l.b[1]), math.Min(l.a[1], l.b[1]))
 }
 
 // Reverse swaps the start and end of the line.
