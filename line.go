@@ -9,15 +9,16 @@ type Line struct {
 	a, b Point
 }
 
+// NewLine creates a new line by cloning the provided points.
 func NewLine(a, b *Point) *Line {
 	return &Line{*a.Clone(), *b.Clone()}
 }
 
 // Transform applies a given projection or inverse projection to the current line.
 // Modifies the line.
-func (l *Line) Transform(projection func(*Point) *Point) *Line {
-	projection(&l.a)
-	projection(&l.b)
+func (l *Line) Transform(projector Projector) *Line {
+	projector(&l.a)
+	projector(&l.b)
 
 	return l
 }

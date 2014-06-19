@@ -44,6 +44,28 @@ func TestMercator(t *testing.T) {
 	}
 }
 
+func TestMercatorScaleFactor(t *testing.T) {
+	expected := 1.154701
+	if f := MercatorScaleFactor(30.0); math.Abs(expected-f) > epsilon {
+		t.Errorf("TestMercatorScaleFactor, wrong, expected %f, got %f", expected, f)
+	}
+
+	expected = 1.414214
+	if f := MercatorScaleFactor(45.0); math.Abs(expected-f) > epsilon {
+		t.Errorf("TestMercatorScaleFactor, wrong, expected %f, got %f", expected, f)
+	}
+
+	expected = 2.0
+	if f := MercatorScaleFactor(60.0); math.Abs(expected-f) > epsilon {
+		t.Errorf("TestMercatorScaleFactor, wrong, expected %f, got %f", expected, f)
+	}
+
+	expected = 5.758770
+	if f := MercatorScaleFactor(80.0); math.Abs(expected-f) > epsilon {
+		t.Errorf("TestMercatorScaleFactor, wrong, expected %f, got %f", expected, f)
+	}
+}
+
 func TestTransverseMercator(t *testing.T) {
 	tested := 0
 
@@ -183,28 +205,6 @@ func TestScalarMercator(t *testing.T) {
 
 		x, y := ScalarMercator.Project(p.Lng(), p.Lat())
 		lng, lat := ScalarMercator.Inverse(x, y)
-
-		p.SetLat(lat)
-		p.SetLng(lng)
-
-		if math.Abs(p.Lat()-city[0]) > epsilon {
-			t.Errorf("Scalar Mercator, latitude miss match: %f != %f", p.Lat(), city[0])
-		}
-
-		if math.Abs(p.Lng()-city[1]) > epsilon {
-			t.Errorf("Scalar Mercator, longitude miss match: %f != %f", p.Lng(), city[1])
-		}
-	}
-
-	// provided level
-	for _, city := range cities {
-		p := &Point{}
-
-		p.SetLat(city[0])
-		p.SetLng(city[1])
-
-		x, y := ScalarMercator.Project(p.Lng(), p.Lat(), 30)
-		lng, lat := ScalarMercator.Inverse(x, y, 30)
 
 		p.SetLat(lat)
 		p.SetLng(lng)

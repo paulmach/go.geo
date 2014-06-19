@@ -12,6 +12,7 @@ type Path struct {
 	points []Point
 }
 
+// NewPath simply creates a new path.
 func NewPath() *Path {
 	p := &Path{}
 	p.points = make([]Point, 0, 1000)
@@ -34,9 +35,9 @@ func (p *Path) Points() []Point {
 
 // Transform applies a given projection or inverse projection to all
 // the points in the path.
-func (p *Path) Transform(projection func(*Point)) *Path {
+func (p *Path) Transform(projector Projector) *Path {
 	for i := range p.points {
-		projection(&p.points[i])
+		projector(&p.points[i])
 	}
 
 	return p

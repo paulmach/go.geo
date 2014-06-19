@@ -4,32 +4,42 @@ import (
 	"math"
 )
 
-type Projecter struct {
-	Project func(p *Point)
-	Inverse func(p *Point)
+// A Projector is a function that converts the given point to a different space.
+type Projector func(p *Point)
+
+// A Projection is a set of projectors to map forward and backwards to the projected space.
+type Projection struct {
+	Project Projector
+	Inverse Projector
 }
 
-var Mercator = Projecter{
-	Project: func(p *Point) {
-		p.SetX(math.Pi / 180.0 * p.Lng())
+const mercatorPole = 20037508.34
 
-		radLat := math.Pi / 180.0 * p.Lat()
-		p.SetY(math.Log(math.Tan(math.Pi/4 + radLat/2.0)))
+// Mercator projection, performs EPSG:3857, sometimes also described as EPSG:900913.
+var Mercator = Projection{
+	Project: func(p *Point) {
+		p.SetX(mercatorPole / 180.0 * p.Lng())
+
+		y := math.Log(math.Tan((90.0+p.Lat())*math.Pi/360.0)) / math.Pi * mercatorPole
+		p.SetY(math.Max(-mercatorPole, math.Min(y, mercatorPole)))
 	},
 	Inverse: func(p *Point) {
-		p.SetLng(p.X() * 180.0 / math.Pi)
-
-		radLat := 2.0*math.Atan(math.Exp(p.Y())) - (math.Pi / 2.0)
-		p.SetLat(radLat * 180.0 / math.Pi)
+		p.SetLng(p.X() * 180.0 / mercatorPole)
+		p.SetLat(180.0 / math.Pi * (2*math.Atan(math.Exp((p.Y()/mercatorPole)*math.Pi)) - math.Pi/2.0))
 	},
+}
+
+// MercatorScaleFactor returns the mercator scaling factor for a given degree latitude.
+func MercatorScaleFactor(degreesLatitude float64) float64 {
+	return 1.0 / math.Cos(degreesLatitude/180.0*math.Pi)
 }
 
 // BuildTransverseMercator builds a transverse Mercator projection
 // that automatically recenters the longitude around the provided centerLng.
 // Works correctly around the anti-meridian.
 // http://en.wikipedia.org/wiki/Transverse_Mercator_projection
-func BuildTransverseMercator(centerLng float64) Projecter {
-	return Projecter{
+func BuildTransverseMercator(centerLng float64) Projection {
+	return Projection{
 		Project: func(p *Point) {
 			lng := p.Lng() - centerLng
 			if lng < 180 {
@@ -60,9 +70,9 @@ func BuildTransverseMercator(centerLng float64) Projecter {
 	}
 }
 
-// This default transverse Mercator projector will only work well +-10 degrees around
-// longitude 0. Use this if you've already pre-centered your points.
-var TransverseMercator = Projecter{
+// TransverseMercator implements a default transverse Mercator projector
+// that will only work well +-10 degrees around longitude 0.
+var TransverseMercator = Projection{
 	Project: func(p *Point) {
 		radLat := deg2rad(p.Lat())
 		radLng := deg2rad(p.Lng())
@@ -85,8 +95,8 @@ var TransverseMercator = Projecter{
 // This is similar to Google's world coordinates.
 var ScalarMercator struct {
 	Level   uint64
-	Project func(lat, lng float64, level ...uint64) (x, y uint64)
-	Inverse func(x, y uint64, level ...uint64) (lat, lng float64)
+	Project func(lat, lng float64) (x, y uint64)
+	Inverse func(x, y uint64) (lat, lng float64)
 }
 
 func init() {
@@ -95,12 +105,9 @@ func init() {
 	ScalarMercator.Inverse = scalarMercatorInverse
 }
 
-func scalarMercatorProject(lng, lat float64, level ...uint64) (x, y uint64) {
+func scalarMercatorProject(lng, lat float64) (x, y uint64) {
 	var factor uint64
 	l := ScalarMercator.Level
-	if len(level) != 0 {
-		l = level[0]
-	}
 
 	factor = 1 << l
 	maxtiles := float64(factor)
@@ -125,12 +132,9 @@ func scalarMercatorProject(lng, lat float64, level ...uint64) (x, y uint64) {
 	return
 }
 
-func scalarMercatorInverse(x, y uint64, level ...uint64) (lng, lat float64) {
+func scalarMercatorInverse(x, y uint64) (lng, lat float64) {
 	var factor uint64
 	l := ScalarMercator.Level
-	if len(level) != 0 {
-		l = level[0]
-	}
 
 	factor = 1 << l
 	maxtiles := float64(factor)
