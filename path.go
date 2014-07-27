@@ -43,58 +43,6 @@ func (p *Path) Transform(projector Projector) *Path {
 	return p
 }
 
-// Reduce the path using Douglas-Peucker to the given threshold.
-// Modifies the existing path.
-// ALERT: this method is now depricated. Use the reducers sub-package.
-func (p *Path) Reduce(threshold float64) *Path {
-	if p.Length() <= 2 {
-		return p
-	}
-
-	mask := make([]byte, p.Length())
-	mask[0] = 1
-	mask[p.Length()-1] = 1
-
-	p.workerReduce(0, p.Length()-1, threshold, mask)
-
-	count := 0
-	for i, v := range mask {
-		if v == 1 {
-			p.points[count] = p.points[i]
-			count++
-		}
-	}
-
-	p.points = p.points[:count]
-	return p
-}
-
-func (p *Path) workerReduce(start, end int, threshold float64, mask []byte) {
-	if end-start <= 1 {
-		return
-	}
-
-	l := Line{p.points[start], p.points[end]}
-
-	maxDist := 0.0
-	maxIndex := start + 1
-	for i := start + 1; i < end; i++ {
-		dist := l.DistanceFrom(&p.points[i])
-
-		if dist >= maxDist {
-			maxDist = dist
-			maxIndex = i
-		}
-	}
-
-	if maxDist > threshold {
-		mask[maxIndex] = 1
-
-		p.workerReduce(start, maxIndex, threshold, mask)
-		p.workerReduce(maxIndex, end, threshold, mask)
-	}
-}
-
 // Resample converts the path into totalPoints-1 evenly spaced segments.
 func (p *Path) Resample(totalPoints int) *Path {
 	// degenerate case
@@ -170,7 +118,7 @@ func Decode(encoded string, factor ...int) *Path {
 
 	for index < len(encoded) {
 		var result int
-		var b int = 0x20
+		var b = 0x20
 		var shift uint
 
 		for b >= 0x20 {
@@ -204,7 +152,7 @@ func Decode(encoded string, factor ...int) *Path {
 	return p
 }
 
-// Google polyline Encode the path into a string.
+// Encode converts the path to a string using the Google Maps Polyline Encoding method.
 // Factor defaults to 1.0e5, the same used by Google for polyline encoding.
 func (p *Path) Encode(factor ...int) string {
 	f := 1.0e5
@@ -342,9 +290,9 @@ func (p *Path) Intersection(geometry interface{}) ([]*Point, [][2]int) {
 // in the parent path and j is the segment in the given path that intersect to form the given point.
 // Slices will be empty if there is no intersection.
 func (p *Path) IntersectionPath(path *Path) ([]*Point, [][2]int) {
-	// TODO: done some sort of line sweep here if p.Lenght() is big enough
-	points := make([]*Point, 0)
-	indexes := make([][2]int, 0)
+	// TODO: done some sort of line sweep here if p.Length() is big enough
+	var points []*Point
+	var indexes [][2]int
 
 	for i := 0; i < len(p.points)-1; i++ {
 		pLine := NewLine(&p.points[i], &p.points[i+1])
@@ -366,8 +314,8 @@ func (p *Path) IntersectionPath(path *Path) ([]*Point, [][2]int) {
 // in path that intersects with the line at the given point.
 // Slices will be empty if there is no intersection.
 func (p *Path) IntersectionLine(line *Line) ([]*Point, [][2]int) {
-	points := make([]*Point, 0)
-	indexes := make([][2]int, 0)
+	var points []*Point
+	var indexes [][2]int
 
 	for i := 0; i < len(p.points)-1; i++ {
 		pTest := NewLine(&p.points[i], &p.points[i+1])
@@ -400,7 +348,7 @@ func (p *Path) Intersects(geometry interface{}) bool {
 
 // IntersectsPath takes a Path and checks if it intersects with the path.
 func (p *Path) IntersectsPath(path *Path) bool {
-	// TODO: done some sort of line sweep here if p.Lenght() is big enough
+	// TODO: done some sort of line sweep here if p.Length() is big enough
 	for i := 0; i < len(p.points)-1; i++ {
 		pLine := NewLine(&p.points[i], &p.points[i+1])
 
@@ -428,7 +376,7 @@ func (p *Path) IntersectsLine(line *Line) bool {
 	return false
 }
 
-// Bounds returns a bound around the path. Simply uses rectangular coordinates.
+// Bound returns a bound around the path. Simply uses rectangular coordinates.
 func (p *Path) Bound() *Bound {
 	if len(p.points) == 0 {
 		return NewBound(0, 0, 0, 0)

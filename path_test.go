@@ -38,42 +38,6 @@ func TestPathPoints(t *testing.T) {
 	}
 }
 
-func TestPathReduce(t *testing.T) {
-	p := NewPath()
-	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Error("path, reduce should return same path if of length 0")
-	}
-
-	p.Push(NewPoint(0, 0))
-	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Error("path, reduce should return same path if of length 1")
-	}
-
-	p.Push(NewPoint(0.5, .2))
-	if reducedPath := p.Reduce(0.1); !reducedPath.Equals(p) {
-		t.Error("path, reduce should return same path if of length 2")
-	}
-
-	p.Push(NewPoint(1, 0))
-
-	if l := p.Clone().Reduce(0.1).Length(); l != 3 {
-		t.Errorf("path, reduce to incorrect number of points, expected 2, got %d", l)
-	}
-
-	if l := p.Clone().Reduce(0.3).Length(); l != 2 {
-		t.Errorf("path, reduce to incorrect number of points, expected 3, got %d", l)
-	}
-
-	p = NewPath()
-	p.Push(NewPoint(0, 0))
-	p.Push(NewPoint(0, 1))
-	p.Push(NewPoint(0, 2))
-
-	if l := p.Clone().Reduce(0.0).Length(); l != 2 {
-		t.Error("path, reduce should remove coliniar points")
-	}
-}
-
 func TestPathResample(t *testing.T) {
 	p := NewPath()
 	p.Resample(10) // should not panic
