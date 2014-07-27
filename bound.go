@@ -11,6 +11,7 @@ type Bound struct {
 	sw, ne *Point
 }
 
+// NewBound creates a new bound given the paramters.
 func NewBound(east, west, north, south float64) *Bound {
 	return &Bound{
 		sw: &Point{math.Min(east, west), math.Min(north, south)},
@@ -18,6 +19,8 @@ func NewBound(east, west, north, south float64) *Bound {
 	}
 }
 
+// NewBoundFromPoints creates a new bound given two opposite corners.
+// These corners can be either sw/ne or se/nw.
 func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 	b := &Bound{
 		sw: corner.Clone(),
@@ -85,7 +88,7 @@ func (b *Bound) Center() *Point {
 	return p
 }
 
-// Expands in all directions by the amount given. The amount must be
+// Pad expands the bound in all directions by the amount given. The amount must be
 // in the units of the bounds. Technically one can pad with negative value,
 // but no error checking is done.
 func (b *Bound) Pad(amount float64) *Bound {
@@ -125,25 +128,34 @@ func (b *Bound) GeoWidth(haversine ...bool) float64 {
 	return A.GeoDistanceFrom(B, yesHaversine(haversine))
 }
 
+// SouthWest returns the lower left corner of the bound.
 func (b *Bound) SouthWest() *Point { return b.sw.Clone() }
+
+// NorthEast returns the upper right corner of the bound.
 func (b *Bound) NorthEast() *Point { return b.ne.Clone() }
 
+// SouthEast returns the lower right corner of the bound.
 func (b *Bound) SouthEast() *Point {
 	newP := &Point{}
 	newP.SetLat(b.sw.Lat()).SetLat(b.ne.Lng())
 	return newP
 }
 
+// NorthWest returns the upper left corner of the bound.
 func (b *Bound) NorthWest() *Point {
 	newP := &Point{}
 	newP.SetLat(b.ne.Lat()).SetLat(b.sw.Lng())
 	return newP
 }
 
+// Empty returns true if it contains zero area or if
+// it's in some malformed negative state where the left point is larger than the right.
+// This can be caused by Padding too much negative.
 func (b *Bound) Empty() bool {
-	return b.sw.Equals(b.ne)
+	return b.sw.X() >= b.ne.X() || b.sw.Y() >= b.ne.Y()
 }
 
+// Equals returns if two bounds are equal.
 func (b *Bound) Equals(c *Bound) bool {
 	if b.sw.Equals(c.sw) && b.ne.Equals(c.ne) {
 		return true
@@ -152,10 +164,13 @@ func (b *Bound) Equals(c *Bound) bool {
 	return false
 }
 
+// Clone returns a copy of the bound.
 func (b *Bound) Clone() *Bound {
 	return NewBoundFromPoints(b.sw, b.ne)
 }
 
+// String returns the string respentation of the bound in the form,
+// [[west, east], [south, north]]
 func (b *Bound) String() string {
 	return fmt.Sprintf("[[%f, %f], [%f, %f]]", b.sw.X(), b.ne.X(), b.sw.Y(), b.ne.Y())
 }

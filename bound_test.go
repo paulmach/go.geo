@@ -191,6 +191,30 @@ func TestBoundEmpty(t *testing.T) {
 	if !bound.Empty() {
 		t.Error("bound, empty exported true, got false")
 	}
+
+	// horizontal bar
+	bound = NewBound(1, 1, 2, 3)
+	if !bound.Empty() {
+		t.Error("bound, empty exported true, got false")
+	}
+
+	// vertical bar
+	bound = NewBound(1, 2, 2, 2)
+	if !bound.Empty() {
+		t.Error("bound, empty exported true, got false")
+	}
+
+	// negative/malformed area
+	bound = NewBound(1, 0, 2, 2)
+	if !bound.Empty() {
+		t.Error("bound, empty exported true, got false")
+	}
+
+	// negative/malformed area
+	bound = NewBound(1, 1, 2, 1)
+	if !bound.Empty() {
+		t.Error("bound, empty exported true, got false")
+	}
 }
 
 func TestBoundString(t *testing.T) {
