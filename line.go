@@ -52,6 +52,13 @@ func (l *Line) GeoDistance(haversine ...bool) float64 {
 	return l.a.GeoDistanceFrom(&l.b, yesHaversine(haversine))
 }
 
+// Direction computes the direction the line is pointing from A() to B().
+// The units are radians from the positive x-axis.
+// Range same as math.Atan2, [-Pi, Pi]
+func (l *Line) Direction() float64 {
+	return math.Atan2(l.b[1]-l.a[1], l.b[0]-l.a[0])
+}
+
 // Project returns the normalized distance of the point on the line nearest the given point.
 // Returned values maybe the outside of [0,1]. This function is the opposite of Interpolate.
 func (l *Line) Project(point *Point) float64 {
@@ -109,10 +116,10 @@ func (l *Line) Side(p *Point) int {
 
 // Intersection finds the intersection of the two lines or nil,
 // if the lines are collinear will return NewPoint(math.Inf(1), math.Inf(1)) == InfinityPoint
-func (l1 *Line) Intersection(l2 *Line) *Point {
-	den := (l2.b[1]-l2.a[1])*(l1.b[0]-l1.a[0]) - (l2.b[0]-l2.a[0])*(l1.b[1]-l1.a[1])
-	U1 := (l2.b[0]-l2.a[0])*(l1.a[1]-l2.a[1]) - (l2.b[1]-l2.a[1])*(l1.a[0]-l2.a[0])
-	U2 := (l1.b[0]-l1.a[0])*(l1.a[1]-l2.a[1]) - (l1.b[1]-l1.a[1])*(l1.a[0]-l2.a[0])
+func (l *Line) Intersection(line *Line) *Point {
+	den := (line.b[1]-line.a[1])*(l.b[0]-l.a[0]) - (line.b[0]-line.a[0])*(l.b[1]-l.a[1])
+	U1 := (line.b[0]-line.a[0])*(l.a[1]-line.a[1]) - (line.b[1]-line.a[1])*(l.a[0]-line.a[0])
+	U2 := (l.b[0]-l.a[0])*(l.a[1]-line.a[1]) - (l.b[1]-l.a[1])*(l.a[0]-line.a[0])
 
 	if den == 0 {
 		// collinear, all bets are off
@@ -127,16 +134,16 @@ func (l1 *Line) Intersection(l2 *Line) *Point {
 		return nil
 	}
 
-	return l1.Interpolate(U1 / den)
+	return l.Interpolate(U1 / den)
 }
 
 // Intersects will return true if the lines are collinear AND intersect.
 // Based on: http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-func (l1 *Line) Intersects(l2 *Line) bool {
-	s1 := l1.Side(&l2.a)
-	s2 := l1.Side(&l2.b)
-	s3 := l2.Side(&l1.a)
-	s4 := l2.Side(&l1.b)
+func (l *Line) Intersects(line *Line) bool {
+	s1 := l.Side(&line.a)
+	s2 := l.Side(&line.b)
+	s3 := line.Side(&l.a)
+	s4 := line.Side(&l.b)
 
 	if s1 != s2 && s3 != s4 {
 		return true
@@ -144,12 +151,13 @@ func (l1 *Line) Intersects(l2 *Line) bool {
 
 	// Special Cases
 	// l1 and l2.a collinear, check if l2.a is on l1
-	if s1 == 0 && l1.Bounds().Contains(&l2.a) {
+	lBound := l.Bounds()
+	if s1 == 0 && lBound.Contains(&line.a) {
 		return true
 	}
 
 	// l1 and l2.b collinear, check if l2.b is on l1
-	if s2 == 0 && l1.Bounds().Contains(&l2.b) {
+	if s2 == 0 && lBound.Contains(&line.b) {
 		return true
 	}
 
@@ -157,12 +165,13 @@ func (l1 *Line) Intersects(l2 *Line) bool {
 	// Thinking yes if there is round off magic.
 
 	// l2 and l1.a collinear, check if l1.a is on l2
-	if s3 == 0 && l2.Bounds().Contains(&l1.a) {
+	lineBound := line.Bounds()
+	if s3 == 0 && lineBound.Contains(&l.a) {
 		return true
 	}
 
 	// l2 and l1.b collinear, check if l1.b is on l2
-	if s4 == 0 && l2.Bounds().Contains(&l1.b) {
+	if s4 == 0 && lineBound.Contains(&l.b) {
 		return true
 	}
 
@@ -209,19 +218,23 @@ func (l *Line) Reverse() *Line {
 	return l
 }
 
-// Line equality is irrespective of direction, i.e. true if one is the reverse of the other.
+// Equals returns the line equality and is irrespective of direction,
+// i.e. true if one is the reverse of the other.
 func (l *Line) Equals(line *Line) bool {
 	return (l.a.Equals(&line.a) && l.b.Equals(&line.b)) || (l.a.Equals(&line.b) && l.b.Equals(&line.a))
 }
 
+// Clone returns a deep copy of the line.
 func (l *Line) Clone() *Line {
 	return &Line{*l.a.Clone(), *l.b.Clone()}
 }
 
+// A returns a pointer to the first point in the line.
 func (l *Line) A() *Point {
 	return &l.a
 }
 
+// B returns a pointer to the second point in the line.
 func (l *Line) B() *Point {
 	return &l.b
 }

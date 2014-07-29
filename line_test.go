@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"math"
 	"testing"
 )
 
@@ -116,6 +117,21 @@ func TestLineMeasure(t *testing.T) {
 	expected = 4.0
 	if measure != expected {
 		t.Errorf("line, measure expected %v == %v", measure, expected)
+	}
+}
+
+func TestDirection(t *testing.T) {
+	lines := []*Line{
+		NewLine(NewPoint(0, 0), NewPoint(1, 0)),
+		NewLine(NewPoint(0, 1), NewPoint(1, 0)),
+	}
+
+	answers := []float64{0, -0.25 * math.Pi}
+
+	for i, v := range answers {
+		if d := lines[i].Direction(); d != v {
+			t.Errorf("line, direction expected %f, got %f", v, d)
+		}
 	}
 }
 

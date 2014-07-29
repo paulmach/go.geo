@@ -177,6 +177,39 @@ func TestPathDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestDirectionAt(t *testing.T) {
+	path := NewPath().
+		Push(NewPoint(0, 0)).
+		Push(NewPoint(0, 1)).
+		Push(NewPoint(1, 1)).
+		Push(NewPoint(1, 0))
+
+	// uses two surrounding points so directions are diagonal
+	answers := []float64{0.5 * math.Pi, 0.25 * math.Pi, -0.25 * math.Pi}
+	for i, v := range answers {
+		if d := path.DirectionAt(i); d != v {
+			t.Errorf("path, directionAt, expected %f, got %f", v, d)
+		}
+	}
+
+	// INF for single point paths
+	path = NewPath().Push(NewPoint(0, 0))
+	if d := path.DirectionAt(0); d != math.Inf(1) {
+		t.Errorf("path, directionAt expected Inf, got %f", d)
+	}
+}
+
+func TestPathDirectionAtPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("path, directionAt invalid geometry should panic")
+		}
+	}()
+
+	// these should panic
+	NewPath().DirectionAt(0)
+}
+
 func TestPathMeasure(t *testing.T) {
 	p := NewPath()
 	p.Push(NewPoint(0, 0))

@@ -244,6 +244,34 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
+// DirectionAt computes the direction of the path at the given index.
+// Uses the line between the two surrounding points to get the direction,
+// or just the first two, or last two if at the start or end, respectively.
+// Assumes the path is in a conformal projection.
+// The units are radians from the positive x-axis. Range same as math.Atan2, [-Pi, Pi]
+// Returns INF for single point paths.
+func (p *Path) DirectionAt(index int) float64 {
+	if index >= len(p.points) || index < 0 {
+		panic(fmt.Sprintf("geo: direction at index out of range, requested: %d, length: %d", index, len(p.points)))
+	}
+
+	if len(p.points) == 1 {
+		return math.Inf(1)
+	}
+
+	var diff *Point
+	if index == 0 {
+		diff = p.GetAt(1).Clone().Subtract(p.GetAt(0))
+	} else if index >= p.Length()-1 {
+		length := p.Length()
+		diff = p.GetAt(length - 1).Clone().Subtract(p.GetAt(length - 2))
+	} else {
+		diff = p.GetAt(index + 1).Clone().Subtract(p.GetAt(index - 1))
+	}
+
+	return math.Atan2(diff.Y(), diff.X())
+}
+
 // Measure computes the distance along this path to the point nearest the given point.
 func (p *Path) Measure(point *Point) float64 {
 	minDistance := math.Inf(1)
