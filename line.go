@@ -151,7 +151,7 @@ func (l *Line) Intersects(line *Line) bool {
 
 	// Special Cases
 	// l1 and l2.a collinear, check if l2.a is on l1
-	lBound := l.Bounds()
+	lBound := l.Bound()
 	if s1 == 0 && lBound.Contains(&line.a) {
 		return true
 	}
@@ -165,7 +165,7 @@ func (l *Line) Intersects(line *Line) bool {
 	// Thinking yes if there is round off magic.
 
 	// l2 and l1.a collinear, check if l1.a is on l2
-	lineBound := line.Bounds()
+	lineBound := line.Bound()
 	if s3 == 0 && lineBound.Contains(&l.a) {
 		return true
 	}
@@ -207,7 +207,7 @@ func (l *Line) GeoMidpoint() *Point {
 }
 
 // Bounds returns a bound around the line. Simply uses rectangular coordinates.
-func (l *Line) Bounds() *Bound {
+func (l *Line) Bound() *Bound {
 	return NewBound(math.Max(l.a[0], l.b[0]), math.Min(l.a[0], l.b[0]),
 		math.Max(l.a[1], l.b[1]), math.Min(l.a[1], l.b[1]))
 }

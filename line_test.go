@@ -276,7 +276,7 @@ func TestLineMidpoint(t *testing.T) {
 	}
 }
 
-func TestLineBounds(t *testing.T) {
+func TestLineBound(t *testing.T) {
 	var answer *Bound
 	a := NewPoint(1, 2)
 	b := NewPoint(3, 4)
@@ -284,11 +284,11 @@ func TestLineBounds(t *testing.T) {
 	l := NewLine(a, b)
 
 	answer = NewBound(1, 3, 2, 4)
-	if b := l.Bounds(); !b.Equals(answer) {
+	if b := l.Bound(); !b.Equals(answer) {
 		t.Errorf("line, bounds expected %v, got %v", answer, b)
 	}
 
-	if b := l.Reverse().Bounds(); !b.Equals(answer) {
+	if b := l.Reverse().Bound(); !b.Equals(answer) {
 		t.Errorf("line, bounds expected %v, got %v", answer, b)
 	}
 }
