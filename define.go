@@ -6,11 +6,15 @@ import (
 
 var epsilon = 1e-6
 
-var DEFAULT_HaversineGeoDistance = false // or use linear approximation
-var DEFAULT_Radius = 6371000.0
+// UseHaversineGeoDistanceByDefault indicates if the more complicated
+// Haversine formula should be used for geo distances.
+var UseHaversineGeoDistanceByDefault = false
+
+// EarthRadius is the radius of the earth in meters. It is used in geo distance calculations.
+var EarthRadius = 6371000.0 // meters
 
 func yesHaversine(haversine []bool) bool {
-	return (len(haversine) != 0 && haversine[0]) || (DEFAULT_HaversineGeoDistance && len(haversine) == 0)
+	return (len(haversine) != 0 && haversine[0]) || (UseHaversineGeoDistanceByDefault && len(haversine) == 0)
 }
 
 func deg2rad(d float64) float64 {

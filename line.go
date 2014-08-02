@@ -206,7 +206,7 @@ func (l *Line) GeoMidpoint() *Point {
 	return p
 }
 
-// Bounds returns a bound around the line. Simply uses rectangular coordinates.
+// Bound returns a bound around the line. Simply uses rectangular coordinates.
 func (l *Line) Bound() *Bound {
 	return NewBound(math.Max(l.a[0], l.b[0]), math.Min(l.a[0], l.b[0]),
 		math.Max(l.a[1], l.b[1]), math.Min(l.a[1], l.b[1]))
