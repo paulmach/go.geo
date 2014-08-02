@@ -297,21 +297,25 @@ func (p *Path) Project(point *Point) float64 {
 
 // Intersection calls IntersectionPath or IntersectionLine depending on the
 // type of the provided geometry.
+// TODO: have this receive an Intersectable interface.
 func (p *Path) Intersection(geometry interface{}) ([]*Point, [][2]int) {
+	var points []*Point
+	var segments [][2]int
+
 	switch g := geometry.(type) {
 	case Line:
-		return p.IntersectionLine(&g)
+		points, segments = p.IntersectionLine(&g)
 	case *Line:
-		return p.IntersectionLine(g)
+		points, segments = p.IntersectionLine(g)
 	case Path:
-		return p.IntersectionPath(&g)
+		points, segments = p.IntersectionPath(&g)
 	case *Path:
-		return p.IntersectionPath(g)
+		points, segments = p.IntersectionPath(g)
 	default:
 		panic("can only determine intersection with lines and paths")
 	}
 
-	return nil, nil // unreachable
+	return points, segments
 }
 
 // IntersectionPath returns a slice of points and a slice of tuples [i, j] where i is the segment
@@ -357,21 +361,24 @@ func (p *Path) IntersectionLine(line *Line) ([]*Point, [][2]int) {
 }
 
 // Intersects can take a line or a path to determine if there is an intersection.
+// TODO: I would love this to accept an intersecter interface.
 func (p *Path) Intersects(geometry interface{}) bool {
+	var result bool
+
 	switch g := geometry.(type) {
 	case Line:
-		return p.IntersectsLine(&g)
+		result = p.IntersectsLine(&g)
 	case *Line:
-		return p.IntersectsLine(g)
+		result = p.IntersectsLine(g)
 	case Path:
-		return p.IntersectsPath(&g)
+		result = p.IntersectsPath(&g)
 	case *Path:
-		return p.IntersectsPath(g)
+		result = p.IntersectsPath(g)
 	default:
 		panic("can only determine intersection with lines and paths")
 	}
 
-	return false // unreachable
+	return result
 }
 
 // IntersectsPath takes a Path and checks if it intersects with the path.
