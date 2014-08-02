@@ -10,14 +10,17 @@ import (
 // Surface is the 2d version of path.
 type Surface struct {
 	Bound         *Bound
-	Width, Height uint32
+	Width, Height int
 
 	// represents the underlying data, as [x][y]
 	// where x in [0:Width] and y in [0:Height]
 	Grid [][]float64 // x,y
 }
 
-func NewSurface(bound *Bound, width, height uint32) *Surface {
+// NewSurface build and allocates all the memory to create
+// a surface defined by the bound represented by width*height discrete points.
+// Note that surface.Grid[width-1][height-1] will be on the boundary of the bound.
+func NewSurface(bound *Bound, width, height int) *Surface {
 	s := &Surface{
 		Bound:  bound.Clone(),
 		Width:  width,
@@ -34,22 +37,17 @@ func NewSurface(bound *Bound, width, height uint32) *Surface {
 	return s
 }
 
-// PointAt returns the point corresponding to this grid coordinate
-// given the size and bounds of the surface.
-// x in [0, s.Width()-1]
-// y in [0, s.Height()-1]
-func (s *Surface) PointAt(x, y uint32) *Point {
+// PointAt returns the point, in the bound, corresponding to
+// this grid coordinate. x in [0, s.Width()-1], y in [0, s.Height()-1]
+func (s *Surface) PointAt(x, y int) *Point {
 	if x >= s.Width || y >= s.Height {
-		return nil
+		panic("geo: x, y outside of grid range")
 	}
 
-	w := float64(x) / float64(s.Width-1)
-	h := float64(y) / float64(s.Height-1)
+	p := NewPoint(0, 0)
 
-	p := s.Bound.sw.Clone()
-
-	p[0] += w * s.Bound.Width()
-	p[1] += h * s.Bound.Height()
+	p[0] = s.Bound.sw.X() + float64(x)*s.gridBoxWidth()
+	p[1] = s.Bound.sw.Y() + float64(y)*s.gridBoxHeight()
 
 	return p
 }
@@ -58,51 +56,59 @@ func (s *Surface) PointAt(x, y uint32) *Point {
 // the given point. Returns 0 if the point is out of surface bounds
 // TODO: cleanup and optimize this code
 func (s *Surface) ValueAt(point *Point) float64 {
-	var w1, w2 float64
-
 	if !s.Bound.Contains(point) {
 		return 0
 	}
 
 	// find height and width
-	w := (point[0] - s.Bound.sw[0]) / s.Bound.Width() * float64(s.Width-1)
-	h := (point[1] - s.Bound.sw[1]) / s.Bound.Height() * float64(s.Height-1)
+	xi, yi, w, h := s.gridCoordinate(point)
 
-	xi := int(math.Floor(w))
-	yi := int(math.Floor(h))
+	xi1 := xi + 1
+	if limit := s.Width - 1; xi1 > limit {
+		xi1 = limit
+	}
 
-	xi1 := int(math.Ceil(w))
-	yi1 := int(math.Ceil(h))
+	yi1 := yi + 1
+	if limit := s.Height - 1; yi1 > limit {
+		yi1 = limit
+	}
 
-	w -= math.Floor(w)
-	h -= math.Floor(h)
-
-	w1 = s.Grid[xi][yi]*(1-w) + s.Grid[xi1][yi]*w
-	w2 = s.Grid[xi][yi1]*(1-w) + s.Grid[xi1][yi1]*w
+	w1 := s.Grid[xi][yi]*(1-w) + s.Grid[xi1][yi]*w
+	w2 := s.Grid[xi][yi1]*(1-w) + s.Grid[xi1][yi1]*w
 
 	return w1*(1-h) + w2*h
 }
 
-// Warning: used by no official test coverage.
+// GradientAt returns the surface gradient at the given point.
+// Bilinearlly interpolates the grid cell to find the gradient.
 func (s *Surface) GradientAt(point *Point) *Point {
-	delta := s.Bound.Width() / float64(s.Width-1) / 5.0
-
-	if !s.Bound.Clone().Pad(delta).Contains(point) {
-		return &Point{}
+	if !s.Bound.Contains(point) {
+		return NewPoint(0, 0)
 	}
 
-	// horizontal
-	x1 := s.ValueAt(point.Clone().Add(NewPoint(-delta, 0)))
-	x2 := s.ValueAt(point.Clone().Add(NewPoint(delta, 0)))
+	xi, yi, deltaX, deltaY := s.gridCoordinate(point)
 
-	horizontal := NewPoint((x1-x2)/(2*delta), 0)
+	xi1 := xi + 1
+	if limit := s.Width - 1; xi1 > limit {
+		xi = limit - 1
+		xi1 = limit
+		deltaX = 1.0
+	}
 
-	// vertical
-	delta = s.Bound.Height() / float64(s.Height-1)
-	y1 := s.ValueAt(point.Clone().Add(NewPoint(0, -delta)))
-	y2 := s.ValueAt(point.Clone().Add(NewPoint(0, delta)))
+	yi1 := yi + 1
+	if limit := s.Height - 1; yi1 > limit {
+		yi = limit - 1
+		yi1 = limit
+		deltaY = 1.0
+	}
 
-	return horizontal.SetY((y1 - y2) / (2 * delta))
+	u1 := s.Grid[xi][yi]*(1-deltaX) + s.Grid[xi1][yi]*deltaX
+	u2 := s.Grid[xi][yi1]*(1-deltaX) + s.Grid[xi1][yi1]*deltaX
+
+	w1 := (1 - deltaY) * (s.Grid[xi1][yi] - s.Grid[xi][yi])
+	w2 := deltaY * (s.Grid[xi1][yi1] - s.Grid[xi][yi1])
+
+	return NewPoint((w1+w2)/s.gridBoxWidth(), (u2-u1)/s.gridBoxHeight())
 }
 
 // WriteOffFile writes an Object File Format representation of
@@ -111,12 +117,12 @@ func (s *Surface) GradientAt(point *Point) *Point {
 // writer yourself after this function returns.
 // http://segeval.cs.princeton.edu/public/off_format.html
 func (s *Surface) WriteOffFile(w io.Writer) {
-	var i, j uint32
+	var i, j int
 
 	facesCount := 0
 	var faces bytes.Buffer
 
-	for i = 0; i < s.Width-1; i += 1 {
+	for i = 0; i < s.Width-1; i++ {
 		for j := i % 2; j < s.Height-1; j += 2 {
 			face := fmt.Sprintf("4 %d %d %d %d\n", i*s.Height+j, i*s.Height+j+1, (i+1)*s.Height+j+1, (i+1)*s.Height+j)
 			faces.WriteString(face)
@@ -137,4 +143,27 @@ func (s *Surface) WriteOffFile(w io.Writer) {
 	}
 
 	w.Write(faces.Bytes())
+}
+
+// gridBoxWidth returns the width of a grid element in the units of s.Bound.
+func (s Surface) gridBoxWidth() float64 {
+	return s.Bound.Width() / float64(s.Width-1)
+}
+
+// gridBoxHeight returns the height of a grid element in the units of s.Bound.
+func (s Surface) gridBoxHeight() float64 {
+	return s.Bound.Height() / float64(s.Height-1)
+}
+
+func (s Surface) gridCoordinate(point *Point) (x, y int, deltaX, deltaY float64) {
+	w := (point[0] - s.Bound.sw[0]) / s.gridBoxWidth()
+	h := (point[1] - s.Bound.sw[1]) / s.gridBoxHeight()
+
+	x = int(math.Floor(w))
+	y = int(math.Floor(h))
+
+	deltaX = w - math.Floor(w)
+	deltaY = h - math.Floor(h)
+
+	return
 }
