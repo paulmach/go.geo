@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -31,6 +32,10 @@ var Mercator = Projection{
 
 // MercatorScaleFactor returns the mercator scaling factor for a given degree latitude.
 func MercatorScaleFactor(degreesLatitude float64) float64 {
+	if degreesLatitude < -90.0 || degreesLatitude > 90.0 {
+		panic(fmt.Sprintf("geo: latitude out of range, given %f", degreesLatitude))
+	}
+
 	return 1.0 / math.Cos(degreesLatitude/180.0*math.Pi)
 }
 
