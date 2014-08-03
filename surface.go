@@ -9,7 +9,7 @@ import (
 
 // Surface is the 2d version of path.
 type Surface struct {
-	Bound         *Bound
+	bound         *Bound
 	Width, Height int
 
 	// represents the underlying data, as [x][y]
@@ -22,7 +22,7 @@ type Surface struct {
 // Note that surface.Grid[width-1][height-1] will be on the boundary of the bound.
 func NewSurface(bound *Bound, width, height int) *Surface {
 	s := &Surface{
-		Bound:  bound.Clone(),
+		bound:  bound.Clone(),
 		Width:  width,
 		Height: height,
 	}
@@ -37,6 +37,11 @@ func NewSurface(bound *Bound, width, height int) *Surface {
 	return s
 }
 
+// Bound returns the same bound given at creation time.
+func (s *Surface) Bound() *Bound {
+	return s.bound
+}
+
 // PointAt returns the point, in the bound, corresponding to
 // this grid coordinate. x in [0, s.Width()-1], y in [0, s.Height()-1]
 func (s *Surface) PointAt(x, y int) *Point {
@@ -46,8 +51,8 @@ func (s *Surface) PointAt(x, y int) *Point {
 
 	p := NewPoint(0, 0)
 
-	p[0] = s.Bound.sw.X() + float64(x)*s.gridBoxWidth()
-	p[1] = s.Bound.sw.Y() + float64(y)*s.gridBoxHeight()
+	p[0] = s.bound.sw.X() + float64(x)*s.gridBoxWidth()
+	p[1] = s.bound.sw.Y() + float64(y)*s.gridBoxHeight()
 
 	return p
 }
@@ -56,7 +61,7 @@ func (s *Surface) PointAt(x, y int) *Point {
 // the given point. Returns 0 if the point is out of surface bounds
 // TODO: cleanup and optimize this code
 func (s *Surface) ValueAt(point *Point) float64 {
-	if !s.Bound.Contains(point) {
+	if !s.bound.Contains(point) {
 		return 0
 	}
 
@@ -82,7 +87,7 @@ func (s *Surface) ValueAt(point *Point) float64 {
 // GradientAt returns the surface gradient at the given point.
 // Bilinearlly interpolates the grid cell to find the gradient.
 func (s *Surface) GradientAt(point *Point) *Point {
-	if !s.Bound.Contains(point) {
+	if !s.bound.Contains(point) {
 		return NewPoint(0, 0)
 	}
 
@@ -147,17 +152,17 @@ func (s *Surface) WriteOffFile(w io.Writer) {
 
 // gridBoxWidth returns the width of a grid element in the units of s.Bound.
 func (s Surface) gridBoxWidth() float64 {
-	return s.Bound.Width() / float64(s.Width-1)
+	return s.bound.Width() / float64(s.Width-1)
 }
 
 // gridBoxHeight returns the height of a grid element in the units of s.Bound.
 func (s Surface) gridBoxHeight() float64 {
-	return s.Bound.Height() / float64(s.Height-1)
+	return s.bound.Height() / float64(s.Height-1)
 }
 
 func (s Surface) gridCoordinate(point *Point) (x, y int, deltaX, deltaY float64) {
-	w := (point[0] - s.Bound.sw[0]) / s.gridBoxWidth()
-	h := (point[1] - s.Bound.sw[1]) / s.gridBoxHeight()
+	w := (point[0] - s.bound.sw[0]) / s.gridBoxWidth()
+	h := (point[1] - s.bound.sw[1]) / s.gridBoxHeight()
 
 	x = int(math.Floor(w))
 	y = int(math.Floor(h))
