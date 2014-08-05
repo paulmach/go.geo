@@ -8,6 +8,26 @@ import (
 	"github.com/paulmach/go.geo"
 )
 
+// A VisvalingamReducer wraps the Visvalingam function
+// to fulfil the geo.Reducer interface.
+type VisvalingamReducer struct {
+	Threshold float64
+	ToKeep    int
+}
+
+// NewVisvalingamReducer creates a new VisvalingamReducer.
+func NewVisvalingamReducer(threshold float64, minPointsToKeep int) *VisvalingamReducer {
+	return &VisvalingamReducer{
+		Threshold: threshold,
+		ToKeep:    minPointsToKeep,
+	}
+}
+
+// Reduce runs the Visvalingam reduction using the values of the Visvalingam.
+func (r VisvalingamReducer) Reduce(path *geo.Path) *geo.Path {
+	return Visvalingam(path, r.Threshold, r.ToKeep)
+}
+
 // VisvalingamThreshold does the Visvalingam-Whyatt algorithm removing
 // triangles whose area is below the threshold. This function is here to simplify the interface.
 // Returns a new path and DOES NOT modify the original.

@@ -6,12 +6,40 @@ import (
 
 type distanceFunc func(*geo.Point, *geo.Point) float64
 
-func distance(p1, p2 *geo.Point) float64 {
-	return p1.DistanceFrom(p2)
+// A RadialReducer wraps the Radial function
+// to fulfil the geo.Reducer interface.
+type RadialReducer struct {
+	Threshold float64 // meters
 }
 
-func geoDistance(p1, p2 *geo.Point) float64 {
-	return p1.GeoDistanceFrom(p2)
+// NewRadialReducer creates a new RadialReducer.
+func NewRadialReducer(threshold float64) *RadialReducer {
+	return &RadialReducer{
+		Threshold: threshold,
+	}
+}
+
+// Reduce runs the Radial reduction using the threshold of the RadialReducer.
+func (r RadialReducer) Reduce(path *geo.Path) *geo.Path {
+	return Radial(path, r.Threshold)
+}
+
+// A RadialGeoReducer wraps the RadialGeo function
+// to fulfil the geo.Reducer interface.
+type RadialGeoReducer struct {
+	Threshold float64 // meters
+}
+
+// NewRadialGeoReducer creates a new RadialGeoReducer.
+func NewRadialGeoReducer(meters float64) *RadialGeoReducer {
+	return &RadialGeoReducer{
+		Threshold: meters,
+	}
+}
+
+// Reduce runs the RadialGeo reduction using the threshold of the RadialGeoReducer.
+func (r RadialGeoReducer) Reduce(path *geo.Path) *geo.Path {
+	return RadialGeo(path, r.Threshold)
 }
 
 // Radial peforms a radial distance polyline simplification using a standard euclidean distance.
@@ -54,4 +82,12 @@ func radialCore(path *geo.Path, meters float64, dist distanceFunc) *geo.Path {
 
 	p := &geo.Path{}
 	return p.SetPoints(newPoints)
+}
+
+func distance(p1, p2 *geo.Point) float64 {
+	return p1.DistanceFrom(p2)
+}
+
+func geoDistance(p1, p2 *geo.Point) float64 {
+	return p1.GeoDistanceFrom(p2)
 }

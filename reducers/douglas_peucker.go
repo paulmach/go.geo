@@ -4,6 +4,24 @@ import (
 	"github.com/paulmach/go.geo"
 )
 
+// A DouglasPeuckerReducer wraps the DouglasPeucker function
+// to fulfil the geo.Reducer interface.
+type DouglasPeuckerReducer struct {
+	Threshold float64
+}
+
+// NewDouglasPeucker creates a new DouglasPeuckerReducer.
+func NewDouglasPeucker(threshold float64) *DouglasPeuckerReducer {
+	return &DouglasPeuckerReducer{
+		Threshold: threshold,
+	}
+}
+
+// Reduce runs the DouglasPeucker using the threshold of the DouglasPeuckerReducer.
+func (r DouglasPeuckerReducer) Reduce(path *geo.Path) *geo.Path {
+	return DouglasPeucker(path, r.Threshold)
+}
+
 // DouglasPeucker simplifies the path using the Douglas Peucker method.
 // Returns a new path and DOES NOT modify the original.
 func DouglasPeucker(path *geo.Path, threshold float64) *geo.Path {
