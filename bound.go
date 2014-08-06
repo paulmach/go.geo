@@ -31,7 +31,7 @@ func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 	return b
 }
 
-// Extend grows the bound to include the new point
+// Extend grows the bound to include the new point.
 func (b *Bound) Extend(point *Point) *Bound {
 
 	// already included, no big deal
@@ -44,6 +44,16 @@ func (b *Bound) Extend(point *Point) *Bound {
 
 	b.sw.SetY(math.Min(b.sw.Y(), point.Y()))
 	b.ne.SetY(math.Max(b.ne.Y(), point.Y()))
+
+	return b
+}
+
+// Union extends this bounds to contain the union of this and the given bounds.
+func (b *Bound) Union(other *Bound) *Bound {
+	b.Extend(other.SouthWest())
+	b.Extend(other.NorthWest())
+	b.Extend(other.SouthEast())
+	b.Extend(other.NorthEast())
 
 	return b
 }

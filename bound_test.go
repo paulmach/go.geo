@@ -43,6 +43,20 @@ func TestBoundExtend(t *testing.T) {
 	}
 }
 
+func TestBoundUnion(t *testing.T) {
+	b1 := NewBound(0, 1, 0, 1)
+	b2 := NewBound(0, 2, 0, 2)
+
+	expected := NewBound(0, 2, 0, 2)
+	if b := b1.Clone().Union(b2); !b.Equals(expected) {
+		t.Errorf("bound, expected %v, got %v", expected, b)
+	}
+
+	if b := b2.Clone().Union(b1); !b.Equals(expected) {
+		t.Errorf("bound, expected %v, got %v", expected, b)
+	}
+}
+
 func TestBoundContains(t *testing.T) {
 	var p *Point
 	bound := NewBound(2, -2, 1, -1)
