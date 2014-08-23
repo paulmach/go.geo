@@ -23,7 +23,7 @@ func (l *Line) Transform(projector Projector) *Line {
 	return l
 }
 
-// DistanceFrom does NOT use geodesic geometry. It finds the distance from
+// DistanceFrom does NOT use spherical geometry. It finds the distance from
 // the line using standard Euclidean geometry, using the units the points are in.
 func (l *Line) DistanceFrom(point *Point) float64 {
 
@@ -42,9 +42,34 @@ func (l *Line) DistanceFrom(point *Point) float64 {
 	return l.Interpolate(u).DistanceFrom(point)
 }
 
+// SquaredDistanceFrom does NOT use spherical geometry. It finds the squared distance from
+// the line using standard Euclidean geometry, using the units the points are in.
+func (l *Line) SquaredDistanceFrom(point *Point) float64 {
+
+	if l.a.Equals(&l.b) {
+		// line is of length 0
+		return l.a.SquaredDistanceFrom(point)
+	}
+
+	u := l.Project(point)
+	if u <= 0 {
+		return l.a.SquaredDistanceFrom(point)
+	} else if u >= 1 {
+		return l.b.SquaredDistanceFrom(point)
+	}
+
+	return l.Interpolate(u).SquaredDistanceFrom(point)
+}
+
 // Distance computes the distance of the line, ie. its length, in Euclidian space.
 func (l *Line) Distance() float64 {
 	return l.a.DistanceFrom(&l.b)
+}
+
+// SquaredDistance computes the squared distance of the line, ie. its length, in Euclidian space.
+// This can save a sqrt computation.
+func (l *Line) SquaredDistance() float64 {
+	return l.a.SquaredDistanceFrom(&l.b)
 }
 
 // GeoDistance computes the distance of the line, ie. its length, using spherical geometry.

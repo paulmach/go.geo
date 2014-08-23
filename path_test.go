@@ -177,6 +177,36 @@ func TestPathDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestPathSquaredDistanceFrom(t *testing.T) {
+	var answer float64
+
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(0, 3))
+	p.Push(NewPoint(4, 3))
+	p.Push(NewPoint(4, 0))
+
+	answer = 0.25
+	if d := p.SquaredDistanceFrom(NewPoint(4.5, 1.5)); math.Abs(d-answer) > epsilon {
+		t.Errorf("path, squaredDistanceFrom expected %f, got: %f", answer, d)
+	}
+
+	answer = 0.16
+	if d := p.SquaredDistanceFrom(NewPoint(0.4, 1.5)); math.Abs(d-answer) > epsilon {
+		t.Errorf("path, squaredDistanceFrom expected %f, got: %f", answer, d)
+	}
+
+	answer = 0.09
+	if d := p.SquaredDistanceFrom(NewPoint(-0.3, 1.5)); math.Abs(d-answer) > epsilon {
+		t.Errorf("path, squaredDistanceFrom expected %f, got: %f", answer, d)
+	}
+
+	answer = 0.04
+	if d := p.SquaredDistanceFrom(NewPoint(0.3, 2.8)); math.Abs(d-answer) > epsilon {
+		t.Errorf("path, squaredDistanceFrom expected %f, got: %f", answer, d)
+	}
+}
+
 func TestDirectionAt(t *testing.T) {
 	path := NewPath().
 		Push(NewPoint(0, 0)).

@@ -28,6 +28,19 @@ func TestPointDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestPointSquaredDistanceFrom(t *testing.T) {
+	p1 := NewPoint(0, 0)
+	p2 := NewPoint(3, 4)
+
+	if d := p1.SquaredDistanceFrom(p2); d != 25 {
+		t.Errorf("point, squaredDistanceFrom expected 25, got %f", d)
+	}
+
+	if d := p2.SquaredDistanceFrom(p1); d != 25 {
+		t.Errorf("point, squaredDistanceFrom expected 25, got %f", d)
+	}
+}
+
 func TestPointGeoDistanceFrom(t *testing.T) {
 	// TODO: implement this test
 }

@@ -244,6 +244,21 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 	return dist
 }
 
+// SquaredDistanceFrom computes an O(n) minimum squared distance from the path.
+// Loops over every subline to find the minimum distance.
+func (p *Path) SquaredDistanceFrom(point *Point) float64 {
+	dist := math.Inf(1)
+
+	loopTo := len(p.points) - 1
+	for i := 0; i < loopTo; i++ {
+		// TODO: profiling in other apps has shown that this reallocation can slow things down.
+		l := &Line{p.points[i], p.points[i+1]}
+		dist = math.Min(l.SquaredDistanceFrom(point), dist)
+	}
+
+	return dist
+}
+
 // DirectionAt computes the direction of the path at the given index.
 // Uses the line between the two surrounding points to get the direction,
 // or just the first two, or last two if at the start or end, respectively.

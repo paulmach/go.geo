@@ -56,6 +56,37 @@ func TestLineDistanceFrom(t *testing.T) {
 	}
 }
 
+func TestLineSquaredDistanceFrom(t *testing.T) {
+	var answer float64
+	l := NewLine(NewPoint(0, 0), NewPoint(0, 10))
+
+	answer = 1
+	if d := l.SquaredDistanceFrom(NewPoint(1, 5)); d != answer {
+		t.Errorf("line, squaredDistanceFrom expected %f, got %f", answer, d)
+	}
+
+	answer = 0
+	if d := l.SquaredDistanceFrom(NewPoint(0, 2)); d != answer {
+		t.Errorf("line, squaredDistanceFrom expected %f, got %f", answer, d)
+	}
+
+	answer = 25
+	if d := l.SquaredDistanceFrom(NewPoint(0, -5)); d != answer {
+		t.Errorf("line, squaredDistanceFrom expected %f, got %f", answer, d)
+	}
+
+	answer = 9
+	if d := l.SquaredDistanceFrom(NewPoint(0, 13)); d != answer {
+		t.Errorf("line, squaredDistanceFrom expected %f, got %f", answer, d)
+	}
+
+	l = NewLine(NewPoint(0, 0), NewPoint(0, 0))
+	answer = 25
+	if d := l.SquaredDistanceFrom(NewPoint(3, 4)); d != answer {
+		t.Errorf("line, squaredDistanceFrom expected %f, got %f", answer, d)
+	}
+}
+
 func TestLineProject(t *testing.T) {
 	l1 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 
@@ -144,6 +175,18 @@ func TestLineDistance(t *testing.T) {
 	l.B().Scale(2)
 	if d := l.Distance(); d != 10 {
 		t.Errorf("line, distance expected 10, got %f", d)
+	}
+}
+
+func TestLineSquaredDistance(t *testing.T) {
+	l := NewLine(NewPoint(0, 0), NewPoint(3, 4))
+	if d := l.SquaredDistance(); d != 25 {
+		t.Errorf("line, squaredDistance expected 25, got %f", d)
+	}
+
+	l.B().Scale(2)
+	if d := l.SquaredDistance(); d != 100 {
+		t.Errorf("line, squaredDistance expected 10, got %f", d)
 	}
 }
 

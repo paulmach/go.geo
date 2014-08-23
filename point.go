@@ -30,6 +30,14 @@ func (p *Point) DistanceFrom(point *Point) float64 {
 	return math.Sqrt(d0*d0 + d1*d1)
 }
 
+// SquaredDistanceFrom returns the squared Euclidean distance between the points.
+// This avoids a sqrt computation.
+func (p *Point) SquaredDistanceFrom(point *Point) float64 {
+	d0 := (point[0] - p[0])
+	d1 := (point[1] - p[1])
+	return d0*d0 + d1*d1
+}
+
 // GeoDistanceFrom returns the geodesic distance in meters.
 func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 	dLat := deg2rad(point.Lat() - p.Lat())
