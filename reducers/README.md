@@ -31,6 +31,11 @@ Usage:
 		reducedPath.GetAt(i) == originalPath.GetAt(v)
 	}
 
+	// to chain reducers and combine their index maps use MergeIndexMaps
+	p1, im1 := reducers.RadialIndexMap(path, meters) 
+	reducedPath, im2 := reducers.DouglasPeuckerIndexMap(p1, threshold)
+	indexMap := MergeIndexMaps(im1, im2)
+
 <a name="vis"></a>Visvalingam
 -----------------------------
 

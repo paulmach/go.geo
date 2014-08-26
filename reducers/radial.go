@@ -45,43 +45,90 @@ func (r RadialGeoReducer) Reduce(path *geo.Path) *geo.Path {
 // Radial peforms a radial distance polyline simplification using a standard euclidean distance.
 // Returns a new path and DOES NOT modify the original.
 func Radial(path *geo.Path, meters float64) *geo.Path {
-	return radialCore(path, meters, distance)
+	p, _ := radialCore(path, meters, distance, false)
+	return p
+}
+
+// RadialIndexMap is similar to Radial but returns an array that maps
+// each new path index to its original path index.
+// Returns a new path and DOES NOT modify the original.
+func RadialIndexMap(path *geo.Path, meters float64) (*geo.Path, []int) {
+	return radialCore(path, meters, distance, true)
 }
 
 // RadialGeo peforms a radial distance polyline simplification using the GeoDistance.
 // ie. the path points must be lng/lat points otherwise the behavior of this function is undefined.
 // Returns a new path and DOES NOT modify the original.
 func RadialGeo(path *geo.Path, meters float64) *geo.Path {
-	return radialCore(path, meters, geoDistance)
+	p, _ := radialCore(path, meters, geoDistance, false)
+	return p
 }
 
-func radialCore(path *geo.Path, meters float64, dist distanceFunc) *geo.Path {
+// RadialGeoIndexMap is similar to RadialGeo but returns an array that maps
+// each new path index to its original path index.
+// Returns a new path and DOES NOT modify the original.
+func RadialGeoIndexMap(path *geo.Path, meters float64) (*geo.Path, []int) {
+	return radialCore(path, meters, geoDistance, true)
+}
+
+func radialCore(
+	path *geo.Path,
+	meters float64,
+	dist distanceFunc,
+	needIndexMap bool,
+) (*geo.Path, []int) {
+
 	if path.Length() == 0 {
-		return path
+		return path.Clone(), []int{}
 	}
 
-	mask := make([]byte, path.Length())
-	mask[0] = 1
-	mask[path.Length()-1] = 1
+	if path.Length() == 1 {
+		return path.Clone(), []int{0}
+	}
+
+	if path.Length() == 2 {
+		return path.Clone(), []int{0, 1}
+	}
+
+	var newPoints []geo.Point
+	var indexMap []int
 
 	points := path.Points()
-	newPoints := make([]geo.Point, 1, len(points)/2+1)
-	newPoints[0] = *points[0].Clone()
+	newPoints = append(newPoints, points[0])
 
+	if needIndexMap {
+		indexMap = append(indexMap, 0)
+	}
+
+	// split it up this way because I think it's faster
+	// TODO: test this assumption
 	currentIndex := 0
-	for i := 1; i < len(points); i++ {
-		if dist(&points[currentIndex], &points[i]) > meters {
-			currentIndex = i
-			newPoints = append(newPoints, points[i])
+	if needIndexMap {
+		for i := 1; i < len(points); i++ {
+			if dist(&points[currentIndex], &points[i]) > meters {
+				currentIndex = i
+				indexMap = append(indexMap, currentIndex)
+				newPoints = append(newPoints, points[i])
+			}
+		}
+	} else {
+		for i := 1; i < len(points); i++ {
+			if dist(&points[currentIndex], &points[i]) > meters {
+				currentIndex = i
+				newPoints = append(newPoints, points[i])
+			}
 		}
 	}
 
 	if currentIndex != len(points)-1 {
 		newPoints = append(newPoints, points[len(points)-1])
+		if needIndexMap {
+			indexMap = append(indexMap, len(points)-1)
+		}
 	}
 
 	p := &geo.Path{}
-	return p.SetPoints(newPoints)
+	return p.SetPoints(newPoints), indexMap
 }
 
 func distance(p1, p2 *geo.Point) float64 {
