@@ -9,7 +9,7 @@ import (
 )
 
 // A VisvalingamReducer wraps the Visvalingam function
-// to fulfil the geo.Reducer interface.
+// to fulfill the geo.Reducer and geo.GeoReducer interfaces.
 type VisvalingamReducer struct {
 	Threshold float64
 	ToKeep    int
@@ -26,6 +26,16 @@ func NewVisvalingamReducer(threshold float64, minPointsToKeep int) *VisvalingamR
 // Reduce runs the Visvalingam reduction using the values of the Visvalingam.
 func (r VisvalingamReducer) Reduce(path *geo.Path) *geo.Path {
 	return Visvalingam(path, r.Threshold, r.ToKeep)
+}
+
+// GeoReduce runs the Visvalingam reduction on a lng/lat path.
+// The threshold is expected to be in meters squared.
+func (r VisvalingamReducer) GeoReduce(path *geo.Path) *geo.Path {
+	factor := geo.MercatorScaleFactor(path.Bound().Center().Lat())
+	path.Transform(geo.Mercator.Project)
+
+	reduced := Visvalingam(path, r.Threshold*factor*factor, r.ToKeep)
+	return reduced.Transform(geo.Mercator.Inverse)
 }
 
 // VisvalingamThreshold does the Visvalingam-Whyatt algorithm removing

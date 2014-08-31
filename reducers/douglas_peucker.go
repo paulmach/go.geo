@@ -5,7 +5,7 @@ import (
 )
 
 // A DouglasPeuckerReducer wraps the DouglasPeucker function
-// to fulfil the geo.Reducer interface.
+// to fulfill the geo.Reducer and geo.GeoReducer interfaces.
 type DouglasPeuckerReducer struct {
 	Threshold float64
 }
@@ -20,6 +20,16 @@ func NewDouglasPeucker(threshold float64) *DouglasPeuckerReducer {
 // Reduce runs the DouglasPeucker using the threshold of the DouglasPeuckerReducer.
 func (r DouglasPeuckerReducer) Reduce(path *geo.Path) *geo.Path {
 	return DouglasPeucker(path, r.Threshold)
+}
+
+// GeoReduce runs the DouglasPeucker on a lng/lat path.
+// The threshold is expected to be in meters.
+func (r DouglasPeuckerReducer) GeoReduce(path *geo.Path) *geo.Path {
+	factor := geo.MercatorScaleFactor(path.Bound().Center().Lat())
+	path.Transform(geo.Mercator.Project)
+	reduced := DouglasPeucker(path, r.Threshold*factor)
+
+	return reduced.Transform(geo.Mercator.Inverse)
 }
 
 // DouglasPeucker simplifies the path using the Douglas Peucker method.

@@ -7,9 +7,9 @@ import (
 type distanceFunc func(*geo.Point, *geo.Point) float64
 
 // A RadialReducer wraps the Radial function
-// to fulfil the geo.Reducer interface.
+// to fulfill the geo.Reducer and geo.GeoReducer interfaces.
 type RadialReducer struct {
-	Threshold float64 // meters
+	Threshold float64 // euclidean distance
 }
 
 // NewRadialReducer creates a new RadialReducer.
@@ -24,13 +24,20 @@ func (r RadialReducer) Reduce(path *geo.Path) *geo.Path {
 	return Radial(path, r.Threshold)
 }
 
+// GeoReduce runs the RadialGeo reduction. The path should be in lng/lat (EPSG:4326).
+// The threshold is expected to be in meters.
+func (r RadialReducer) GeoReduce(path *geo.Path) *geo.Path {
+	return RadialGeo(path, r.Threshold)
+}
+
 // A RadialGeoReducer wraps the RadialGeo function
-// to fulfil the geo.Reducer interface.
+// to fulfill the geo.Reducer and geo.GeoReducer interfaces.
 type RadialGeoReducer struct {
 	Threshold float64 // meters
 }
 
 // NewRadialGeoReducer creates a new RadialGeoReducer.
+// This reducer should be used with EPSG:4326 (lng/lat) paths.
 func NewRadialGeoReducer(meters float64) *RadialGeoReducer {
 	return &RadialGeoReducer{
 		Threshold: meters,
@@ -38,14 +45,21 @@ func NewRadialGeoReducer(meters float64) *RadialGeoReducer {
 }
 
 // Reduce runs the RadialGeo reduction using the threshold of the RadialGeoReducer.
+// The threshold is expected to be in meters.
 func (r RadialGeoReducer) Reduce(path *geo.Path) *geo.Path {
+	return RadialGeo(path, r.Threshold)
+}
+
+// GeoReduce runs the RadialGeo reduction. The path should be in lng/lat (EPSG:4326).
+// The threshold is expected to be in meters.
+func (r RadialGeoReducer) GeoReduce(path *geo.Path) *geo.Path {
 	return RadialGeo(path, r.Threshold)
 }
 
 // Radial peforms a radial distance polyline simplification using a standard euclidean distance.
 // Returns a new path and DOES NOT modify the original.
 func Radial(path *geo.Path, meters float64) *geo.Path {
-	p, _ := radialCore(path, meters, distance, false)
+	p, _ := radialCore(path, meters*meters, squaredDistance, false)
 	return p
 }
 
@@ -53,7 +67,7 @@ func Radial(path *geo.Path, meters float64) *geo.Path {
 // each new path index to its original path index.
 // Returns a new path and DOES NOT modify the original.
 func RadialIndexMap(path *geo.Path, meters float64) (*geo.Path, []int) {
-	return radialCore(path, meters, distance, true)
+	return radialCore(path, meters*meters, squaredDistance, true)
 }
 
 // RadialGeo peforms a radial distance polyline simplification using the GeoDistance.
@@ -78,6 +92,7 @@ func radialCore(
 	needIndexMap bool,
 ) (*geo.Path, []int) {
 
+	// initial sanity checks
 	if path.Length() == 0 {
 		return path.Clone(), []int{}
 	}
@@ -131,8 +146,8 @@ func radialCore(
 	return p.SetPoints(newPoints), indexMap
 }
 
-func distance(p1, p2 *geo.Point) float64 {
-	return p1.DistanceFrom(p2)
+func squaredDistance(p1, p2 *geo.Point) float64 {
+	return p1.SquaredDistanceFrom(p2)
 }
 
 func geoDistance(p1, p2 *geo.Point) float64 {
