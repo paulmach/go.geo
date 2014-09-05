@@ -196,7 +196,19 @@ func TestScalarMercator(t *testing.T) {
 		t.Errorf("Scalar Mercator, longitude should be 0: %f", lng)
 	}
 
+	// specific case
+	ScalarMercator.Level = 20
+	if x, y := ScalarMercator.Project(-87.65005229999997, 41.850033); x != 268988 || y != 389836 {
+		t.Errorf("Scalar Mercator, projection incorrect, got %d %d", x, y)
+	}
+
+	ScalarMercator.Level = 28
+	if x, y := ScalarMercator.Project(-87.65005229999997, 41.850033); x != 68861112 || y != 99798110 {
+		t.Errorf("Scalar Mercator, projection incorrect, got %d %d", x, y)
+	}
+
 	// default level
+	ScalarMercator.Level = 31
 	for _, city := range cities {
 		p := &Point{}
 
@@ -220,10 +232,10 @@ func TestScalarMercator(t *testing.T) {
 
 	// test polar regions
 	if _, y := ScalarMercator.Project(0, 89.9); y != (1<<ScalarMercator.Level)-1 {
-		t.Error("Scalar Mercator, top of the world error")
+		t.Errorf("Scalar Mercator, top of the world error, got %d", y)
 	}
 
 	if _, y := ScalarMercator.Project(0, -89.9); y != 0 {
-		t.Error("Scalar Mercator, bottom of the world error")
+		t.Errorf("Scalar Mercator, bottom of the world error, got %d", y)
 	}
 }

@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"math"
 	"testing"
 )
 
@@ -12,6 +13,70 @@ func TestPointNew(t *testing.T) {
 
 	if p.Y() != 2 || p.Lat() != 2 {
 		t.Errorf("point, expected 2, got %f", p.Y())
+	}
+}
+
+func TestPointQuadkey(t *testing.T) {
+	p := &Point{}
+
+	p.SetLat(41.850033)
+	p.SetLng(-87.65005229999997)
+
+	if k := p.Quadkey(15); k != 212521785 {
+		t.Errorf("point quadkey, incorrect got %d", k)
+	}
+
+	// default level
+	level := 30
+	for _, city := range cities {
+		p := &Point{}
+
+		p.SetLat(city[0])
+		p.SetLng(city[1])
+
+		key := p.Quadkey(level)
+
+		p = NewPointFromQuadkey(key, level)
+
+		if math.Abs(p.Lat()-city[0]) > epsilon {
+			t.Errorf("point quadkey, latitude miss match: %f != %f", p.Lat(), city[0])
+		}
+
+		if math.Abs(p.Lng()-city[1]) > epsilon {
+			t.Errorf("point quadkey, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
+	}
+}
+
+func TestPointQuadkeyString(t *testing.T) {
+	p := &Point{}
+
+	p.SetLat(41.850033)
+	p.SetLng(-87.65005229999997)
+
+	if k := p.QuadkeyString(15); k != "030222231030321" {
+		t.Errorf("point quadkey string, incorrect got %s", k)
+	}
+
+	// default level
+	level := 30
+	for _, city := range cities {
+		p := &Point{}
+
+		p.SetLat(city[0])
+		p.SetLng(city[1])
+
+		key := p.QuadkeyString(level)
+
+		p = NewPointFromQuadkeyString(key)
+
+		if math.Abs(p.Lat()-city[0]) > epsilon {
+			t.Errorf("point quadkey, latitude miss match: %f != %f", p.Lat(), city[0])
+		}
+
+		if math.Abs(p.Lng()-city[1]) > epsilon {
+			t.Errorf("point quadkey, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
 	}
 }
 

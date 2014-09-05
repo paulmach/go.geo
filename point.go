@@ -3,6 +3,7 @@ package geo
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 // A Point is a simple X/Y or Lng/Lat 2d point. [X, Y] or [Lng, Lat]
@@ -15,6 +16,28 @@ var InfinityPoint = &Point{math.Inf(1), math.Inf(1)}
 // NewPoint creates a new point
 func NewPoint(x, y float64) *Point {
 	return &Point{x, y}
+}
+
+// NewPointFromQuadkey creates a new point from a quadkey.
+// See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
+// about this coordinate system.
+func NewPointFromQuadkey(key uint64, level int) *Point {
+	var x, y uint64
+
+	var i uint
+	for i = 0; i < uint(level); i++ {
+		x |= (key & (1 << (2 * i))) >> i
+		y |= (key & (1 << (2*i + 1))) >> (i + 1)
+	}
+
+	lng, lat := scalarMercatorInverse(x, y, uint64(level))
+	return &Point{lng, lat}
+}
+
+// NewPointFromQuadkeyString creates a new point from a quadkey string.
+func NewPointFromQuadkeyString(key string) *Point {
+	i, _ := strconv.ParseInt(key, 4, 64)
+	return NewPointFromQuadkey(uint64(i), len(key))
 }
 
 // Transform applies a given projection or inverse projection to the current point.
@@ -69,6 +92,33 @@ func (p *Point) BearingTo(point *Point) float64 {
 	x := math.Cos(pLatRad)*math.Sin(pointLatRad) - math.Sin(pLatRad)*math.Cos(pointLatRad)*math.Cos(dLng)
 
 	return rad2deg(math.Atan2(y, x))
+}
+
+// Quadkey returns the quad key for the given point at the provided level.
+// See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
+// about this coordinate system.
+func (p Point) Quadkey(level int) (key uint64) {
+	x, y := scalarMercatorProject(p.Lng(), p.Lat(), uint64(level))
+
+	var i uint
+	for i = 0; i < uint(level); i++ {
+		key |= (x & (1 << i)) << i
+		key |= (y & (1 << i)) << (i + 1)
+	}
+
+	return
+}
+
+// QuadkeyString returns the quad key for the given point at the provided level in string form
+// See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
+// about this coordinate system.
+func (p Point) QuadkeyString(level int) string {
+	s := strconv.FormatInt(int64(p.Quadkey(level)), 4)
+	for len(s) < level {
+		s = "0" + s
+	}
+
+	return s
 }
 
 // Add a point to the given point.
