@@ -21,8 +21,8 @@ func NewPoint(x, y float64) *Point {
 // NewPointFromQuadkey creates a new point from a quadkey.
 // See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
 // about this coordinate system.
-func NewPointFromQuadkey(key uint64, level int) *Point {
-	var x, y uint64
+func NewPointFromQuadkey(key int64, level int) *Point {
+	var x, y int64
 
 	var i uint
 	for i = 0; i < uint(level); i++ {
@@ -30,14 +30,27 @@ func NewPointFromQuadkey(key uint64, level int) *Point {
 		y |= (key & (1 << (2*i + 1))) >> (i + 1)
 	}
 
-	lng, lat := scalarMercatorInverse(x, y, uint64(level))
+	lng, lat := scalarMercatorInverse(uint64(x), uint64(y), uint64(level))
 	return &Point{lng, lat}
 }
 
 // NewPointFromQuadkeyString creates a new point from a quadkey string.
 func NewPointFromQuadkeyString(key string) *Point {
 	i, _ := strconv.ParseInt(key, 4, 64)
-	return NewPointFromQuadkey(uint64(i), len(key))
+	return NewPointFromQuadkey(i, len(key))
+}
+
+// NewPointFromGeoHash creates a new point at the center of the geohash range.
+func NewPointFromGeoHash(hash string) *Point {
+	west, east, south, north := geoHash2ranges(hash)
+	return NewPoint((west+east)/2.0, (north+south)/2.0)
+}
+
+// NewPointFromGeoHashInt64 creates a new point at the center of the
+// integer version of a geohash range. bits indicates the precision of the hash.
+func NewPointFromGeoHashInt64(hash int64, bits int) *Point {
+	west, east, south, north := geoHashInt2ranges(hash, bits)
+	return NewPoint((west+east)/2.0, (north+south)/2.0)
 }
 
 // Transform applies a given projection or inverse projection to the current point.
@@ -97,28 +110,80 @@ func (p *Point) BearingTo(point *Point) float64 {
 // Quadkey returns the quad key for the given point at the provided level.
 // See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
 // about this coordinate system.
-func (p Point) Quadkey(level int) (key uint64) {
+func (p Point) Quadkey(level int) int64 {
 	x, y := scalarMercatorProject(p.Lng(), p.Lat(), uint64(level))
 
 	var i uint
+	var result uint64
 	for i = 0; i < uint(level); i++ {
-		key |= (x & (1 << i)) << i
-		key |= (y & (1 << i)) << (i + 1)
+		result |= (x & (1 << i)) << i
+		result |= (y & (1 << i)) << (i + 1)
 	}
 
-	return
+	return int64(result)
 }
 
 // QuadkeyString returns the quad key for the given point at the provided level in string form
 // See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
 // about this coordinate system.
 func (p Point) QuadkeyString(level int) string {
-	s := strconv.FormatInt(int64(p.Quadkey(level)), 4)
+	s := strconv.FormatInt(p.Quadkey(level), 4)
 	for len(s) < level {
 		s = "0" + s
 	}
 
 	return s
+}
+
+// GeoHash returns the geohash string of a point representing a lng/lat location.
+// The resulting hash will be `GeoHashPrecision` characters long, default is 12.
+func (p Point) GeoHash() string {
+	base32 := "0123456789bcdefghjkmnpqrstuvwxyz"
+	hash := p.GeoHashInt64(5 * GeoHashPrecision)
+
+	result := make([]byte, GeoHashPrecision, GeoHashPrecision)
+	for i := 0; i < GeoHashPrecision; i++ {
+		result[GeoHashPrecision-i-1] = byte(base32[hash&0x1F])
+		hash >>= 5
+	}
+
+	return string(result)
+}
+
+// GeoHashInt64 returns the integer version of the geohash
+// down to the given number of bits.
+// The main usecase for this function is to be able to do integer based ordering of points.
+// In that case the number of bits should be the same for all encodings.
+func (p Point) GeoHashInt64(bits int) (hash int64) {
+	// This code was inspired by https://github.com/broady/gogeohash
+
+	latMin, latMax := -90.0, 90.0
+	lngMin, lngMax := -180.0, 180.0
+
+	for i := 0; i < bits; i++ {
+		hash <<= 1
+
+		// interleave bits
+		if i%2 == 0 {
+			mid := (lngMin + lngMax) / 2.0
+			if p[0] > mid {
+				lngMin = mid
+				hash |= 1
+			} else {
+				lngMax = mid
+			}
+		} else {
+			mid := (latMin + latMax) / 2.0
+			if p[1] > mid {
+				latMin = mid
+				hash |= 1
+			} else {
+				latMax = mid
+			}
+		}
+	}
+
+	return
 }
 
 // Add a point to the given point.

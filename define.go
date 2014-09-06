@@ -13,6 +13,9 @@ var UseHaversineGeoDistanceByDefault = false
 // EarthRadius is the radius of the earth in meters. It is used in geo distance calculations.
 var EarthRadius = 6371000.0 // meters
 
+// GeoHashPrecision is the number of charactors of a encoded GeoHash.
+var GeoHashPrecision = 12
+
 func yesHaversine(haversine []bool) bool {
 	return (len(haversine) != 0 && haversine[0]) || (UseHaversineGeoDistanceByDefault && len(haversine) == 0)
 }

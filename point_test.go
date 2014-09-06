@@ -2,10 +2,18 @@ package geo
 
 import (
 	"math"
+	"strings"
 	"testing"
 )
 
-func TestPointNew(t *testing.T) {
+var citiesGeoHash = [][3]interface{}{
+	{57.09700, 9.85000, "u4phb4hw"},
+	{49.03000, -122.32000, "c29nbt9k3q"},
+	{39.23500, -76.17490, "dqcz4we0k"},
+	{-34.7666, 138.53670, "r1fd0qzmg"},
+}
+
+func TestNewPoint(t *testing.T) {
 	p := NewPoint(1, 2)
 	if p.X() != 1 || p.Lng() != 1 {
 		t.Errorf("point, expected 1, got %f", p.X())
@@ -76,6 +84,30 @@ func TestPointQuadkeyString(t *testing.T) {
 
 		if math.Abs(p.Lng()-city[1]) > epsilon {
 			t.Errorf("point quadkey, longitude miss match: %f != %f", p.Lng(), city[1])
+		}
+	}
+}
+
+func TestNewPointFromGeoHash(t *testing.T) {
+	for _, c := range citiesGeoHash {
+		p := NewPointFromGeoHash(c[2].(string))
+		if d := p.GeoDistanceFrom(NewPoint(c[1].(float64), c[0].(float64))); d > 10 {
+			t.Errorf("point, new from geohash expected distance %f", d)
+		}
+	}
+}
+
+func TestNewPointFromGeoHashInt64(t *testing.T) {
+	for _, c := range citiesGeoHash {
+		var hash int64
+		for _, r := range c[2].(string) {
+			hash <<= 5
+			hash |= int64(strings.Index("0123456789bcdefghjkmnpqrstuvwxyz", string(r)))
+		}
+
+		p := NewPointFromGeoHashInt64(hash, 5*len(c[2].(string)))
+		if d := p.GeoDistanceFrom(NewPoint(c[1].(float64), c[0].(float64))); d > 10 {
+			t.Errorf("point, new from geohash expected distance %f", d)
 		}
 	}
 }
@@ -198,6 +230,23 @@ func TestDot(t *testing.T) {
 	// reverse version
 	if d := p2.Dot(p1); d != answer {
 		t.Errorf("point, dot expteced %v == %v", d, answer)
+	}
+}
+
+func TestPointGeoHash(t *testing.T) {
+	for _, c := range citiesGeoHash {
+		hash := NewPoint(c[1].(float64), c[0].(float64)).GeoHash()
+		if !strings.HasPrefix(hash, c[2].(string)) {
+			t.Errorf("point, geohash expected %s, got %s", c[2].(string), hash)
+		}
+	}
+
+	for _, c := range citiesGeoHash {
+		GeoHashPrecision = len(c[2].(string))
+		hash := NewPoint(c[1].(float64), c[0].(float64)).GeoHash()
+		if hash != c[2].(string) {
+			t.Errorf("point, geohash expected %s, got %s", c[2].(string), hash)
+		}
 	}
 }
 

@@ -3,6 +3,7 @@ package geo
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 // A Bound represents an enclosed "box" in the 2D Euclidean or Cartesian plane.
@@ -12,7 +13,7 @@ type Bound struct {
 }
 
 // NewBound creates a new bound given the paramters.
-func NewBound(east, west, north, south float64) *Bound {
+func NewBound(west, east, south, north float64) *Bound {
 	return &Bound{
 		sw: &Point{math.Min(east, west), math.Min(north, south)},
 		ne: &Point{math.Max(east, west), math.Max(north, south)},
@@ -29,6 +30,79 @@ func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 
 	b.Extend(oppositeCorner)
 	return b
+}
+
+// NewBoundFromGeoHash creates a new bound for the region defined by the GeoHash.
+func NewBoundFromGeoHash(hash string) *Bound {
+	west, east, south, north := geoHash2ranges(hash)
+	return NewBound(west, east, south, north)
+}
+
+// NewBoundFromGeoHashInt64 creates a new bound from the region defined by the GeoHesh.
+// bits indicates the precision of the hash.
+func NewBoundFromGeoHashInt64(hash int64, bits int) *Bound {
+	west, east, south, north := geoHashInt2ranges(hash, bits)
+	return NewBound(west, east, south, north)
+}
+
+func geoHash2ranges(hash string) (float64, float64, float64, float64) {
+	latMin, latMax := -90.0, 90.0
+	lngMin, lngMax := -180.0, 180.0
+	even := true
+
+	for _, r := range hash {
+		// TODO: index step could probably be done better
+		i := strings.Index("0123456789bcdefghjkmnpqrstuvwxyz", string(r))
+		for j := 0x10; j != 0; j >>= 1 {
+			if even {
+				mid := (lngMin + lngMax) / 2.0
+				if i&j == 0 {
+					lngMax = mid
+				} else {
+					lngMin = mid
+				}
+			} else {
+				mid := (latMin + latMax) / 2.0
+				if i&j == 0 {
+					latMax = mid
+				} else {
+					latMin = mid
+				}
+			}
+			even = !even
+		}
+	}
+
+	return lngMin, lngMax, latMin, latMax
+}
+
+func geoHashInt2ranges(hash int64, bits int) (float64, float64, float64, float64) {
+	latMin, latMax := -90.0, 90.0
+	lngMin, lngMax := -180.0, 180.0
+
+	var i int64
+	i = 1 << uint(bits)
+
+	for i != 0 {
+		i >>= 1
+
+		mid := (lngMin + lngMax) / 2.0
+		if hash&i == 0 {
+			lngMax = mid
+		} else {
+			lngMin = mid
+		}
+
+		i >>= 1
+		mid = (latMin + latMax) / 2.0
+		if hash&i == 0 {
+			latMax = mid
+		} else {
+			latMin = mid
+		}
+	}
+
+	return lngMin, lngMax, latMin, latMax
 }
 
 // Extend grows the bound to include the new point.
