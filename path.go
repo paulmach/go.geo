@@ -14,8 +14,13 @@ type Path struct {
 
 // NewPath simply creates a new path.
 func NewPath() *Path {
+	return NewPathPreallocate(0, 100)
+}
+
+// NewPath simply creates a new path.
+func NewPathPreallocate(length, capacity int) *Path {
 	p := &Path{}
-	p.points = make([]Point, 0, 1000)
+	p.points = make([]Point, length, capacity)
 
 	return p
 }

@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func TestNewPathPreallocate(t *testing.T) {
+	p := NewPathPreallocate(10, 1000)
+	if l := p.Length(); l != 10 {
+		t.Errorf("path, length not set correctly, got %d", l)
+	}
+
+	if c := cap(p.Points()); c != 1000 {
+		t.Errorf("path, capactity not set corrctly, got %d", c)
+	}
+}
+
 func TestPathSetPoints(t *testing.T) {
 	p := NewPath()
 
