@@ -93,6 +93,23 @@ func TestPathResample(t *testing.T) {
 	if p1.Length() != 109 {
 		t.Errorf("path, resample incorrect length, expected 109, got %d", p1.Length())
 	}
+
+	// duplicate points
+	p = NewPath()
+	p.Push(NewPoint(1, 0))
+	p.Push(NewPoint(1, 0))
+	p.Push(NewPoint(1, 0))
+
+	p.Resample(10)
+	if l := p.Length(); l != 10 {
+		t.Errorf("path, resample length incorrect, got %d", l)
+	}
+
+	for i := 0; i < p.Length(); i++ {
+		if !p.GetAt(i).Equals(NewPoint(1, 0)) {
+			t.Errorf("path, resample not correct point, got %v", p.GetAt(i))
+		}
+	}
 }
 
 func TestPathEncode(t *testing.T) {

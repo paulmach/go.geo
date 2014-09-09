@@ -17,7 +17,7 @@ func NewPath() *Path {
 	return NewPathPreallocate(0, 100)
 }
 
-// NewPath simply creates a new path.
+// NewPathPreallocate simply creates a new path with points array of the given size.
 func NewPathPreallocate(length, capacity int) *Path {
 	p := &Path{}
 	p.points = make([]Point, length, capacity)
@@ -57,6 +57,30 @@ func (p *Path) Resample(totalPoints int) *Path {
 
 	if totalPoints <= 0 {
 		p.points = make([]Point, 0)
+		return p
+	}
+
+	// if all the points are the same, treat as special case.
+	equal := true
+	for _, point := range p.points {
+		if !p.points[0].Equals(&point) {
+			equal = false
+			break
+		}
+	}
+
+	if equal {
+		if totalPoints > p.Length() {
+			// extend to be requested length
+			for p.Length() != totalPoints {
+				p.Push(&p.points[0])
+			}
+
+			return p
+		}
+
+		// contract to be requested length
+		p.points = p.points[:totalPoints]
 		return p
 	}
 

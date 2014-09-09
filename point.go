@@ -60,7 +60,7 @@ func (p *Point) Transform(projector Projector) *Point {
 }
 
 // DistanceFrom returns the Euclidean distance between the points.
-func (p *Point) DistanceFrom(point *Point) float64 {
+func (p Point) DistanceFrom(point *Point) float64 {
 	d0 := (point[0] - p[0])
 	d1 := (point[1] - p[1])
 	return math.Sqrt(d0*d0 + d1*d1)
@@ -68,14 +68,14 @@ func (p *Point) DistanceFrom(point *Point) float64 {
 
 // SquaredDistanceFrom returns the squared Euclidean distance between the points.
 // This avoids a sqrt computation.
-func (p *Point) SquaredDistanceFrom(point *Point) float64 {
+func (p Point) SquaredDistanceFrom(point *Point) float64 {
 	d0 := (point[0] - p[0])
 	d1 := (point[1] - p[1])
 	return d0*d0 + d1*d1
 }
 
 // GeoDistanceFrom returns the geodesic distance in meters.
-func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
+func (p Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 	dLat := deg2rad(point.Lat() - p.Lat())
 	dLng := deg2rad(point.Lng() - p.Lng())
 
@@ -95,7 +95,7 @@ func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 
 // BearingTo computes the direction one must start traveling on earth
 // to be heading to the given point. WARNING: untested
-func (p *Point) BearingTo(point *Point) float64 {
+func (p Point) BearingTo(point *Point) float64 {
 	dLng := deg2rad(point.Lng() - p.Lng())
 
 	pLatRad := deg2rad(p.Lat())
@@ -229,24 +229,24 @@ func (p *Point) Scale(factor float64) *Point {
 }
 
 // Dot is just x1*x2 + y1*y2
-func (p *Point) Dot(v *Point) float64 {
+func (p Point) Dot(v *Point) float64 {
 	return p[0]*v[0] + p[1]*v[1]
 }
 
 // ToArray casts the data to a [2]float64.
-func (p *Point) ToArray() [2]float64 {
-	return [2]float64(*p)
+func (p Point) ToArray() [2]float64 {
+	return [2]float64(p)
 }
 
 // Clone creates a duplicate of the point.
-func (p *Point) Clone() *Point {
+func (p Point) Clone() *Point {
 	newP := &Point{}
 	copy(newP[:], p[:])
 	return newP
 }
 
 // Equals checks if the point represents the same point or vector.
-func (p *Point) Equals(point *Point) bool {
+func (p Point) Equals(point *Point) bool {
 	if p[0] == point[0] && p[1] == point[1] {
 		return true
 	}
@@ -255,7 +255,7 @@ func (p *Point) Equals(point *Point) bool {
 }
 
 // Lat returns the latitude/vertical component of the point.
-func (p *Point) Lat() float64 {
+func (p Point) Lat() float64 {
 	return p[1]
 }
 
@@ -266,7 +266,7 @@ func (p *Point) SetLat(lat float64) *Point {
 }
 
 // Lng returns the longitude/horizontal component of the point.
-func (p *Point) Lng() float64 {
+func (p Point) Lng() float64 {
 	return p[0]
 }
 
@@ -277,7 +277,7 @@ func (p *Point) SetLng(lng float64) *Point {
 }
 
 // X returns the x/horizontal component of the point.
-func (p *Point) X() float64 {
+func (p Point) X() float64 {
 	return p[0]
 }
 
@@ -288,7 +288,7 @@ func (p *Point) SetX(x float64) *Point {
 }
 
 // Y returns the y/vertical component of the point.
-func (p *Point) Y() float64 {
+func (p Point) Y() float64 {
 	return p[1]
 }
 
@@ -299,6 +299,6 @@ func (p *Point) SetY(y float64) *Point {
 }
 
 // String returns a string representation of the point.
-func (p *Point) String() string {
+func (p Point) String() string {
 	return fmt.Sprintf("[%f, %f]", p[0], p[1])
 }
