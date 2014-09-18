@@ -26,39 +26,33 @@ func (l *Line) Transform(projector Projector) *Line {
 // DistanceFrom does NOT use spherical geometry. It finds the distance from
 // the line using standard Euclidean geometry, using the units the points are in.
 func (l *Line) DistanceFrom(point *Point) float64 {
-
-	if l.a.Equals(&l.b) {
-		// line is of length 0
-		return l.a.DistanceFrom(point)
-	}
-
-	u := l.Project(point)
-	if u <= 0 {
-		return l.a.DistanceFrom(point)
-	} else if u >= 1 {
-		return l.b.DistanceFrom(point)
-	}
-
-	return l.Interpolate(u).DistanceFrom(point)
+	return math.Sqrt(l.SquaredDistanceFrom(point))
 }
 
 // SquaredDistanceFrom does NOT use spherical geometry. It finds the squared distance from
 // the line using standard Euclidean geometry, using the units the points are in.
 func (l *Line) SquaredDistanceFrom(point *Point) float64 {
+	x := l.a[0]
+	y := l.a[1]
+	dx := l.b[0] - x
+	dy := l.b[1] - y
 
-	if l.a.Equals(&l.b) {
-		// line is of length 0
-		return l.a.SquaredDistanceFrom(point)
+	if dx != 0 || dy != 0 {
+		t := ((point[0]-x)*dx + (point[1]-y)*dy) / (dx*dx + dy*dy)
+
+		if t > 1 {
+			x = l.b[0]
+			y = l.b[1]
+		} else if t > 0 {
+			x += dx * t
+			y += dy * t
+		}
 	}
 
-	u := l.Project(point)
-	if u <= 0 {
-		return l.a.SquaredDistanceFrom(point)
-	} else if u >= 1 {
-		return l.b.SquaredDistanceFrom(point)
-	}
+	dx = point[0] - x
+	dy = point[1] - y
 
-	return l.Interpolate(u).SquaredDistanceFrom(point)
+	return dx*dx + dy*dy
 }
 
 // Distance computes the distance of the line, ie. its length, in Euclidian space.
