@@ -19,8 +19,66 @@ func NewPath() *Path {
 
 // NewPathPreallocate simply creates a new path with points array of the given size.
 func NewPathPreallocate(length, capacity int) *Path {
+	if length > capacity {
+		capacity = length
+	}
+
 	p := &Path{}
 	p.points = make([]Point, length, capacity)
+
+	return p
+}
+
+// NewPathFromXYData creates a path from a slice of [2]float64 values
+// representing [horizontal, vertical] type data, for example lng/lat values from geojson.
+func NewPathFromXYData(data [][2]float64) *Path {
+	p := NewPathPreallocate(0, len(data))
+
+	for i := range data {
+		p.points = append(p.points, Point{data[i][0], data[i][1]})
+	}
+
+	return p
+}
+
+// NewPathFromYXData creates a path from a slice of [2]float64 values
+// representing [vertical, horizontal] type data, for example typical lat/lng data.
+func NewPathFromYXData(data [][2]float64) *Path {
+	p := NewPathPreallocate(0, len(data))
+
+	for i := range data {
+		p.points = append(p.points, Point{data[i][1], data[i][0]})
+	}
+
+	return p
+}
+
+// NewPathFromXYSlice creates a path from a slice of []float64 values.
+// The first two elements are taken to be horizontal and vertical components of each point respectively.
+// The rest of the elements of the slide are ignored. Nil slices are skipped.
+func NewPathFromXYSlice(data [][]float64) *Path {
+	p := NewPathPreallocate(0, len(data))
+
+	for i := range data {
+		if data[i] != nil && len(data[i]) >= 2 {
+			p.points = append(p.points, Point{data[i][0], data[i][1]})
+		}
+	}
+
+	return p
+}
+
+// NewPathFromYXSlice creates a path from a slice of []float64 values.
+// The first two elements are taken to be vertical and horizontal components of each point respectively.
+// The rest of the elements of the slide are ignored. Nil slices are skipped.
+func NewPathFromYXSlice(data [][]float64) *Path {
+	p := NewPathPreallocate(0, len(data))
+
+	for i := range data {
+		if data[i] != nil && len(data[i]) >= 2 {
+			p.points = append(p.points, Point{data[i][1], data[i][0]})
+		}
+	}
 
 	return p
 }

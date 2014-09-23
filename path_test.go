@@ -16,6 +16,92 @@ func TestNewPathPreallocate(t *testing.T) {
 	if c := cap(p.Points()); c != 1000 {
 		t.Errorf("path, capactity not set corrctly, got %d", c)
 	}
+
+	p = NewPathPreallocate(100, 10)
+	if l := p.Length(); l != 100 {
+		t.Error("path, should handle length > capacity")
+	}
+}
+
+func TestNewPathFromXYData(t *testing.T) {
+	data := [][2]float64{
+		[2]float64{1, 2},
+		[2]float64{3, 4},
+	}
+
+	p := NewPathFromXYData(data)
+	if l := p.Length(); l != len(data) {
+		t.Errorf("path, should take full length of data, expected %d, got %d", len(data), l)
+	}
+
+	if point := p.GetAt(0); !point.Equals(&Point{1, 2}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+
+	if point := p.GetAt(1); !point.Equals(&Point{3, 4}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+}
+
+func TestNewPathFromYXData(t *testing.T) {
+	data := [][2]float64{
+		[2]float64{1, 2},
+		[2]float64{3, 4},
+	}
+
+	p := NewPathFromYXData(data)
+	if l := p.Length(); l != len(data) {
+		t.Errorf("path, should take full length of data, expected %d, got %d", len(data), l)
+	}
+
+	if point := p.GetAt(0); !point.Equals(&Point{2, 1}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+
+	if point := p.GetAt(1); !point.Equals(&Point{4, 3}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+}
+
+func TestNewPathFromXYSlice(t *testing.T) {
+	data := [][]float64{
+		[]float64{1, 2, -1},
+		nil,
+		[]float64{3, 4},
+	}
+
+	p := NewPathFromXYSlice(data)
+	if l := p.Length(); l != 2 {
+		t.Errorf("path, should take full length of data, expected %d, got %d", 2, l)
+	}
+
+	if point := p.GetAt(0); !point.Equals(&Point{1, 2}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+
+	if point := p.GetAt(1); !point.Equals(&Point{3, 4}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+}
+
+func TestNewPathFromYXSlice(t *testing.T) {
+	data := [][]float64{
+		[]float64{1, 2},
+		[]float64{3, 4, -1},
+	}
+
+	p := NewPathFromYXSlice(data)
+	if l := p.Length(); l != len(data) {
+		t.Errorf("path, should take full length of data, expected %d, got %d", len(data), l)
+	}
+
+	if point := p.GetAt(0); !point.Equals(&Point{2, 1}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+
+	if point := p.GetAt(1); !point.Equals(&Point{4, 3}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
 }
 
 func TestPathSetPoints(t *testing.T) {
