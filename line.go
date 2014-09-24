@@ -26,7 +26,29 @@ func (l *Line) Transform(projector Projector) *Line {
 // DistanceFrom does NOT use spherical geometry. It finds the distance from
 // the line using standard Euclidean geometry, using the units the points are in.
 func (l *Line) DistanceFrom(point *Point) float64 {
-	return math.Sqrt(l.SquaredDistanceFrom(point))
+	// yes duplicate code, but saw a 15% performance increase by removing the function call
+	// return math.Sqrt(l.SquaredDistanceFrom(point))
+	x := l.a[0]
+	y := l.a[1]
+	dx := l.b[0] - x
+	dy := l.b[1] - y
+
+	if dx != 0 || dy != 0 {
+		t := ((point[0]-x)*dx + (point[1]-y)*dy) / (dx*dx + dy*dy)
+
+		if t > 1 {
+			x = l.b[0]
+			y = l.b[1]
+		} else if t > 0 {
+			x += dx * t
+			y += dy * t
+		}
+	}
+
+	dx = point[0] - x
+	dy = point[1] - y
+
+	return math.Sqrt(dx*dx + dy*dy)
 }
 
 // SquaredDistanceFrom does NOT use spherical geometry. It finds the squared distance from
@@ -79,7 +101,7 @@ func (l *Line) Direction() float64 {
 }
 
 // Project returns the normalized distance of the point on the line nearest the given point.
-// Returned values maybe the outside of [0,1]. This function is the opposite of Interpolate.
+// Returned values may be outside of [0,1]. This function is the opposite of Interpolate.
 func (l *Line) Project(point *Point) float64 {
 	if point.Equals(&l.a) {
 		return 0.0
@@ -112,12 +134,10 @@ func (l *Line) Measure(point *Point) float64 {
 // Interpolate performs a simple linear interpolation, from A to B.
 // This function is the opposite of Project.
 func (l *Line) Interpolate(percent float64) *Point {
-	p := &Point{}
-	p.SetX(l.a[0] + percent*(l.b[0]-l.a[0]))
-	p.SetY(l.a[1] + percent*(l.b[1]-l.a[1]))
-
-	// simple
-	return p
+	return &Point{
+		l.a[0] + percent*(l.b[0]-l.a[0]),
+		l.a[1] + percent*(l.b[1]-l.a[1]),
+	}
 }
 
 // Side returns 1 if the point is on the right side, -1 if on the left side, and 0 if collinear.
@@ -199,7 +219,7 @@ func (l *Line) Intersects(line *Line) bool {
 
 // Midpoint returns the Euclidean midpoint of the line.
 func (l *Line) Midpoint() *Point {
-	return l.Interpolate(0.5)
+	return &Point{(l.a[0] + l.b[0]) / 2, (l.a[1] + l.b[1]) / 2}
 }
 
 // GeoMidpoint returns the half-way point along a great circle path between the two points.
@@ -244,8 +264,8 @@ func (l *Line) Equals(line *Line) bool {
 }
 
 // Clone returns a deep copy of the line.
-func (l *Line) Clone() *Line {
-	return &Line{*l.a.Clone(), *l.b.Clone()}
+func (l Line) Clone() *Line {
+	return &l
 }
 
 // A returns a pointer to the first point in the line.
