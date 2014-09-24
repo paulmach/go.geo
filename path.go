@@ -131,7 +131,7 @@ func (p *Path) Resample(totalPoints int) *Path {
 		if totalPoints > p.Length() {
 			// extend to be requested length
 			for p.Length() != totalPoints {
-				p.Push(&p.points[0])
+				p.points = append(p.points, p.points[0])
 			}
 
 			return p
@@ -145,24 +145,32 @@ func (p *Path) Resample(totalPoints int) *Path {
 	points := make([]Point, 1, totalPoints)
 	points[0] = p.points[0] // start stays the same
 
-	// location on the original line
-	prevIndex := 0
-	prevDistance := 0.0
-
 	// first distance we're looking for
 	step := 1
-	totalDistance := p.Distance()
-	currentDistance := totalDistance * float64(step) / float64(totalPoints-1)
+	totalDistance := 0.0
+	distance := 0.0
+	distances := make([]float64, len(p.points)-1)
+	for i := 0; i < len(p.points)-1; i++ {
+		distances[i] = p.points[i].DistanceFrom(&p.points[i+1])
+		totalDistance += distances[i]
+	}
 
-	for {
-		currentLine := NewLine(&p.points[prevIndex], &p.points[prevIndex+1])
-		currentLineDistance := currentLine.Distance()
-		nextDistance := prevDistance + currentLineDistance
+	currentDistance := totalDistance / float64(totalPoints-1)
+	currentLine := &Line{} // declare here and update has nice performance benefits
+	for i := 0; i < len(p.points)-1; i++ {
+		currentLine.a = p.points[i]
+		currentLine.b = p.points[i+1]
+
+		currentLineDistance := distances[i]
+		nextDistance := distance + currentLineDistance
 
 		for currentDistance <= nextDistance {
 			// need to add a point
-			percent := (currentDistance - prevDistance) / currentLineDistance
-			points = append(points, *currentLine.Interpolate(percent))
+			percent := (currentDistance - distance) / currentLineDistance
+			points = append(points, Point{
+				currentLine.a[0] + percent*(currentLine.b[0]-currentLine.a[0]),
+				currentLine.a[1] + percent*(currentLine.b[1]-currentLine.a[1]),
+			})
 
 			// move to the next distance we want
 			step++
@@ -173,12 +181,7 @@ func (p *Path) Resample(totalPoints int) *Path {
 		}
 
 		// past the current point in the original line, so move to the next one
-		prevIndex++
-		prevDistance = nextDistance
-
-		if prevIndex == len(p.points)-1 {
-			break
-		}
+		distance = nextDistance
 	}
 
 	// end stays the same, to handle round off errors
@@ -320,15 +323,7 @@ func (p *Path) GeoDistance(haversine ...bool) float64 {
 // DistanceFrom computes an O(n) distance from the path. Loops over every
 // subline to find the minimum distance.
 func (p *Path) DistanceFrom(point *Point) float64 {
-	dist := math.Inf(1)
-
-	loopTo := len(p.points) - 1
-	for i := 0; i < loopTo; i++ {
-		l := &Line{p.points[i], p.points[i+1]}
-		dist = math.Min(l.DistanceFrom(point), dist)
-	}
-
-	return dist
+	return math.Sqrt(p.SquaredDistanceFrom(point))
 }
 
 // SquaredDistanceFrom computes an O(n) minimum squared distance from the path.
@@ -336,10 +331,11 @@ func (p *Path) DistanceFrom(point *Point) float64 {
 func (p *Path) SquaredDistanceFrom(point *Point) float64 {
 	dist := math.Inf(1)
 
+	l := &Line{}
 	loopTo := len(p.points) - 1
 	for i := 0; i < loopTo; i++ {
-		// TODO: profiling in other apps has shown that this reallocation can slow things down.
-		l := &Line{p.points[i], p.points[i+1]}
+		l.a = p.points[i]
+		l.b = p.points[i+1]
 		dist = math.Min(l.SquaredDistanceFrom(point), dist)
 	}
 
@@ -379,9 +375,12 @@ func (p *Path) Measure(point *Point) float64 {
 	minDistance := math.Inf(1)
 	measure := math.Inf(-1)
 	sum := 0.0
+
+	seg := &Line{}
 	for i := 0; i < len(p.points)-1; i++ {
-		seg := &Line{p.points[i], p.points[i+1]}
-		distanceToLine := seg.DistanceFrom(point)
+		seg.a = p.points[i]
+		seg.b = p.points[i+1]
+		distanceToLine := seg.SquaredDistanceFrom(point)
 		if distanceToLine < minDistance {
 			minDistance = distanceToLine
 			measure = sum + seg.Measure(point)
