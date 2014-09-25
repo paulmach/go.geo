@@ -1,4 +1,4 @@
-package reducers
+package reducers_test
 
 import (
 	"compress/gzip"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	reducers "."
 	"github.com/paulmach/go.geo"
 )
 
@@ -27,7 +28,7 @@ func TestDouglasPeuckerBenchmarkData(t *testing.T) {
 	}
 	path := benchmarkData()
 	for i := range tests {
-		p := DouglasPeucker(path, tests[i].Threshold)
+		p := reducers.DouglasPeucker(path, tests[i].Threshold)
 		if p.Length() != tests[i].Length {
 			t.Errorf("douglas peucker benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
 		}
@@ -38,7 +39,7 @@ func BenchmarkDouglasPeucker(b *testing.B) {
 	path := benchmarkData()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DouglasPeucker(path, 0.1)
+		reducers.DouglasPeucker(path, 0.1)
 	}
 }
 
@@ -46,7 +47,7 @@ func BenchmarkDouglasPeuckerIndexMap(b *testing.B) {
 	path := benchmarkData()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DouglasPeuckerIndexMap(path, 0.1)
+		reducers.DouglasPeuckerIndexMap(path, 0.1)
 	}
 }
 

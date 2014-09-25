@@ -43,9 +43,9 @@ func DouglasPeucker(path *geo.Path, threshold float64) *geo.Path {
 	mask[0] = 1
 	mask[path.Length()-1] = 1
 
-	found := dpWorker(path, threshold, mask)
-
 	points := path.Points()
+
+	found := dpWorker(points, threshold, mask)
 	newPoints := make([]geo.Point, 0, found)
 
 	for i, v := range mask {
@@ -77,11 +77,11 @@ func DouglasPeuckerIndexMap(path *geo.Path, threshold float64) (reduced *geo.Pat
 	mask[0] = 1
 	mask[path.Length()-1] = 1
 
-	found := dpWorker(path, threshold, mask)
-
 	originalPoints := path.Points()
-	points := make([]geo.Point, 0, found)
 
+	found := dpWorker(originalPoints, threshold, mask)
+
+	points := make([]geo.Point, 0, found)
 	for i, v := range mask {
 		if v == 1 {
 			points = append(points, originalPoints[i])
@@ -96,11 +96,11 @@ func DouglasPeuckerIndexMap(path *geo.Path, threshold float64) (reduced *geo.Pat
 // dpWorker does the recursive threshold checks.
 // Using a stack array with a stackLength variable resulted in 4x speed improvement
 // over calling the function recursively.
-func dpWorker(path *geo.Path, threshold float64, mask []byte) int {
+func dpWorker(points []geo.Point, threshold float64, mask []byte) int {
 
 	found := 0
 	stack := make([]int, 0)
-	stack = append(stack, 0, path.Length()-1)
+	stack = append(stack, 0, len(points)-1)
 
 	l := &geo.Line{}
 	for len(stack) > 0 {
@@ -109,17 +109,15 @@ func dpWorker(path *geo.Path, threshold float64, mask []byte) int {
 
 		// modify the line in place
 		a := l.A()
-		s := path.GetAt(start)
-		a[0], a[1] = s[0], s[1]
+		a[0], a[1] = points[start][0], points[start][1]
 
 		b := l.B()
-		e := path.GetAt(end)
-		b[0], b[1] = e[0], e[1]
+		b[0], b[1] = points[end][0], points[end][1]
 
 		maxDist := 0.0
 		maxIndex := 0
 		for i := start + 1; i < end; i++ {
-			dist := l.SquaredDistanceFrom(path.GetAt(i))
+			dist := l.SquaredDistanceFrom(&points[i])
 
 			if dist > maxDist {
 				maxDist = dist
