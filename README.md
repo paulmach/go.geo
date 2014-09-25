@@ -30,13 +30,12 @@ All objects are defined in a 2D context.
 	projection of that point, or a vector.
 * **Line** represents the shortest distance between two points in Euclidean space. 
 	In many cases the path object is more useful.
-* **Path** represents a set of points representing a path in the 2D plane.
+* **Path** represents a set of points making up a path in the 2D plane.
 	Functions for converting to/from
 	[Google's polyline encoding](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) are included.
 * **Bound** represents a rectangular 2D area defined by North, South, East, West values.
 	Computable for Line and Path objects, used by the Surface object.
 * **Surface** is used to assign values to points in a 2D area, such as elevation.
-	*This object is still being developed and is experimental*
 
 ### Reducers
 
@@ -69,6 +68,20 @@ If you want to create a copy, all objects support the `Clone` method.
 These conventions put extra load on the programmer,
 but tests showed that making a copy every time was significantly slower.
 So, **remember to explicitly Clone() your objects**.
+
+## Performance
+
+As this code is meant to act as a core library, performance is very important. 
+There is a good set of benchmarks covering the core objects and efforts have been
+made to optimize them. To run:
+
+	go get github.com/paulmach/go.geo
+	go test github.com/paulmach/go.geo -bench .
+
+To benchmark the reducers run:
+
+	go get github.com/paulmach/go.geo/reducers
+	go test github.com/paulmach/go.geo/reducers -bench .
 
 ## Examples
 
@@ -114,8 +127,8 @@ defining the number of discrete points in the bound. This allows for access such
 	surface.Grid[x][y]         // the value at a location in the grid
 	surface.GetPoint(x, y)     // the point, which will be in the space as surface.bound,
 	                           // corresponding to surface.Grid[x][y]
-	surface.ValueAt(*point)    // the bi-linearly interpolated grid value for any point in the bounds
-	surface.GradientAt(*point) // the gradient of the surface a any point in the bounds,
+	surface.ValueAt(*Point)    // the bi-linearly interpolated grid value for any point in the bounds
+	surface.GradientAt(*Point) // the gradient of the surface a any point in the bounds,
 	                           // returns a point object which should be treated as a vector
 
 A couple things about how the bound area is discretized in the grid:
@@ -123,8 +136,13 @@ A couple things about how the bound area is discretized in the grid:
 	* surface.Grid[0][0]
 		corresponds to the surface.Bound.SouthWest() location, or bottom left corner or the bound
 	* surface.Grid[0][surface.Height-1]
-		corresponds to the surface.Bound.SouthEast() location,
+		corresponds to the surface.Bound.NorthWest() location,
 		the extreme points in the grid are on the edges of the bound
 
-While these conventions are useful, the programmer must be aware of them or they will cause confusion.
+While these conventions are useful, they are different.
 If you're using this object, your feedback on these choices would be appreciated.
+
+## Contributing
+
+While this project started as the core of [Slide](https://github.com/paulmach/slide) it's now being used in many place.
+So, if you have features you'd like to add or improvements to make, please submit a pull request.
