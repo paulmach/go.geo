@@ -69,20 +69,6 @@ These conventions put extra load on the programmer,
 but tests showed that making a copy every time was significantly slower.
 So, **remember to explicitly Clone() your objects**.
 
-## Performance
-
-As this code is meant to act as a core library, performance is very important. 
-There is a good set of benchmarks covering the core objects and efforts have been
-made to optimize them. To run:
-
-	go get github.com/paulmach/go.geo
-	go test github.com/paulmach/go.geo -bench .
-
-To benchmark the reducers run:
-
-	go get github.com/paulmach/go.geo/reducers
-	go test github.com/paulmach/go.geo/reducers -bench .
-
 ## Examples
 
 The [GoDoc Documentation](https://godoc.org/github.com/paulmach/go.geo) provides a very readable list
@@ -141,6 +127,46 @@ A couple things about how the bound area is discretized in the grid:
 
 While these conventions are useful, they are different.
 If you're using this object, your feedback on these choices would be appreciated.
+
+## Performance <a id="performance">&nbsp;</a>
+
+This code is meant to act as a core library to more advanced geo algorithms, 
+like [slide](https://github.com/paulmach/slide) for example.
+Thus, performance is very important. Included are a good set of benchmarks covering
+the core functions and efforts have been made to optimize them. Recent improvements:
+
+	                                      old         new        delta
+	BenchmarkPointDistanceFrom             8.16        5.91      -27.57%
+	BenchmarkPointSquaredDistanceFrom      1.63        1.62       -0.61%
+	BenchmarkPointQuadKey                271         265          -2.21%
+	BenchmarkPointQuadKeyString         2888         522         -81.93%
+	BenchmarkPointGeoHash                302         308           1.99%
+	BenchmarkPointGeoHashInt64           165         158          -4.24%
+	BenchmarkPointNormalize               22.3        17.6       -21.08%
+	BenchmarkPointEquals                   1.65        1.29      -21.82%
+	BenchmarkPointClone                    7.46        0.97      -87.00%
+
+	BenchmarkLineDistanceFrom             15.5        13.2       -14.84%
+	BenchmarkLineSquaredDistanceFrom       9.3         9.24       -0.65%
+	BenchmarkLineProject                   8.75        8.73       -0.23%
+	BenchmarkLineMeasure                  21.3        20          -6.10%
+	BenchmarkLineInterpolate              44.9        44.6        -0.67%
+	BenchmarkLineMidpoint                 47.2         5.13      -89.13%
+	BenchmarkLineEquals                    9.38       10.4        10.87%
+	BenchmarkLineClone                    70.5         3.26      -95.38%
+
+	BenchmarkPathDistanceFrom           6190        4662         -24.68%
+	BenchmarkPathSquaredDistanceFrom    5076        4625          -8.88%
+	BenchmarkPathMeasure               10080        7626         -24.35%
+	BenchmarkPathResampleToMorePoints  69380       17255         -75.13%
+	BenchmarkPathResampleToLessPoints  26093        6780         -74.02%
+
+
+Units are Nanoseconds per Operation and run using Golang 1.3.1 on a 2012 Macbook Air with a 2GHz Intel Core i7 processor.
+The old version corresponds to a commit on [Sept. 22, 2014](https://github.com/paulmach/go.geo/tree/984bc95cceb5e8fd7c3b8e9fdb0b2066207790e5) and the new version corresponds to a commit on [Sept 24, 2014](https://github.com/paulmach/go.geo/tree/9eb57f27bd88cdb2c1c96e058fafc74bb9aeaffb). These benchmarks can be run using: 
+
+	go get github.com/paulmach/go.geo
+	go test github.com/paulmach/go.geo -bench .
 
 ## Contributing
 
