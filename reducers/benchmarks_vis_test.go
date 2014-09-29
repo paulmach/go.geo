@@ -13,14 +13,14 @@ func TestVisvalingamBenchmarkData(t *testing.T) {
 	}
 
 	tests := []reduceTest{
-		reduceTest{0.1, 875},
-		reduceTest{0.5, 408},
-		reduceTest{1.0, 291},
-		reduceTest{1.5, 243},
-		reduceTest{2.0, 210},
-		reduceTest{3.0, 166},
-		reduceTest{4.0, 149},
-		reduceTest{5.0, 132},
+		reduceTest{0.1, 867},
+		reduceTest{0.5, 410},
+		reduceTest{1.0, 293},
+		reduceTest{1.5, 245},
+		reduceTest{2.0, 208},
+		reduceTest{3.0, 169},
+		reduceTest{4.0, 151},
+		reduceTest{5.0, 135},
 	}
 	path := benchmarkData()
 	for i := range tests {

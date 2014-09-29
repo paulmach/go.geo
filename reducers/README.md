@@ -12,6 +12,14 @@ Currently implemented:
 * [Visvalingam](#vis)
 * [Radial](http://psimpl.sourceforge.net/radial-distance.html)
 
+Performance
+-----------
+
+These reducers fast (optimal?) and performance is comparible to libraries in other languages.
+
+go get github.com/paulmach/go.geo/reducers
+go test github.com/paulmach/go.geo/reducers -bench .
+
 
 <a name="dp"></a>Douglas-Peucker
 --------------------------------

@@ -1,8 +1,6 @@
 package reducers
 
 import (
-	"container/heap"
-	"container/list"
 	"math"
 
 	"github.com/paulmach/go.geo"
@@ -38,15 +36,15 @@ func (r VisvalingamReducer) GeoReduce(path *geo.Path) *geo.Path {
 	return reduced.Transform(geo.Mercator.Inverse)
 }
 
-// VisvalingamThreshold does the Visvalingam-Whyatt algorithm removing
+// VisvalingamThreshold runs the Visvalingam-Whyatt algorithm removing
 // triangles whose area is below the threshold. This function is here to simplify the interface.
 // Returns a new path and DOES NOT modify the original.
 func VisvalingamThreshold(path *geo.Path, threshold float64) *geo.Path {
 	return Visvalingam(path, threshold, 0)
 }
 
-// VisvalingamKeep does the Visvalingam-Whyatt algorithm removing
-// triangles of minimum area until we're down to toKeep number of points.
+// VisvalingamKeep runs the Visvalingam-Whyatt algorithm removing
+// triangles of minimum area until we're down to `toKeep` number of points.
 // Returns a new path and DOES NOT modify the original.
 func VisvalingamKeep(path *geo.Path, toKeep int) *geo.Path {
 	return Visvalingam(path, math.MaxFloat64, toKeep)
@@ -71,163 +69,225 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 		return path.Clone()
 	}
 
-	if path.Length() <= 1 {
+	if path.Length() <= 2 {
 		return path.Clone()
 	}
 
-	// since our triangleSquareDistanceNormalArea function
-	// doesn't do the extra 1/4 sqrt we do the opposite to the threshold
-	threshold = 16 * threshold * threshold
-
-	numPoints := path.Length()
-	points := path.Points()
-
+	// edge cases checked, get on with it
+	threshold *= 2 // triangle area is doubled to save the multiply :)
 	removed := 0
 
-	// build the initial linked list and priority queue
-	pointList := list.New()
-	queue := &visQueue{}
-	heap.Init(queue)
+	points := path.Points()
+	numPoints := len(points)
 
-	pointList.PushBack(&visItem{
-		point: &points[0],
-		loc:   0,
-		area:  -1,
-		index: -1,
-	})
+	// build the initial minheap linked list.
+	heap := minHeap(make([]*visItem, 0, numPoints))
 
-	d1 := sqDistance(&points[0], &points[1])
+	linkedListStart := &visItem{
+		area:       math.Inf(1),
+		pointIndex: 0,
+	}
+	heap.Push(linkedListStart)
+
+	// internal path items
+	previous := linkedListStart
 	for i := 1; i < numPoints-1; i++ {
-		d2 := sqDistance(&points[i], &points[i+1])
-		d3 := sqDistance(&points[i-1], &points[i+1])
-
-		item := &visItem{
-			point: &points[i],
-			area:  triangleSquareDistanceNormalArea(d1, d2, d3),
-			index: i - 1,
-			loc:   i,
+		current := &visItem{
+			area:       doubleTriangleArea(&points[i-1], &points[i], &points[i+1]),
+			pointIndex: i,
+			previous:   previous,
 		}
 
-		// add the item to the end of the linked list
-		// also push that item on the heap/priority queue
-		heap.Push(queue, pointList.PushBack(item))
-
-		d1 = d2
+		heap.Push(current)
+		previous.next = current
+		previous = current
 	}
 
-	pointList.PushBack(&visItem{
-		point: &points[numPoints-1],
-		area:  -2,
-		index: -2,
-		loc:   numPoints - 1,
-	})
+	// final item
+	endItem := &visItem{
+		area:       math.Inf(1),
+		pointIndex: numPoints - 1,
+		previous:   previous,
+	}
+	previous.next = endItem
+	heap.Push(endItem)
 
 	// run through the reduction process
-	for queue.Len() > 0 {
-		element := heap.Pop(queue).(*list.Element)
-		item := element.Value.(*visItem)
+	for len(heap) > 0 {
+		current := heap.Pop()
 
-		if item.area > threshold || numPoints-removed <= minPointsToKeep {
+		if current.area > threshold || numPoints-removed <= minPointsToKeep {
 			break
 		}
 
-		next := element.Next()
-		nextnext := next.Next()
-		prev := element.Prev()
-		prevprev := prev.Prev()
+		next := current.next
+		previous := current.previous
 
-		// remove current element from list
-		pointList.Remove(element)
+		// remove current element from linked list
+		previous.next = current.next
+		next.previous = current.previous
 		removed++
 
-		// figure out the new area of the previous element
-		if prevprev != nil {
-			area := trianglePointNormalArea(
-				prevprev.Value.(*visItem).point,
-				prev.Value.(*visItem).point,
-				next.Value.(*visItem).point)
+		// figure out the new areas
+		if previous.previous != nil {
+			area := doubleTriangleArea(
+				&points[previous.previous.pointIndex],
+				&points[previous.pointIndex],
+				&points[next.pointIndex],
+			)
 
-			area = math.Max(area, item.area)
-			queue.update(prev, area)
+			area = math.Max(area, current.area)
+			heap.Update(previous, area)
 		}
 
-		if nextnext != nil {
-			area := trianglePointNormalArea(
-				prev.Value.(*visItem).point,
-				next.Value.(*visItem).point,
-				nextnext.Value.(*visItem).point)
+		if next.next != nil {
+			area := doubleTriangleArea(
+				&points[previous.pointIndex],
+				&points[next.pointIndex],
+				&points[next.next.pointIndex],
+			)
 
-			area = math.Max(area, item.area)
-			queue.update(next, area)
+			area = math.Max(area, current.area)
+			heap.Update(next, area)
 		}
 	}
 
-	newPoints := make([]geo.Point, 0, queue.Len()+2)
-	for e := pointList.Front(); e != nil; e = e.Next() {
-		newPoints = append(newPoints, *(e.Value.(*visItem).point))
+	item := linkedListStart
+	newPoints := make([]geo.Point, 0, len(heap)+2)
+
+	for item != nil {
+		newPoints = append(newPoints, points[item.pointIndex])
+		item = item.next
 	}
 
 	reduced := &geo.Path{}
 	return reduced.SetPoints(newPoints)
 }
 
-// Stuff to create the priority queue and the related linked list.
-//
-// The priority queue is made up of elements from a linked of the points.
-// This allows you to access the previous and next point, and remove points simply.
+// Stuff to create the priority queue, or min heap.
+// Rewriting it here, vs using the std lib, resulted in a 10x performance bump!
+type minHeap []*visItem
 
 type visItem struct {
-	point *geo.Point
-	area  float64
-	loc   int
-	index int
+	area       float64 // triangle area
+	pointIndex int     // index of point in original path
+
+	// to keep a virtual linked list to help rebuild the triangle areas as we remove points.
+	next     *visItem
+	previous *visItem
+
+	index int // interal index in heap, for removal and update
 }
 
-type visQueue []*list.Element
-
-func (q visQueue) Len() int { return len(q) }
-
-func (q visQueue) Less(i, j int) bool {
-	return q[i].Value.(*visItem).area < q[j].Value.(*visItem).area
+func (h *minHeap) Push(item *visItem) {
+	item.index = len(*h)
+	*h = append(*h, item)
+	h.up(item.index)
 }
 
-func (q visQueue) Swap(i, j int) {
-	q[i], q[j] = q[j], q[i]
-	q[i].Value.(*visItem).index = i
-	q[j].Value.(*visItem).index = j
+func (h *minHeap) Pop() *visItem {
+	removed := (*h)[0]
+	lastItem := (*h)[len(*h)-1]
+	(*h) = (*h)[:len(*h)-1]
+
+	if len(*h) > 0 {
+		lastItem.index = 0
+		(*h)[0] = lastItem
+		h.down(0)
+	}
+
+	return removed
 }
 
-func (q *visQueue) Push(x interface{}) {
-	item := x.(*list.Element)
-	item.Value.(*visItem).index = q.Len()
-	*q = append(*q, item)
+func (h minHeap) Update(item *visItem, area float64) {
+	if item.area > area {
+		// area got smaller
+		item.area = area
+		h.up(item.index)
+	} else {
+		// area got larger
+		item.area = area
+		h.down(item.index)
+	}
 }
 
-func (q *visQueue) Pop() interface{} {
-	old := *q
-	n := len(old)
-	item := old[n-1]
-	item.Value.(*visItem).index = -1
-	*q = old[0 : n-1]
-	return item
+func (h *minHeap) Remove(item *visItem) {
+	i := item.index
+
+	lastItem := (*h)[len(*h)-1]
+	*h = (*h)[:len(*h)-1]
+
+	if i != len(*h) {
+		lastItem.index = i
+		(*h)[i] = lastItem
+
+		if lastItem.area < item.area {
+			h.up(i)
+		} else {
+			h.down(i)
+		}
+	}
 }
 
-// update modifies the priority and value of an Item in the queue.
-func (q *visQueue) update(element *list.Element, area float64) {
-	heap.Remove(q, element.Value.(*visItem).index)
-	element.Value.(*visItem).area = area
-	heap.Push(q, element)
+func (h minHeap) up(i int) {
+	object := h[i]
+	for i > 0 {
+		up := ((i + 1) >> 1) - 1
+		parent := h[up]
+
+		if parent.area <= object.area {
+			// parent is smaller so we're done fixing up the heap.
+			break
+		}
+
+		// swap nodes
+		parent.index = i
+		h[i] = parent
+
+		object.index = up
+		h[up] = object
+
+		i = up
+	}
 }
 
-func sqDistance(a, b *geo.Point) float64 {
-	return (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1])
+func (h minHeap) down(i int) {
+	object := h[i]
+	for {
+		right := (i + 1) << 1
+		left := right - 1
+
+		down := i
+		child := h[down]
+
+		// swap with smallest child
+		if left < len(h) && h[left].area < child.area {
+			down = left
+			child = h[down]
+		}
+
+		if right < len(h) && h[right].area < child.area {
+			down = right
+			child = h[down]
+		}
+
+		// non smaller, so quit
+		if down == i {
+			break
+		}
+
+		// swap the nodes
+		child.index = i
+		h[child.index] = child
+
+		object.index = down
+		h[down] = object
+
+		i = down
+	}
 }
 
-func trianglePointNormalArea(a, b, c *geo.Point) float64 {
-	return triangleSquareDistanceNormalArea(sqDistance(a, b), sqDistance(b, c), sqDistance(a, c))
-}
-
-// triangleSquareDistanceNormalArea returns the triangle area  =  (4 * area)^2
-func triangleSquareDistanceNormalArea(a, b, c float64) float64 {
-	return 2*(a*b+b*c+c*a) - a*a - b*b - c*c
+func doubleTriangleArea(a, b, c *geo.Point) float64 {
+	area := (b[0]-a[0])*(c[1]-a[1]) - (b[1]-a[1])*(c[0]-a[0])
+	return math.Abs(area)
 }

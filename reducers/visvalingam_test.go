@@ -151,23 +151,35 @@ func TestVisvalingamPanic(t *testing.T) {
 	Visvalingam(geo.NewPath(), -100, 0)
 }
 
-func TestSqDistance(t *testing.T) {
-	expected := 25.0
-	if d := sqDistance(geo.NewPoint(0, 3), geo.NewPoint(4, 0)); d != expected {
-		t.Errorf("sqDistance expected %f, got %f", expected, d)
-	}
-}
+func TestDoubleTriangleArea(t *testing.T) {
+	p1 := geo.NewPoint(2, 5)
+	p2 := geo.NewPoint(5, 1)
+	p3 := geo.NewPoint(-4, 3)
 
-func TestTrianglePointNormalArea(t *testing.T) {
-	expected := 576.0
-	if d := trianglePointNormalArea(geo.NewPoint(0, 3), geo.NewPoint(4, 0), geo.NewPoint(0, 0)); d != expected {
-		t.Errorf("trianglePointNormalArea expected %f, got %f", expected, d)
-	}
-}
+	expected := 30.0
 
-func TestTriangleSquareDistanceNormalArea(t *testing.T) {
-	expected := 576.0
-	if d := triangleSquareDistanceNormalArea(9, 16, 25); d != expected {
-		t.Errorf("triangleSquareDistanceNormalArea expected %f, got %f", expected, d)
+	// check all the orderings
+	if area := doubleTriangleArea(p1, p2, p3); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
+	}
+
+	if area := doubleTriangleArea(p1, p3, p2); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
+	}
+
+	if area := doubleTriangleArea(p2, p3, p1); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
+	}
+
+	if area := doubleTriangleArea(p2, p1, p3); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
+	}
+
+	if area := doubleTriangleArea(p3, p1, p2); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
+	}
+
+	if area := doubleTriangleArea(p3, p2, p1); area != expected {
+		t.Errorf("triangleArea expected %f, got %f", expected, area)
 	}
 }

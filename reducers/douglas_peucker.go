@@ -99,7 +99,8 @@ func DouglasPeuckerIndexMap(path *geo.Path, threshold float64) (reduced *geo.Pat
 func dpWorker(points []geo.Point, threshold float64, mask []byte) int {
 
 	found := 0
-	stack := make([]int, 0)
+
+	var stack []int
 	stack = append(stack, 0, len(points)-1)
 
 	l := &geo.Line{}
