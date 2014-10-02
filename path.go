@@ -256,8 +256,8 @@ func (p *Path) Encode(factor ...int) string {
 	var result bytes.Buffer
 
 	for _, p := range p.points {
-		lat5 := int(p.Lat() * f)
-		lng5 := int(p.Lng() * f)
+		lat5 := int(math.Floor(p.Lat()*f + 0.5))
+		lng5 := int(math.Floor(p.Lng()*f + 0.5))
 
 		deltaLat := lat5 - pLat
 		deltaLng := lng5 - pLng
