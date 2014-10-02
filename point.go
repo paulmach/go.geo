@@ -105,7 +105,7 @@ func (p *Point) BearingTo(point *Point) float64 {
 	pLatRad := deg2rad(p.Lat())
 	pointLatRad := deg2rad(point.Lat())
 
-	y := math.Sin(dLng) * math.Cos(point.Lat())
+	y := math.Sin(dLng) * math.Cos(pointLatRad)
 	x := math.Cos(pLatRad)*math.Sin(pointLatRad) - math.Sin(pLatRad)*math.Cos(pointLatRad)*math.Cos(dLng)
 
 	return rad2deg(math.Atan2(y, x))

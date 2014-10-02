@@ -143,7 +143,27 @@ func TestPointGeoDistanceFrom(t *testing.T) {
 }
 
 func TestPointBearingTo(t *testing.T) {
-	// TODO: implement this test
+	p1 := NewPoint(0, 0)
+	p2 := NewPoint(0, 1)
+
+	if d := p1.BearingTo(p2); d != 0 {
+		t.Errorf("point, bearingTo expected 0, got %f", d)
+	}
+
+	if d := p2.BearingTo(p1); d != 180 {
+		t.Errorf("point, bearingTo expected 180, got %f", d)
+	}
+
+	p1 = NewPoint(0, 0)
+	p2 = NewPoint(1, 0)
+
+	if d := p1.BearingTo(p2); d != 90 {
+		t.Errorf("point, bearingTo expected 90, got %f", d)
+	}
+
+	if d := p2.BearingTo(p1); d != -90 {
+		t.Errorf("point, bearingTo expected -90, got %f", d)
+	}
 }
 
 func TestPointAddSubtract(t *testing.T) {
