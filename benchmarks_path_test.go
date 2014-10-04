@@ -69,13 +69,13 @@ func BenchmarkPathEncode(b *testing.B) {
 	}
 }
 
-func BenchmarkPathDecode(b *testing.B) {
+func BenchmarkPathFromEncoding(b *testing.B) {
 	path := testPath1()
 	encoded := path.Encode()
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		geo.Decode(encoded)
+		geo.NewPathFromEncoding(encoded)
 	}
 }
 

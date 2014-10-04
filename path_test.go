@@ -23,6 +23,35 @@ func TestNewPathPreallocate(t *testing.T) {
 	}
 }
 
+func TestNewPathFromEncoding(t *testing.T) {
+	for loop := 0; loop < 100; loop++ {
+		p := NewPath()
+		for i := 0; i < 100; i++ {
+			p.Push(&Point{rand.Float64(), rand.Float64()})
+		}
+
+		encoded := p.Encode(int(1.0 / epsilon))
+		path := Decode(encoded, int(1.0/epsilon))
+
+		if path.Length() != 100 {
+			t.Fatalf("path, encodeDecode length mismatch: %d != 100", path.Length())
+		}
+
+		for i := 0; i < 100; i++ {
+			a := p.GetAt(i)
+			b := path.GetAt(i)
+
+			if e := math.Abs(a[0] - b[0]); e > epsilon {
+				t.Errorf("path, encodeDecode X error too big: %f", e)
+			}
+
+			if e := math.Abs(a[1] - b[1]); e > epsilon {
+				t.Errorf("path, encodeDecode Y error too big: %f", e)
+			}
+		}
+	}
+}
+
 func TestNewPathFromXYData(t *testing.T) {
 	data := [][2]float64{
 		[2]float64{1, 2},
@@ -217,36 +246,6 @@ func TestPathEncode(t *testing.T) {
 	path := NewPath()
 	if path.Encode() != "" {
 		t.Error("path, encode empty path should be empty string")
-	}
-}
-
-func TestPathEncodeDecode(t *testing.T) {
-	for loop := 0; loop < 100; loop++ {
-
-		p := NewPath()
-		for i := 0; i < 100; i++ {
-			p.Push(&Point{rand.Float64(), rand.Float64()})
-		}
-
-		encoded := p.Encode(int(1.0 / epsilon))
-		path := Decode(encoded, int(1.0/epsilon))
-
-		if path.Length() != 100 {
-			t.Fatalf("path, encodeDecode length mismatch: %d != 100", path.Length())
-		}
-
-		for i := 0; i < 100; i++ {
-			a := p.GetAt(i)
-			b := path.GetAt(i)
-
-			if e := math.Abs(a[0] - b[0]); e > epsilon {
-				t.Errorf("path, encodeDecode X error too big: %f", e)
-			}
-
-			if e := math.Abs(a[1] - b[1]); e > epsilon {
-				t.Errorf("path, encodeDecode Y error too big: %f", e)
-			}
-		}
 	}
 }
 
