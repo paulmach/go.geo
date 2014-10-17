@@ -221,14 +221,14 @@ func (b *Bound) NorthEast() *Point { return b.ne.Clone() }
 // SouthEast returns the lower right corner of the bound.
 func (b *Bound) SouthEast() *Point {
 	newP := &Point{}
-	newP.SetLat(b.sw.Lat()).SetLat(b.ne.Lng())
+	newP.SetLat(b.sw.Lat()).SetLng(b.ne.Lng())
 	return newP
 }
 
 // NorthWest returns the upper left corner of the bound.
 func (b *Bound) NorthWest() *Point {
 	newP := &Point{}
-	newP.SetLat(b.ne.Lat()).SetLat(b.sw.Lng())
+	newP.SetLat(b.ne.Lat()).SetLng(b.sw.Lng())
 	return newP
 }
 

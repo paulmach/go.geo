@@ -175,6 +175,14 @@ func TestBoundAccessors(t *testing.T) {
 	if !bound.ne.Equals(bound.NorthEast()) || !bound.NorthEast().Equals(bound.ne) {
 		t.Errorf("bound, northeast expected %v == %v", bound.ne, bound.NorthEast())
 	}
+
+	if !bound.NorthWest().Equals(NewPoint(1, 4)) {
+		t.Errorf("bound, northwest incorrect, got %v", bound.NorthWest())
+	}
+
+	if !bound.SouthEast().Equals(NewPoint(2, 3)) {
+		t.Errorf("bound, southeast incorrect, got %v", bound.SouthEast())
+	}
 }
 
 func TestBoundEquals(t *testing.T) {
