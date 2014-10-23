@@ -100,8 +100,8 @@ var TransverseMercator = Projection{
 // This is similar to Google's world coordinates.
 var ScalarMercator struct {
 	Level   uint64
-	Project func(lat, lng float64) (x, y uint64)
-	Inverse func(x, y uint64) (lat, lng float64)
+	Project func(lng, lat float64) (x, y uint64)
+	Inverse func(x, y uint64) (lng, lat float64)
 }
 
 func init() {

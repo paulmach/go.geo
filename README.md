@@ -25,9 +25,13 @@ All objects are defined in a 2D context.
 ## Exposed objects
 
 * **Point** represents a 2D location, x/y or lng/lat.
-	It also supports some vector functions like add, scale, etc.
-	It's up to the programmer to know if the data is a lng/lat location, 
-	projection of that point, or a vector.
+ 	It is up to the programmer to know if the data is a lng/lat location, projection of that point, or a vector.
+ 	Useful features: 
+	
+	* Project between WGS84 (EPSG:4326) and Mercator (EPSG:3857) or Scalar Mercator (map tiles). See examples below.
+	* [GeoHash](https://godoc.org/github.com/paulmach/go.geo#Point.GeoHash) and [Quadkey](https://godoc.org/github.com/paulmach/go.geo#Point.Quadkey) support.
+	* Supports vector functions like add, scale, etc. 
+	
 * **Line** represents the shortest distance between two points in Euclidean space. 
 	In many cases the path object is more useful.
 * **Path** represents a set of points making up a path in the 2D plane.
@@ -73,6 +77,23 @@ So, **remember to explicitly Clone() your objects**.
 
 The [GoDoc Documentation](https://godoc.org/github.com/paulmach/go.geo) provides a very readable list
 of exported functions. Below are a few usage examples.
+
+### Projections
+
+	lnglatPoint := geo.NewPoint(-122.4167, 37.7833)
+
+	// Mercator, EPSG:3857
+	mercator := geo.Mercator.Project(latlngPoint)
+	backToLnglat := geo.Mercator.Inverse(mercator)
+
+	// ScalarMercator or Google World Coordinates
+	tileX, TileY := geo.ScalarMercator.Project(latlngPoint.Lng(), latlngPoint.Lat())
+	tileZ := geo.ScalarMercator.Level
+
+	// level 16 tile the point is in
+	tileX >>= (geo.ScalarMercator.Level - 16)
+	tileY >>= (geo.ScalarMercator.Level - 16)
+	tileZ = 16
 
 ### Encode/Decode polyline path
 
@@ -168,7 +189,18 @@ The old version corresponds to a commit on [Sept. 22, 2014](https://github.com/p
 	go get github.com/paulmach/go.geo
 	go test github.com/paulmach/go.geo -bench .
 
+## Projects making use of this package
+
+* [Slide: Vector to Raster Map Conflation](https://github.com/paulmach/slide)
+* [SF MUNI Transit Delays, Visualized](http://bdon.org/transit)
+* [osm-rune](https://github.com/tmcw/osm-rune) and [osm-rune-viewer](https://github.com/tmcw/osm-rune-viewer)
+* Internally at [Strava](http://www.strava.com) for data analysis and the [Segment Compare Tool](http://blog.strava.com/whats-your-best-effort-see-how-it-compares-8480/)
+
 ## Contributing
 
 While this project started as the core of [Slide](https://github.com/paulmach/slide) it's now being used in many place.
 So, if you have features you'd like to add or improvements to make, please submit a pull request.
+A big thank you to those who have contributed so far:
+
+* [@bdon](https://github.com/bdon)
+* [@ericrwolfe](https://github.com/ericrwolfe)
