@@ -107,11 +107,11 @@ var ScalarMercator struct {
 func init() {
 	ScalarMercator.Level = 31
 
-	ScalarMercator.Project = func(lat, lng float64) (x, y uint64) {
-		return scalarMercatorProject(lat, lng, ScalarMercator.Level)
+	ScalarMercator.Project = func(lng, lat float64) (x, y uint64) {
+		return scalarMercatorProject(lng, lat, ScalarMercator.Level)
 	}
 
-	ScalarMercator.Inverse = func(x, y uint64) (lat, lng float64) {
+	ScalarMercator.Inverse = func(x, y uint64) (lng, lat float64) {
 		return scalarMercatorInverse(x, y, ScalarMercator.Level)
 	}
 }
