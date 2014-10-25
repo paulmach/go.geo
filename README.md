@@ -23,16 +23,13 @@ All objects are defined in a 2D context.
 [![Godoc Reference](https://godoc.org/github.com/paulmach/go.geo?status.png)](https://godoc.org/github.com/paulmach/go.geo)
 
 ## Exposed objects
-
 * **Point** represents a 2D location, x/y or lng/lat.
- 	It is up to the programmer to know if the data is a lng/lat location, projection of that point, or a vector.
- 	Useful features: 
-	
+	It is up to the programmer to know if the data is a lng/lat location, projection of that point, or a vector.
+	Useful features:
 	* Project between WGS84 (EPSG:4326) and Mercator (EPSG:3857) or Scalar Mercator (map tiles). See examples below.
 	* [GeoHash](https://godoc.org/github.com/paulmach/go.geo#Point.GeoHash) and [Quadkey](https://godoc.org/github.com/paulmach/go.geo#Point.Quadkey) support.
 	* Supports vector functions like add, scale, etc. 
-	
-* **Line** represents the shortest distance between two points in Euclidean space. 
+* **Line** represents the shortest distance between two points in Euclidean space.
 	In many cases the path object is more useful.
 * **Path** represents a set of points making up a path in the 2D plane.
 	Functions for converting to/from
@@ -140,11 +137,11 @@ defining the number of discrete points in the bound. This allows for access such
 
 A couple things about how the bound area is discretized in the grid:
  
-	* surface.Grid[0][0]
-		corresponds to the surface.Bound.SouthWest() location, or bottom left corner or the bound
-	* surface.Grid[0][surface.Height-1]
-		corresponds to the surface.Bound.NorthWest() location,
-		the extreme points in the grid are on the edges of the bound
+* **surface.Grid[0][0]**
+	corresponds to the surface.Bound.SouthWest() location, or bottom left corner or the bound
+* **surface.Grid[0][surface.Height-1]**
+	corresponds to the surface.Bound.NorthWest() location,
+	the extreme points in the grid are on the edges of the bound
 
 While these conventions are useful, they are different.
 If you're using this object, your feedback on these choices would be appreciated.
