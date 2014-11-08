@@ -105,6 +105,10 @@ of exported functions. Below are a few usage examples.
 	// encode with the default/typical 5 decimal place precision
 	encodedString := reducedPath.Encode() 
 
+	// encode as json [[lng1,lat1],[lng2, lat2],...]
+	// using encoding/json from the standard library.
+	encodedJSON, err := json.Marshal(reducedPath)
+
 ### Path, line intersection
 
 	path := geo.NewPath()
