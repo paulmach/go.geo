@@ -11,7 +11,8 @@ var epsilon = 1e-6
 var UseHaversineGeoDistanceByDefault = false
 
 // EarthRadius is the radius of the earth in meters. It is used in geo distance calculations.
-var EarthRadius = 6371000.0 // meters
+// To keep things consistent, this values matches that used in WGS84 Web Mercator (EPSG:3857).
+var EarthRadius = 6378137.0 // meters
 
 // GeoHashPrecision is the number of charactors of a encoded GeoHash.
 var GeoHashPrecision = 12

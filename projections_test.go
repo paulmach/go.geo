@@ -98,6 +98,24 @@ func TestTransverseMercator(t *testing.T) {
 	}
 }
 
+func TestTransverseMercatorScaling(t *testing.T) {
+
+	// points on the 0 longitude should have the same
+	// projected distance as geo distance
+	p1 := NewPoint(0, 15)
+	p2 := NewPoint(0, 30)
+
+	geoDistance := p1.GeoDistanceFrom(p2)
+
+	TransverseMercator.Project(p1)
+	TransverseMercator.Project(p2)
+	projectedDistance := p1.DistanceFrom(p2)
+
+	if math.Abs(geoDistance-projectedDistance) > epsilon {
+		t.Errorf("TransverseMercatorScaling: values mismatch: %f != %f", geoDistance, projectedDistance)
+	}
+}
+
 func TestBuildTransverseMercator(t *testing.T) {
 	for _, city := range cities {
 		p := &Point{}

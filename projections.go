@@ -83,13 +83,16 @@ var TransverseMercator = Projection{
 		radLng := deg2rad(p.Lng())
 
 		sincos := math.Sin(radLng) * math.Cos(radLat)
-		p.SetX(0.5 * math.Log((1+sincos)/(1-sincos)))
+		p.SetX(0.5 * math.Log((1+sincos)/(1-sincos)) * EarthRadius)
 
-		p.SetY(math.Atan(math.Tan(radLat) / math.Cos(radLng)))
+		p.SetY(math.Atan(math.Tan(radLat)/math.Cos(radLng)) * EarthRadius)
 	},
 	Inverse: func(p *Point) {
-		lng := math.Atan(math.Sinh(p.X()) / math.Cos(p.Y()))
-		lat := math.Asin(math.Sin(p.Y()) / math.Cosh(p.X()))
+		x := p.X() / EarthRadius
+		y := p.Y() / EarthRadius
+
+		lng := math.Atan(math.Sinh(x) / math.Cos(y))
+		lat := math.Asin(math.Sin(y) / math.Cosh(x))
 
 		p.SetLng(rad2deg(lng))
 		p.SetLat(rad2deg(lat))
