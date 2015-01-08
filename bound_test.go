@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"math"
 	"testing"
 )
 
@@ -162,6 +163,26 @@ func TestBoundPad(t *testing.T) {
 	tester = NewBound(0.1, 0.9, 2.1, 2.9)
 	if bound.Pad(-0.1); !bound.Equals(tester) {
 		t.Errorf("bound, pad expected %v, got %v", tester, bound)
+	}
+}
+
+func TestBoundGeoPad(t *testing.T) {
+	tests := []*Bound{
+		NewBoundFromPoints(NewPoint(-122.559, 37.887), NewPoint(-122.521, 37.911)),
+		NewBoundFromPoints(NewPoint(-122.559, 15), NewPoint(-122.521, 15)),
+		NewBoundFromPoints(NewPoint(20, -15), NewPoint(20, -15)),
+	}
+
+	for i, b1 := range tests {
+		b2 := b1.Clone().GeoPad(100)
+
+		if math.Abs(b1.GeoHeight()+200-b2.GeoHeight()) > 1.0 {
+			t.Errorf("height incorrected for %d, expected %v, got %v", i, b1.GeoHeight()+200, b2.GeoHeight())
+		}
+
+		if math.Abs(b1.GeoWidth()+200-b2.GeoWidth()) > 1.0 {
+			t.Errorf("width incorrected for %d, expected %v, got %v", i, b1.GeoWidth()+200, b2.GeoWidth())
+		}
 	}
 }
 

@@ -185,6 +185,21 @@ func (b *Bound) Pad(amount float64) *Bound {
 	return b
 }
 
+// GeoPad expands the bound in all directions by the given amount of meters.
+// Only applies if the data is Lng/Lat degrees.
+func (b *Bound) GeoPad(meters float64) *Bound {
+	dy := meters / 111131.75
+	dx := dy / math.Cos(deg2rad(b.ne.Lat()+b.sw.Lat())/2.0)
+
+	b.sw.SetLng(b.sw.Lng() - dx)
+	b.sw.SetLat(b.sw.Lat() - dy)
+
+	b.ne.SetLng(b.ne.Lng() + dx)
+	b.ne.SetLat(b.ne.Lat() + dy)
+
+	return b
+}
+
 // Height returns just the difference in the point's Y/Latitude.
 func (b *Bound) Height() float64 {
 	return b.ne.Y() - b.sw.Y()
