@@ -31,6 +31,33 @@ func TestBoundNew(t *testing.T) {
 	}
 }
 
+func TestNewBoundFromMapTile(t *testing.T) {
+	bound := NewBoundFromMapTile(7, 8, 9)
+
+	// edges should be within the bounds
+	lng, lat := ScalarMercator.Inverse(7<<(ScalarMercator.Level-9)+1, 8<<(ScalarMercator.Level-9)+1)
+	if !bound.Contains(NewPoint(lng, lat)) {
+		t.Errorf("bound, should contain point")
+	}
+
+	lng, lat = ScalarMercator.Inverse(7<<(ScalarMercator.Level-9)-1, 8<<(ScalarMercator.Level-9)-1)
+	if bound.Contains(NewPoint(lng, lat)) {
+		t.Errorf("bound, should not contain point")
+	}
+
+	lng, lat = ScalarMercator.Inverse(8<<(ScalarMercator.Level-9)-1, 9<<(ScalarMercator.Level-9)-1)
+	if !bound.Contains(NewPoint(lng, lat)) {
+		t.Errorf("bound, should contain point")
+	}
+
+	lng, lat = ScalarMercator.Inverse(8<<(ScalarMercator.Level-9)+1, 9<<(ScalarMercator.Level-9)+1)
+	if bound.Contains(NewPoint(lng, lat)) {
+		t.Errorf("bound, should not contain point")
+	}
+
+	bound = NewBoundFromMapTile(7, 8, 35)
+}
+
 func TestBoundExtend(t *testing.T) {
 	bound := NewBound(3, 0, 5, 0)
 
@@ -177,11 +204,11 @@ func TestBoundGeoPad(t *testing.T) {
 		b2 := b1.Clone().GeoPad(100)
 
 		if math.Abs(b1.GeoHeight()+200-b2.GeoHeight()) > 1.0 {
-			t.Errorf("height incorrected for %d, expected %v, got %v", i, b1.GeoHeight()+200, b2.GeoHeight())
+			t.Errorf("bound, geoPad height incorrected for %d, expected %v, got %v", i, b1.GeoHeight()+200, b2.GeoHeight())
 		}
 
 		if math.Abs(b1.GeoWidth()+200-b2.GeoWidth()) > 1.0 {
-			t.Errorf("width incorrected for %d, expected %v, got %v", i, b1.GeoWidth()+200, b2.GeoWidth())
+			t.Errorf("bound, geoPad width incorrected for %d, expected %v, got %v", i, b1.GeoWidth()+200, b2.GeoWidth())
 		}
 	}
 }

@@ -32,6 +32,28 @@ func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 	return b
 }
 
+// NewBoundFromMapTile creates a bound given an online map tile index.
+// Panics if x or y is out of range for zoom level.
+func NewBoundFromMapTile(x, y, z uint64) *Bound {
+	maxIndex := uint64(1) << z
+	if x < 0 || y < 0 || x >= maxIndex || y >= maxIndex {
+		panic("tile index out of range")
+	}
+
+	shift := 31 - z
+	if z > 31 {
+		shift = 0
+	}
+
+	lng1, lat1 := scalarMercatorInverse(x<<shift, y<<shift, 31)
+	lng2, lat2 := scalarMercatorInverse((x+1)<<shift, (y+1)<<shift, 31)
+
+	return &Bound{
+		sw: &Point{math.Min(lng1, lng2), math.Min(lat1, lat2)},
+		ne: &Point{math.Max(lng1, lng2), math.Max(lat1, lat2)},
+	}
+}
+
 // NewBoundFromGeoHash creates a new bound for the region defined by the GeoHash.
 func NewBoundFromGeoHash(hash string) *Bound {
 	west, east, south, north := geoHash2ranges(hash)
