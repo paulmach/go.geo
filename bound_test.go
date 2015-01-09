@@ -295,3 +295,21 @@ func TestBoundString(t *testing.T) {
 		t.Errorf("bound, string expected %s, got %s", answer, s)
 	}
 }
+
+func TestBoundToMysqlPolygon(t *testing.T) {
+	b := NewBound(1, 2, 3, 4)
+
+	expected := "POLYGON((1.000000 3.000000, 1.000000 4.000000, 2.000000 4.000000, 2.000000 3.000000, 1.000000 3.000000))"
+	if p := b.ToMysqlPolygon(); p != expected {
+		t.Errorf("bound, incorrect polygon, got %v", p)
+	}
+}
+
+func TestBoundToMysqlIntersectsCondition(t *testing.T) {
+	b := NewBound(1, 2, 3, 4)
+
+	expected := "INTERSECTS(column, GEOMFROMTEXT('POLYGON((1.000000 3.000000, 1.000000 4.000000, 2.000000 4.000000, 2.000000 3.000000, 1.000000 3.000000))'))"
+	if p := b.ToMysqlIntersectsCondition("column"); p != expected {
+		t.Errorf("bound, incorrect condition, got %v", p)
+	}
+}

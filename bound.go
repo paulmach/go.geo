@@ -295,3 +295,15 @@ func (b *Bound) Clone() *Bound {
 func (b *Bound) String() string {
 	return fmt.Sprintf("[[%f, %f], [%f, %f]]", b.sw.X(), b.ne.X(), b.sw.Y(), b.ne.Y())
 }
+
+// ToMysqlPolygon converts the bound into a polygon to be used in a MySQL spacial query.
+func (b *Bound) ToMysqlPolygon() string {
+	// west, south, west, north, east, north, east, south, west, south
+	return fmt.Sprintf("POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))", b.sw[0], b.sw[1], b.sw[0], b.ne[1], b.ne[0], b.ne[1], b.ne[0], b.sw[1], b.sw[0], b.sw[1])
+}
+
+// ToMysqlIntersectsCondition returns a condition defining the intersection
+// of the column and the bound. To be used in a MySQL query.
+func (b *Bound) ToMysqlIntersectsCondition(column string) string {
+	return fmt.Sprintf("INTERSECTS(%s, GEOMFROMTEXT('%s'))", column, b.ToMysqlPolygon())
+}
