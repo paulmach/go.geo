@@ -15,7 +15,7 @@ Currently implemented:
 Performance
 -----------
 
-These reducers fast (optimal?) and performance is comparible to libraries in other languages.
+These reducers are optimized and performance is comparible to libraries in other languages.
 
 go get github.com/paulmach/go.geo/reducers
 go test github.com/paulmach/go.geo/reducers -bench .
