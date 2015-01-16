@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/paulmach/go.geo"
-	"github.com/paulmach/go.geo/clustering/point_clustering"
+	"github.com/paulmach/go.geo/clustering"
 )
 
-func TestFilterSmallPointClusters(t *testing.T) {
-	g := FilterSmallPointClusters([]*point_clustering.Cluster{}, 5)
+func TestFilterSmallClusters(t *testing.T) {
+	g := FilterSmallClusters([]*clustering.Cluster{}, 5)
 	if g == nil {
 		t.Errorf("result should not be nil")
 	}
@@ -17,12 +17,12 @@ func TestFilterSmallPointClusters(t *testing.T) {
 		t.Errorf("zero group input should result in zero group output")
 	}
 
-	testSet := []*point_clustering.Cluster{
-		point_clustering.NewCluster(&event{Location: geo.NewPoint(1, 1)}),
-		point_clustering.NewCluster(&event{Location: geo.NewPoint(1, 1)}, &event{Location: geo.NewPoint(2, 2)}),
+	testSet := []*clustering.Cluster{
+		clustering.NewCluster(&event{Location: geo.NewPoint(1, 1)}),
+		clustering.NewCluster(&event{Location: geo.NewPoint(1, 1)}, &event{Location: geo.NewPoint(2, 2)}),
 	}
 
-	g = FilterSmallPointClusters(testSet, 5)
+	g = FilterSmallClusters(testSet, 5)
 
 	if l := len(g); l != 0 {
 		t.Errorf("should filter out small groups, but got %d", l)
@@ -32,7 +32,7 @@ func TestFilterSmallPointClusters(t *testing.T) {
 		t.Errorf("should not change test set, but got length %d", l)
 	}
 
-	g = FilterSmallPointClusters(testSet, 2)
+	g = FilterSmallClusters(testSet, 2)
 	if l := len(g); l != 1 {
 		t.Errorf("should filter out small groups, but got %d", l)
 	}

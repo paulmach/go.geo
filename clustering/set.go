@@ -1,16 +1,16 @@
-package shared
+package clustering
 
 import "math"
 
 // State represents the state of the hierarchical clustering and manages
 // the updates of the distance sets.
-type State struct {
-	Distances    []*DistanceSet
+type state struct {
+	Distances    []*distanceSet
 	DistanceFunc func(a, b int) float64
 }
 
 // ResetDistances makes sure the distance map is up to date given the recent merge of clusters.
-func (s *State) ResetDistances(into, from int) {
+func (s *state) ResetDistances(into, from int) {
 	// since the center of into changed, need to update the distance to anything linked to this one.
 	for k := range s.Distances[into].Distances {
 		if k == into {
@@ -46,7 +46,7 @@ func (s *State) ResetDistances(into, from int) {
 
 // MinDistance returns the link with minimum distance.
 // a is the index stored on the DistanceSet, b is the index of the smallest values.
-func (s *State) MinDistance() (a, b int, dist float64) {
+func (s *state) MinDistance() (a, b int, dist float64) {
 	dist = math.MaxFloat64
 
 	for i, ds := range s.Distances {

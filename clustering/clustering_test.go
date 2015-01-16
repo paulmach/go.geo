@@ -1,10 +1,9 @@
-package point_clustering
+package clustering
 
 import (
 	"compress/gzip"
 	"encoding/json"
 	"os"
-
 	"testing"
 
 	"github.com/paulmach/go.geo"
@@ -18,7 +17,7 @@ func TestClusteringClusterClusters(t *testing.T) {
 	}
 	bound.GeoPad(1) // for round off
 
-	clusters := New(30, CentroidGeoDistance{}).ClusterClusters(preclusters)
+	clusters := ClusterClusters(preclusters, CentroidGeoDistance{}, 30)
 
 	if l := len(clusters); l != 27 {
 		t.Errorf("incorrect number of clusters, got %d", l)
@@ -65,7 +64,7 @@ func TestGeoProjectedClusteringClusterClusters(t *testing.T) {
 	}
 	bound.GeoPad(1) // for projection loop round off
 
-	clusters := NewGeoProjectedClustering(30).ClusterClusters(preclusters)
+	clusters := ClusterClustersGeoProjected(preclusters, 30)
 
 	if l := len(clusters); l != 27 {
 		t.Errorf("incorrect number of clusters, got %d", l)
@@ -121,11 +120,10 @@ func TestGeoProjectedClusteringClusterClusters(t *testing.T) {
 // > go tool pprof clustering.test cpu.out
 func BenchmarkClusterClusters(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
-	clustering := New(30, CentroidGeoDistance{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		cs := clustering.ClusterClusters(clusters)
+		cs := ClusterClusters(clusters, CentroidGeoDistance{}, 30)
 		if len(cs) != 27 {
 			b.Fatalf("incorrect number of clusters, got %v", len(cs))
 		}
@@ -136,11 +134,10 @@ func BenchmarkClusterClusters(b *testing.B) {
 // > go tool pprof clustering.test cpu.out
 func BenchmarkPointClusteringGeoProjected(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
-	clustering := NewGeoProjectedClustering(30)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		cs := clustering.ClusterClusters(clusters)
+		cs := ClusterClustersGeoProjected(clusters, 30)
 
 		if len(cs) != 27 {
 			b.Fatalf("incorrect number of clusters, got %v", len(cs))
@@ -166,7 +163,7 @@ func BenchmarkInitializePointClusterDistances(b *testing.B) {
 }
 
 func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []Pointer) {
-	f, err := os.Open("../testdata/prefiltered.json.gz")
+	f, err := os.Open("testdata/prefiltered.json.gz")
 	if err != nil {
 		tb.Fatalf("unable to open test file %v", err)
 	}

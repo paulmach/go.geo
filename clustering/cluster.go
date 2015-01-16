@@ -1,4 +1,4 @@
-package point_clustering
+package clustering
 
 import "github.com/paulmach/go.geo"
 
@@ -17,7 +17,7 @@ type Cluster struct {
 	Pointers []Pointer
 }
 
-// NewPointCluster creates the point cluster and finds the center of the given pointers.
+// NewCluster creates the point cluster and finds the center of the given pointers.
 func NewCluster(pointers ...Pointer) *Cluster {
 	var (
 		sumX, sumY float64
@@ -60,9 +60,9 @@ func NewClusterWithCentroid(centroid *geo.Point, pointers ...Pointer) *Cluster {
 	}
 }
 
-// Merge merges the given point clusters into the current cluster and returns.
+// Combine merges the given point clusters into the current cluster and returns.
 // It mutates the base cluster. Updates the centroid.
-func (c *Cluster) Merge(c2 *Cluster) {
+func (c *Cluster) Combine(c2 *Cluster) {
 	c.Centroid = geo.NewLine(c.Centroid, c2.Centroid).Interpolate(1 - float64(len(c.Pointers))/float64(len(c2.Pointers)+len(c.Pointers)))
 	c.Pointers = append(c.Pointers, c2.Pointers...)
 

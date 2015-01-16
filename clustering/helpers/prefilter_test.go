@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/paulmach/go.geo"
-	"github.com/paulmach/go.geo/clustering/point_clustering"
+	"github.com/paulmach/go.geo/clustering"
 )
 
 func TestRemoveOutlierPointersByQuadkey(t *testing.T) {
@@ -37,10 +37,10 @@ func BenchmarkPrefilteredClusterClustering(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		groups := RemoveOutlierPointersByQuadkey(pointers, 24, 3)
-		groups = point_clustering.New(30, point_clustering.CentroidGeoDistance{}).ClusterClusters(groups)
-		if l := len(groups); l != 27 {
-			b.Errorf("incorrect number of groups, got %v", l)
+		clusters := RemoveOutlierPointersByQuadkey(pointers, 24, 3)
+		clusters = clustering.ClusterClusters(clusters, clustering.CentroidGeoDistance{}, 30)
+		if l := len(clusters); l != 27 {
+			b.Errorf("incorrect number of clusters, got %v", l)
 		}
 	}
 }
@@ -50,16 +50,16 @@ func BenchmarkPrefilteredGeoProjectedClustering(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		groups := RemoveOutlierPointersByQuadkey(pointers, 24, 3)
-		groups = point_clustering.NewGeoProjectedClustering(30).ClusterClusters(groups)
+		clusters := RemoveOutlierPointersByQuadkey(pointers, 24, 3)
+		clusters = clustering.ClusterClustersGeoProjected(clusters, 30)
 
-		if l := len(groups); l != 27 {
-			b.Errorf("incorrect number of groups, got %v", l)
+		if l := len(clusters); l != 27 {
+			b.Errorf("incorrect number of clusters, got %v", l)
 		}
 	}
 }
 
-func loadTestPointers(tb testing.TB) []point_clustering.Pointer {
+func loadTestPointers(tb testing.TB) []clustering.Pointer {
 	f, err := os.Open("../testdata/points.csv.gz")
 	if err != nil {
 		tb.Fatalf("unable to open test file %v", err)
@@ -73,7 +73,7 @@ func loadTestPointers(tb testing.TB) []point_clustering.Pointer {
 	defer gzReader.Close()
 
 	// read in events
-	var pointers []point_clustering.Pointer
+	var pointers []clustering.Pointer
 	scanner := bufio.NewScanner(gzReader)
 	for scanner.Scan() {
 		parts := strings.Split(scanner.Text(), ",")

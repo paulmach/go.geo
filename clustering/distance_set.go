@@ -1,19 +1,19 @@
-package shared
+package clustering
 
 import "math"
 
-// A DistanceSet is used to denormalize the minimum cluster distance in the set.
+// A distanceSet is used to denormalize the minimum cluster distance in the set.
 // Stores cluster-cluster distances, so MinDistance would be closest
 // other cluster to the given cluster.
-type DistanceSet struct {
+type distanceSet struct {
 	MinDistance float64
 	MinIndex    int
 	Distances   map[int]float64
 }
 
-// NewDistanceSet creates a new distance set.
-func NewDistanceSet() *DistanceSet {
-	return &DistanceSet{
+// newDistanceSet creates a new distance set.
+func newDistanceSet() *distanceSet {
+	return &distanceSet{
 		MinDistance: math.MaxFloat64,
 		Distances:   make(map[int]float64, 500), // adding 500 was a 20% performance win
 	}
@@ -22,7 +22,7 @@ func NewDistanceSet() *DistanceSet {
 // Set sets the distance for a given index
 // and updates the denormalized min distance if necessary.
 // Returns true if the minimum has been updated.
-func (ds *DistanceSet) Set(index int, distance float64) bool {
+func (ds *distanceSet) Set(index int, distance float64) bool {
 	if d, ok := ds.Distances[index]; ok && index == ds.MinIndex && distance > d {
 		// minimum index is being made greater, need to reset
 		ds.Distances[index] = distance
@@ -42,7 +42,7 @@ func (ds *DistanceSet) Set(index int, distance float64) bool {
 
 // Delete removes a values for an index and resets denormalized minimum.
 // Returns true if the minimum has been updated.
-func (ds *DistanceSet) Delete(index int) bool {
+func (ds *distanceSet) Delete(index int) bool {
 	delete(ds.Distances, index)
 	if index == ds.MinIndex {
 		ds.reset()
@@ -54,7 +54,7 @@ func (ds *DistanceSet) Delete(index int) bool {
 
 // reset refinds the denormalized minimum. Can be used if manually updating values.
 // not part of the official api.
-func (ds *DistanceSet) reset() {
+func (ds *distanceSet) reset() {
 	minDist := math.MaxFloat64
 	minIndex := 0
 	for i, d := range ds.Distances {

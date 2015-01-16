@@ -1,9 +1,9 @@
-package shared
+package clustering
 
 import "testing"
 
 func TestNewDistanceSet(t *testing.T) {
-	s := NewDistanceSet()
+	s := newDistanceSet()
 
 	if s.Distances == nil {
 		t.Errorf("must initialize map")
@@ -15,7 +15,7 @@ func TestNewDistanceSet(t *testing.T) {
 }
 
 func TestDistanceSetSet(t *testing.T) {
-	s := NewDistanceSet()
+	s := newDistanceSet()
 
 	s.Set(1, 10)
 	if v := s.MinIndex; v != 1 {
@@ -68,7 +68,7 @@ func TestDistanceSetSet(t *testing.T) {
 }
 
 func TestDistanceSetDelete(t *testing.T) {
-	s := NewDistanceSet()
+	s := newDistanceSet()
 
 	s.Set(1, 10)
 	s.Set(2, 20)

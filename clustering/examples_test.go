@@ -1,23 +1,24 @@
-package point_clustering_test
+package clustering_test
 
 import (
 	"fmt"
 
 	"github.com/paulmach/go.geo"
-	"github.com/paulmach/go.geo/clustering/point_clustering"
+	"github.com/paulmach/go.geo/clustering"
 )
 
 func ExamplePointClustering() {
-	pointers := []point_clustering.Pointer{
+	pointers := []clustering.Pointer{
 		&Event{Location: geo.NewPoint(1, 1)},
 		&Event{Location: geo.NewPoint(2, 2)},
 		&Event{Location: geo.NewPoint(5, 5)},
 	}
 
-	clusters := point_clustering.New(
+	clusters := clustering.ClusterPointers(
+		pointers,
+		clustering.CentroidDistance{},
 		2, // distance threshold, merge until clusters are at least this far apart
-		point_clustering.CentroidDistance{},
-	).Cluster(pointers)
+	)
 
 	for i, c := range clusters {
 		fmt.Printf("cluster %d:\n", i+1)
@@ -35,7 +36,7 @@ func ExamplePointClustering() {
 }
 
 func ExampleGeoPointClustering() {
-	pointers := []point_clustering.Pointer{
+	pointers := []clustering.Pointer{
 		&Event{Location: geo.NewPoint(-122.548081, 37.905995)},
 		&Event{Location: geo.NewPoint(-122.548091, 37.905987)},
 		&Event{Location: geo.NewPoint(-122.54807, 37.905995)},
@@ -44,7 +45,10 @@ func ExampleGeoPointClustering() {
 	}
 
 	threshold := 1.0 // meter
-	clusters := point_clustering.NewGeoProjectedClustering(threshold).Cluster(pointers)
+	clusters := clustering.ClusterPointersGeoProjected(
+		pointers,
+		threshold,
+	)
 
 	for i, c := range clusters {
 		fmt.Printf("cluster %d:\n", i+1)
