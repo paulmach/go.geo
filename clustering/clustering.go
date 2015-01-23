@@ -22,9 +22,7 @@ func ClusterPointers(pointers []Pointer, distancer ClusterDistancer, threshold f
 // so the original set will be unchanged.
 func ClusterClusters(clusters []*Cluster, distancer ClusterDistancer, threshold float64) []*Cluster {
 	copiedClusters := make([]*Cluster, len(clusters), len(clusters))
-	for i, cluster := range clusters {
-		copiedClusters[i] = NewClusterWithCentroid(cluster.Centroid, cluster.Pointers...)
-	}
+	copy(copiedClusters, clusters)
 
 	return cluster(copiedClusters, distancer, threshold)
 }
@@ -44,7 +42,7 @@ func cluster(clusters []*Cluster, distancer ClusterDistancer, threshold float64)
 	clusters, found := clusterClusters(
 		clusters,
 		// Default intialization, TODO: better bucketing/prefiltering will greatly increase performance.
-		initializeClusterDistances(clusters, distancer, threshold),
+		initClusterDistances(clusters, distancer, threshold),
 		distancer,
 		threshold,
 	)
@@ -59,11 +57,11 @@ func cluster(clusters []*Cluster, distancer ClusterDistancer, threshold float64)
 	return result
 }
 
-// ClusterPointersGeoProjected will take a set of Pointers and cluster
-// them using the distancer and threshold. It will project the points
-// using mercator, cluster, and project back. Performace is about 40%
-// than simply using a geo distancer.
-func ClusterPointersGeoProjected(pointers []Pointer, threshold float64) []*Cluster {
+// ClusterGeoPointers will take a set of Pointers and cluster them.
+// It will project the points using mercator, scale the threshold, cluster, and project back.
+// Performace is about 40% than simply using a geo distancer.
+// This may not make sense for all geo datasets.
+func ClusterGeoPointers(pointers []Pointer, threshold float64) []*Cluster {
 	clusters := make([]*Cluster, 0, len(pointers))
 	for _, p := range pointers {
 		clusters = append(clusters, NewCluster(p))
@@ -77,9 +75,9 @@ func ClusterPointersGeoProjected(pointers []Pointer, threshold float64) []*Clust
 	return geocluster(clusters, threshold)
 }
 
-// ClusterClustersGeoProjected can be used if you've already created clusters objects
+// ClusterGeoClusters can be used if you've already created clusters objects
 // using a prefilterer of something else.
-func ClusterClustersGeoProjected(clusters []*Cluster, threshold float64) []*Cluster {
+func ClusterGeoClusters(clusters []*Cluster, threshold float64) []*Cluster {
 	if len(clusters) < 2 {
 		return clusters
 	}
@@ -112,7 +110,7 @@ func geocluster(clusters []*Cluster, threshold float64) []*Cluster {
 		clusters,
 		// Default intialization, TODO: better bucketing/prefiltering will greatly increase performance.
 		// can use the bound above to help with this.
-		initializeClusterDistances(clusters, CentroidSquaredDistance{}, scaledThreshold),
+		initClusterDistances(clusters, CentroidSquaredDistance{}, scaledThreshold),
 		CentroidSquaredDistance{},
 		scaledThreshold,
 	)
@@ -128,7 +126,7 @@ func geocluster(clusters []*Cluster, threshold float64) []*Cluster {
 	return result
 }
 
-func initializeClusterDistances(
+func initClusterDistances(
 	clusters []*Cluster,
 	distancer ClusterDistancer,
 	threshold float64,
@@ -186,7 +184,7 @@ func clusterClusters(
 		}
 
 		// merge these two
-		clusters[lower].Combine(clusters[higher])
+		clusters[lower] = CombineClusters(clusters[lower], clusters[higher])
 		s.ResetDistances(lower, higher)
 		clusters[higher] = nil
 

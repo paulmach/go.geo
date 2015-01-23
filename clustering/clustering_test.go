@@ -56,7 +56,7 @@ func TestClusteringClusterClusters(t *testing.T) {
 	}
 }
 
-func TestGeoProjectedClusteringClusterClusters(t *testing.T) {
+func TestClusterGeoClusters(t *testing.T) {
 	preclusters, pointers := loadPrefilteredTestClusters(t)
 	bound := geo.NewBoundFromPoints(pointers[0].CenterPoint(), pointers[1].CenterPoint())
 	for _, p := range pointers {
@@ -64,7 +64,7 @@ func TestGeoProjectedClusteringClusterClusters(t *testing.T) {
 	}
 	bound.GeoPad(1) // for projection loop round off
 
-	clusters := ClusterClustersGeoProjected(preclusters, 30)
+	clusters := ClusterGeoClusters(preclusters, 30)
 
 	if l := len(clusters); l != 27 {
 		t.Errorf("incorrect number of clusters, got %d", l)
@@ -130,14 +130,28 @@ func BenchmarkClusterClusters(b *testing.B) {
 	}
 }
 
+// > go test -c && ./clustering.test -test.bench=ClusterPointers -test.cpuprofile=cpu.out -test.benchtime=10s
+// > go tool pprof clustering.test cpu.out
+func BenchmarkClusterPointers(b *testing.B) {
+	_, pointers := loadPrefilteredTestClusters(b)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		cs := ClusterPointers(pointers, CentroidGeoDistance{}, 30)
+		if len(cs) != 26 {
+			b.Fatalf("incorrect number of clusters, got %v", len(cs))
+		}
+	}
+}
+
 // > go test -c && ./clustering.test -test.bench=PointClusteringGeoProjected -test.cpuprofile=cpu.out -test.benchtime=10s
 // > go tool pprof clustering.test cpu.out
-func BenchmarkPointClusteringGeoProjected(b *testing.B) {
+func BenchmarkClusterGeoClusters(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		cs := ClusterClustersGeoProjected(clusters, 30)
+		cs := ClusterGeoClusters(clusters, 30)
 
 		if len(cs) != 27 {
 			b.Fatalf("incorrect number of clusters, got %v", len(cs))
@@ -145,7 +159,7 @@ func BenchmarkPointClusteringGeoProjected(b *testing.B) {
 	}
 }
 
-func BenchmarkInitializePointClusterDistances(b *testing.B) {
+func BenchmarkInitClusterDistances(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
 
 	bound := geo.NewBoundFromPoints(clusters[0].Centroid, clusters[1].Centroid)
@@ -158,7 +172,7 @@ func BenchmarkInitializePointClusterDistances(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		initializeClusterDistances(clusters, CentroidSquaredDistance{}, threshold)
+		initClusterDistances(clusters, CentroidSquaredDistance{}, threshold)
 	}
 }
 

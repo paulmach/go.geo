@@ -4,11 +4,11 @@ import "math"
 
 // A Combiner is something that can be combined.
 type Combiner interface {
-	Combine(c Combiner)
+	Combine(c Combiner) Combiner
 	DistanceFromCombiner(c Combiner) float64
 }
 
-// CombineCombiners will do a simple hierarchical of the combiners.
+// ClusterCombiners will do a simple hierarchical of the combiners.
 // It will modify the input slice as things will be combined into each other.
 func ClusterCombiners(combiners []Combiner, threshold float64) []Combiner {
 	if len(combiners) < 2 {
@@ -30,7 +30,7 @@ func ClusterCombiners(combiners []Combiner, threshold float64) []Combiner {
 		}
 
 		// merge these two
-		combiners[lower].Combine(combiners[higher])
+		combiners[lower] = combiners[lower].Combine(combiners[higher])
 		s.ResetDistances(lower, higher)
 		combiners[higher] = nil
 	}

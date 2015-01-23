@@ -45,7 +45,7 @@ func ExampleGeoPointClustering() {
 	}
 
 	threshold := 1.0 // meter
-	clusters := clustering.ClusterPointersGeoProjected(
+	clusters := clustering.ClusterGeoPointers(
 		pointers,
 		threshold,
 	)

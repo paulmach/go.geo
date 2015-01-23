@@ -51,7 +51,7 @@ func BenchmarkPrefilteredGeoProjectedClustering(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		clusters := RemoveOutlierPointersByQuadkey(pointers, 24, 3)
-		clusters = clustering.ClusterClustersGeoProjected(clusters, 30)
+		clusters = clustering.ClusterGeoClusters(clusters, 30)
 
 		if l := len(clusters); l != 27 {
 			b.Errorf("incorrect number of clusters, got %v", l)

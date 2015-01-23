@@ -63,11 +63,11 @@ func TestNewCluster(t *testing.T) {
 	}
 }
 
-func TestClusterCombine(t *testing.T) {
+func TestCombineClusters(t *testing.T) {
 	c1 := NewCluster(&event{Location: geo.NewPoint(1, 0)})
 	c2 := NewCluster(&event{Location: geo.NewPoint(2, 1)})
 
-	c1.Combine(c2)
+	c1 = CombineClusters(c1, c2)
 	if !c1.Centroid.Equals(geo.NewPoint(1.5, 0.5)) {
 		t.Errorf("centroid not adjusted correctly, got %v", c1.Centroid)
 	}
@@ -77,8 +77,7 @@ func TestClusterCombine(t *testing.T) {
 	}
 
 	c3 := NewCluster(&event{Location: geo.NewPoint(3, 2)})
-
-	c1.Combine(c3)
+	c1 = CombineClusters(c1, c3)
 	if !c1.Centroid.Equals(geo.NewPoint(2.0, 1.0)) {
 		t.Errorf("centroid not adjusted correctly, got %v", c1.Centroid)
 	}

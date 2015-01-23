@@ -15,6 +15,7 @@ type Pointer interface {
 type Cluster struct {
 	Centroid *geo.Point
 	Pointers []Pointer
+	Parents  [2]*Cluster // can be used to trace down the clustering tree.
 }
 
 // NewCluster creates the point cluster and finds the center of the given pointers.
@@ -60,11 +61,12 @@ func NewClusterWithCentroid(centroid *geo.Point, pointers ...Pointer) *Cluster {
 	}
 }
 
-// Combine merges the given point clusters into the current cluster and returns.
-// It mutates the base cluster. Updates the centroid.
-func (c *Cluster) Combine(c2 *Cluster) {
-	c.Centroid = geo.NewLine(c.Centroid, c2.Centroid).Interpolate(1 - float64(len(c.Pointers))/float64(len(c2.Pointers)+len(c.Pointers)))
-	c.Pointers = append(c.Pointers, c2.Pointers...)
-
-	return
+// CombineClusters merges the given point clusters and creates a new one.
+// Sets c1 and c2 as the children of the new cluster for tracing back down the tree.
+func CombineClusters(c1, c2 *Cluster) *Cluster {
+	return &Cluster{
+		Centroid: geo.NewLine(c1.Centroid, c2.Centroid).Interpolate(1 - float64(len(c1.Pointers))/float64(len(c2.Pointers)+len(c1.Pointers))),
+		Pointers: append(c1.Pointers, c2.Pointers...),
+		Parents:  [2]*Cluster{c1, c2},
+	}
 }
