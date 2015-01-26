@@ -34,11 +34,11 @@ func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 
 // NewBoundAroundPoint creates a new bound given a center point,
 // and a distance from the center point in meters
-func NewBoundAroundPoint(center *Point, distance float64) *Bound {
+func NewGeoBoundAroundPoint(center *Point, distance float64) *Bound {
 	if distance < 0 {
 		panic("invalid distance around center")
 	}
-	return boundAroundPoint(center, distance)
+	return geoBoundAroundPoint(center, distance)
 }
 
 // NewBoundFromMapTile creates a bound given an online map tile index.
@@ -107,7 +107,7 @@ func geoHash2ranges(hash string) (float64, float64, float64, float64) {
 	return lngMin, lngMax, latMin, latMax
 }
 
-func boundAroundPoint(center *Point, distance float64) *Bound {
+func geoBoundAroundPoint(center *Point, distance float64) *Bound {
 	radDist := distance / EarthRadius
 	radLat := deg2rad(center.Lat())
 	radLon := deg2rad(center.Lng())
@@ -115,21 +115,21 @@ func boundAroundPoint(center *Point, distance float64) *Bound {
 	maxLat := radLat + radDist
 
 	var minLon, maxLon float64
-	if minLat > MinLatitude && maxLat < MaxLatitude {
+	if minLat > minLatitude && maxLat < maxLatitude {
 		deltaLon := math.Asin(math.Sin(radDist) / math.Cos(radLat))
 		minLon = radLon - deltaLon
-		if minLon < MinLongitude {
+		if minLon < minLongitude {
 			minLon += 2 * math.Pi
 		}
 		maxLon = radLon + deltaLon
-		if maxLon > MaxLongitude {
+		if maxLon > maxLongitude {
 			maxLon -= 2 * math.Pi
 		}
 	} else {
-		minLat = math.Max(minLat, MinLatitude)
-		maxLat = math.Min(maxLat, MaxLatitude)
-		minLon = MinLongitude
-		maxLon = MaxLongitude
+		minLat = math.Max(minLat, minLatitude)
+		maxLat = math.Min(maxLat, maxLatitude)
+		minLon = minLongitude
+		maxLon = maxLongitude
 	}
 	return &Bound{
 		sw: &Point{rad2deg(minLon), rad2deg(minLat)},

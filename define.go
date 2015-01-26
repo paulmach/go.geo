@@ -15,16 +15,16 @@ var UseHaversineGeoDistanceByDefault = false
 var EarthRadius = 6378137.0 // meters
 
 //MinLatitude is the minimum possible latitude
-var MinLatitude = deg2rad(-90)
+var minLatitude = deg2rad(-90)
 
 //MaxLatitude is the maxiumum possible latitude
-var MaxLatitude = deg2rad(90)
+var maxLatitude = deg2rad(90)
 
 //MinLongitude is the minimum possible longitude
-var MinLongitude = deg2rad(-180)
+var minLongitude = deg2rad(-180)
 
 //MaxLongitude is the maxiumum possible longitude
-var MaxLongitude = deg2rad(180)
+var maxLongitude = deg2rad(180)
 
 // GeoHashPrecision is the number of charactors of a encoded GeoHash.
 var GeoHashPrecision = 12
