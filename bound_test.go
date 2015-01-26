@@ -31,6 +31,25 @@ func TestBoundNew(t *testing.T) {
 	}
 }
 
+func TestBoundAroundPoint(t *testing.T) {
+	p := &Point{}
+	p.SetLat(50.0359)
+	p.SetLng(5.42553)
+	bound := NewBoundAroundPoint(p, 1000000)
+	if bound.Center().Lat() != p.Lat() {
+		t.Errorf("bound, should have correct center lat point")
+	}
+
+	if bound.Center().Lng() != p.Lng() {
+		t.Errorf("bound, should have correct center lng point")
+	}
+
+	//Given point is 968.9 km away from center
+	if !bound.Contains(&Point{3.412, 58.3838}) {
+		t.Errorf("bound, should have correct center point")
+	}
+}
+
 func TestNewBoundFromMapTile(t *testing.T) {
 	bound := NewBoundFromMapTile(7, 8, 9)
 
