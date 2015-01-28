@@ -35,19 +35,18 @@ func (l *Line) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON enables paths to be encoded as JSON using the encoding/json package.
 func (p *Path) MarshalJSON() ([]byte, error) {
-	return json.Marshal(p.points)
+	return json.Marshal(p.PointSet)
 }
 
 // UnmarshalJSON enables paths to be decoded as JSON using the encoding/json package.
 func (p *Path) UnmarshalJSON(data []byte) error {
-	var points []Point
+	var pointSet PointSet
 
-	err := json.Unmarshal(data, &points)
+	err := json.Unmarshal(data, &pointSet)
 	if err != nil {
 		return err
 	}
-
-	p.SetPoints(points)
+	p.PointSet = pointSet
 	return nil
 }
 
