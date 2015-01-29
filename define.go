@@ -14,6 +14,18 @@ var UseHaversineGeoDistanceByDefault = false
 // To keep things consistent, this values matches that used in WGS84 Web Mercator (EPSG:3857).
 var EarthRadius = 6378137.0 // meters
 
+//MinLatitude is the minimum possible latitude
+var minLatitude = deg2rad(-90)
+
+//MaxLatitude is the maxiumum possible latitude
+var maxLatitude = deg2rad(90)
+
+//MinLongitude is the minimum possible longitude
+var minLongitude = deg2rad(-180)
+
+//MaxLongitude is the maxiumum possible longitude
+var maxLongitude = deg2rad(180)
+
 // GeoHashPrecision is the number of charactors of a encoded GeoHash.
 var GeoHashPrecision = 12
 
