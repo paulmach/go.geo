@@ -31,7 +31,11 @@ All objects are defined in a 2D context.
 	* Supports vector functions like add, scale, etc. 
 * **Line** represents the shortest distance between two points in Euclidean space.
 	In many cases the path object is more useful.
-* **Path** represents a set of points making up a path in the 2D plane.
+
+* **PointSet** represents a set of points.
+	with methods such as GeoDistanceFrom and GeoCentroid.
+
+* **Path** is an extention of PointSet with methods for working with a polyline.
 	Functions for converting to/from
 	[Google's polyline encoding](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) are included.
 * **Bound** represents a rectangular 2D area defined by North, South, East, West values.
@@ -205,3 +209,4 @@ A big thank you to those who have contributed so far:
 
 * [@bdon](https://github.com/bdon)
 * [@ericrwolfe](https://github.com/ericrwolfe)
+* [@mlerner](https://github.com/mlerner)
