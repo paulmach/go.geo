@@ -138,19 +138,22 @@ func (p *Point) QuadkeyString(level int) string {
 	return zeros[:((level+1)-len(s))/2] + s
 }
 
+const base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
+
 // GeoHash returns the geohash string of a point representing a lng/lat location.
 // The resulting hash will be `GeoHashPrecision` characters long, default is 12.
 func (p *Point) GeoHash() string {
-	base32 := "0123456789bcdefghjkmnpqrstuvwxyz"
-	hash := p.GeoHashInt64(5 * GeoHashPrecision)
 
-	result := make([]byte, GeoHashPrecision, GeoHashPrecision)
+	// 15 must be greater than GeoHashPrecision. If not, panic!!
+	var result [15]byte
+
+	hash := p.GeoHashInt64(5 * GeoHashPrecision)
 	for i := 1; i <= GeoHashPrecision; i++ {
 		result[GeoHashPrecision-i] = byte(base32[hash&0x1F])
 		hash >>= 5
 	}
 
-	return string(result)
+	return string(result[:GeoHashPrecision])
 }
 
 // GeoHashInt64 returns the integer version of the geohash
