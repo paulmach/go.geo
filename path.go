@@ -252,6 +252,8 @@ func (p *Path) Encode(factor ...int) string {
 	var pLng int
 
 	var result bytes.Buffer
+	scratch1 := make([]byte, 0, 50)
+	scratch2 := make([]byte, 0, 50)
 
 	for _, p := range p.PointSet {
 		lat5 := int(math.Floor(p.Lat()*f + 0.5))
@@ -263,34 +265,28 @@ func (p *Path) Encode(factor ...int) string {
 		pLat = lat5
 		pLng = lng5
 
-		result.WriteString(encodeSignedNumber(deltaLat))
-		result.WriteString(encodeSignedNumber(deltaLng))
+		result.Write(append(encodeSignedNumber(deltaLat, scratch1), encodeSignedNumber(deltaLng, scratch2)...))
+
+		scratch1 = scratch1[:0]
+		scratch2 = scratch2[:0]
 	}
 
 	return result.String()
 }
 
-func encodeSignedNumber(num int) string {
+func encodeSignedNumber(num int, result []byte) []byte {
 	shiftedNum := num << 1
 
 	if num < 0 {
 		shiftedNum = ^shiftedNum
 	}
 
-	return encodeNumber(shiftedNum)
-}
-
-func encodeNumber(num int) string {
-	result := ""
-
-	for num >= 0x20 {
-		result += string((0x20 | (num & 0x1f)) + 63)
-		num >>= 5
+	for shiftedNum >= 0x20 {
+		result = append(result, byte(0x20|(shiftedNum&0x1f)+63))
+		shiftedNum >>= 5
 	}
 
-	result += string(num + 63)
-
-	return result
+	return append(result, byte(shiftedNum+63))
 }
 
 // Distance computes the total distance in the units of the points.

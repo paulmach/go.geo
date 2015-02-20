@@ -12,6 +12,8 @@ func BenchmarkPathDistanceFrom(b *testing.B) {
 	otherPath := testPath2()
 
 	points := otherPath.Length()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		basePath.DistanceFrom(otherPath.GetAt(i % points))
@@ -23,6 +25,8 @@ func BenchmarkPathSquaredDistanceFrom(b *testing.B) {
 	otherPath := testPath2()
 
 	points := otherPath.Length()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		basePath.SquaredDistanceFrom(otherPath.GetAt(i % points))
@@ -34,6 +38,8 @@ func BenchmarkPathMeasure(b *testing.B) {
 	otherPath := testPath2()
 
 	points := otherPath.Length()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		basePath.Measure(otherPath.GetAt(i % points))
@@ -44,6 +50,7 @@ func BenchmarkPathResampleToMorePoints(b *testing.B) {
 	path := testPath1()
 	totalPoints := int(float64(path.Length()) * 1.616)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		path.Resample(totalPoints)
@@ -54,6 +61,7 @@ func BenchmarkPathResampleToLessPoints(b *testing.B) {
 	path := testPath1()
 	totalPoints := int(float64(path.Length()) / 1.616)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		path.Resample(totalPoints)
@@ -63,6 +71,7 @@ func BenchmarkPathResampleToLessPoints(b *testing.B) {
 func BenchmarkPathEncode(b *testing.B) {
 	path := testPath1()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		path.Encode()
@@ -73,6 +82,7 @@ func BenchmarkPathFromEncoding(b *testing.B) {
 	path := testPath1()
 	encoded := path.Encode()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		geo.NewPathFromEncoding(encoded)
