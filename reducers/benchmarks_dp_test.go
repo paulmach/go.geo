@@ -37,6 +37,8 @@ func TestDouglasPeuckerBenchmarkData(t *testing.T) {
 
 func BenchmarkDouglasPeucker(b *testing.B) {
 	path := benchmarkData()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.DouglasPeucker(path, 0.1)
@@ -45,6 +47,8 @@ func BenchmarkDouglasPeucker(b *testing.B) {
 
 func BenchmarkDouglasPeuckerIndexMap(b *testing.B) {
 	path := benchmarkData()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.DouglasPeuckerIndexMap(path, 0.1)

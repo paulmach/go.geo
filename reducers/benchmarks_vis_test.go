@@ -33,6 +33,8 @@ func TestVisvalingamBenchmarkData(t *testing.T) {
 
 func BenchmarkVisvalingamThreshold(b *testing.B) {
 	path := benchmarkData()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.VisvalingamThreshold(path, 0.1)
@@ -41,8 +43,9 @@ func BenchmarkVisvalingamThreshold(b *testing.B) {
 
 func BenchmarkVisvalingamKeep(b *testing.B) {
 	path := benchmarkData()
-
 	toKeep := int(float64(path.Length()) / 1.616)
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.VisvalingamKeep(path, toKeep)

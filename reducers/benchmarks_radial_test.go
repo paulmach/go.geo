@@ -33,6 +33,8 @@ func TestRadialBenchmarkData(t *testing.T) {
 
 func BenchmarkRadial(b *testing.B) {
 	path := benchmarkData()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.Radial(path, 0.1)
@@ -41,6 +43,8 @@ func BenchmarkRadial(b *testing.B) {
 
 func BenchmarkRadialIndexMap(b *testing.B) {
 	path := benchmarkData()
+
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reducers.RadialIndexMap(path, 0.1)
