@@ -250,7 +250,8 @@ func (b *Bound) Pad(amount float64) *Bound {
 // Only applies if the data is Lng/Lat degrees.
 func (b *Bound) GeoPad(meters float64) *Bound {
 	dy := meters / 111131.75
-	dx := dy / math.Cos(deg2rad(b.ne.Lat()+b.sw.Lat())/2.0)
+	dx := dy / math.Cos(deg2rad(b.ne.Lat()))
+	dx = math.Max(dx, dy/math.Cos(deg2rad(b.sw.Lat())))
 
 	b.sw.SetLng(b.sw.Lng() - dx)
 	b.sw.SetLat(b.sw.Lat() - dy)
@@ -277,8 +278,9 @@ func (b *Bound) GeoHeight() float64 {
 	return 111131.75 * b.Height()
 }
 
-// GeoWidth returns the approximate width in meters.
-// Only applies if the data is Lng/Lat degrees.
+// GeoWidth returns the approximate width in meters
+// of the center of the bound.  Only applies if
+// the data is Lng/Lat degrees.
 func (b *Bound) GeoWidth(haversine ...bool) float64 {
 	c := b.Center()
 
