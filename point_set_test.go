@@ -5,27 +5,49 @@ import (
 	"testing"
 )
 
-func TestGepCentroid(t *testing.T) {
+func TestPointSetCentroid(t *testing.T) {
 	ps := &PointSet{}
-	ps.Push(&Point{-122.42558918, 37.76159786}).
-		Push(&Point{-122.41486043, 37.78138826}).
-		Push(&Point{-122.40206146, 37.77962363})
-	centroid := ps.GeoCentroid()
-	expectedCenter := &Point{-122.41417035666666, 37.77420325}
+	ps.Push(&Point{0, 0}).
+		Push(&Point{1, 1.5}).
+		Push(&Point{2, 0})
+	centroid := ps.Centroid()
+	expectedCenter := &Point{1, 0.5}
 	if !centroid.Equals(expectedCenter) {
-		t.Errorf("should find centroid correctly, got %v", centroid.Lng())
+		t.Errorf("should find centroid correctly, got %v", centroid)
 	}
 }
 
-func TestGeoDistanceFrom(t *testing.T) {
+func TestPointSetDistanceFrom(t *testing.T) {
+	ps := &PointSet{}
+	ps.Push(&Point{0, 0}).
+		Push(&Point{1, 1}).
+		Push(&Point{2, 2})
+
+	fromPoint := &Point{3, 2}
+
+	if distance, _ := ps.DistanceFrom(fromPoint); distance != 1 {
+		t.Errorf("distance incorrect, got %v", distance)
+	}
+
+	if _, index := ps.GeoDistanceFrom(fromPoint); index != 2 {
+		t.Errorf("incorrect closest index, got %v", index)
+	}
+}
+
+func TestPointSetGeoDistanceFrom(t *testing.T) {
 	ps := &PointSet{}
 	ps.Push(&Point{-122.42558918, 37.76159786}).
-		Push(&Point{-122.41486043, 37.78138826}).
-		Push(&Point{-122.40206146, 37.77962363})
+		Push(&Point{-122.40206146, 37.77962363}).
+		Push(&Point{-122.41486043, 37.78138826})
+
 	fromPoint := &Point{-122.41941550000001, 37.7749295}
 
-	if distance := ps.GeoDistanceFrom(fromPoint); math.Floor(distance) != 823 {
-		t.Errorf("should find geo distance from correctly, got %v", distance)
+	if distance, _ := ps.GeoDistanceFrom(fromPoint); math.Floor(distance) != 823 {
+		t.Errorf("geo distance incorrect, got %v", distance)
+	}
+
+	if _, index := ps.GeoDistanceFrom(fromPoint); index != 2 {
+		t.Errorf("incorrect closest index, got %v", index)
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 // A PointSet represents a set of points in the 2D Eucledian or Cartesian plane.
 type PointSet []Point
 
-// NewPointSetPreallocate simply creates a new point set with points array of the given size.
+// NewPointSet simply creates a new point set with points array of the given size.
 func NewPointSet() *PointSet {
 	return &PointSet{}
 }
@@ -33,28 +33,48 @@ func (ps PointSet) Clone() *PointSet {
 	return &nps
 }
 
-// Centroid returns the average latitude and longitude coordinate of the point set
-func (ps PointSet) GeoCentroid() *Point {
-	averageLat := 0.0
-	averageLng := 0.0
+// Centroid returns the average x and y coordinate of the point set.
+// This can also be used for small clusters of lat/lng points.
+func (ps PointSet) Centroid() *Point {
+	x := 0.0
+	y := 0.0
 	numPoints := float64(len(ps))
 	for _, point := range ps {
-		averageLat += point.Lat()
-		averageLng += point.Lng()
+		x += point[0]
+		y += point[1]
 	}
-	return &Point{averageLng / numPoints, averageLat / numPoints}
+	return &Point{x / numPoints, y / numPoints}
 }
 
-// GeoDistanceFrom returns the minimum geo distance from the point set
-func (ps PointSet) GeoDistanceFrom(point *Point) float64 {
+// DistanceFrom returns the minimum euclidean distance from the point set.
+func (ps PointSet) DistanceFrom(point *Point) (float64, int) {
 	dist := math.Inf(1)
+	index := 0
 
-	loopTo := len(ps) - 1
-	for i := 0; i < loopTo; i++ {
-		dist = math.Min(ps[i].GeoDistanceFrom(point), dist)
+	for i := range ps {
+		if d := ps[i].SquaredDistanceFrom(point); d < dist {
+			dist = d
+			index = i
+		}
 	}
 
-	return dist
+	return math.Sqrt(dist), index
+}
+
+// GeoDistanceFrom returns the minimum geo distance from the point set,
+// along with the index of the point with minimum index.
+func (ps PointSet) GeoDistanceFrom(point *Point) (float64, int) {
+	dist := math.Inf(1)
+	index := 0
+
+	for i := range ps {
+		if d := ps[i].GeoDistanceFrom(point); d < dist {
+			dist = d
+			index = i
+		}
+	}
+
+	return dist, index
 }
 
 // Bound returns a bound around the point set. Simply uses rectangular coordinates.
