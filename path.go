@@ -581,7 +581,7 @@ func (p *Path) Equals(path *Path) bool {
 
 // Clone returns a new copy of the path.
 func (p *Path) Clone() *Path {
-	return &Path{(&p.PointSet).Clone()}
+	return &Path{*(&p.PointSet).Clone()}
 }
 
 // WriteOffFile writes an Object File Format representation of

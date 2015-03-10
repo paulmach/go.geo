@@ -25,11 +25,12 @@ func NewPointSetPreallocate(length, capacity int) *PointSet {
 }
 
 // Clone returns a new copy of the point set.
-func (ps PointSet) Clone() PointSet {
+func (ps PointSet) Clone() *PointSet {
 	points := make([]Point, len(ps))
 	copy(points, ps)
 
-	return points
+	nps := PointSet(points)
+	return &nps
 }
 
 // Centroid returns the average latitude and longitude coordinate of the point set
@@ -54,6 +55,29 @@ func (ps PointSet) GeoDistanceFrom(point *Point) float64 {
 	}
 
 	return dist
+}
+
+// Bound returns a bound around the point set. Simply uses rectangular coordinates.
+func (ps PointSet) Bound() *Bound {
+	if len(ps) == 0 {
+		return NewBound(0, 0, 0, 0)
+	}
+
+	minX := math.Inf(1)
+	minY := math.Inf(1)
+
+	maxX := math.Inf(-1)
+	maxY := math.Inf(-1)
+
+	for _, v := range ps {
+		minX = math.Min(minX, v.X())
+		minY = math.Min(minY, v.Y())
+
+		maxX = math.Max(maxX, v.X())
+		maxY = math.Max(maxY, v.Y())
+	}
+
+	return NewBound(maxX, minX, maxY, minY)
 }
 
 // SetAt updates a position at i in the point set
