@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+
+	"github.com/paulmach/go.geojson"
 )
 
 // A PointSet represents a set of points in the 2D Eucledian or Cartesian plane.
@@ -124,6 +126,26 @@ func (ps *PointSet) GetAt(i int) *Point {
 	return &deref[i]
 }
 
+// First returns the first point in the point set.
+// Will return nil if there are no points in the set.
+func (ps PointSet) First() *Point {
+	if len(ps) == 0 {
+		return nil
+	}
+
+	return &ps[0]
+}
+
+// Last returns the last point in the point set.
+// Will return nil if there are no points in the set.
+func (ps PointSet) Last() *Point {
+	if len(ps) == 0 {
+		return nil
+	}
+
+	return &ps[len(ps)-1]
+}
+
 // InsertAt inserts a Point at i in the point set.
 // Panics if index is out of range.
 func (ps *PointSet) InsertAt(index int, point *Point) *PointSet {
@@ -202,6 +224,17 @@ func (ps PointSet) Equals(pointSet *PointSet) bool {
 	}
 
 	return true
+}
+
+// ToGeoJSON creates a new geojson feature with a multipoint geometry
+// containing all the points.
+func (ps PointSet) ToGeoJSON() *geojson.Feature {
+	f := geojson.NewMultiPointFeature()
+	for _, v := range ps {
+		f.Geometry.MultiPoint = append(f.Geometry.MultiPoint, []float64{v[0], v[1]})
+	}
+
+	return f
 }
 
 // String returns a string representation of the path.

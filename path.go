@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+
+	"github.com/paulmach/go.geojson"
 )
 
 // Path represents a set of points to be thought of as a polyline.
@@ -582,6 +584,18 @@ func (p *Path) Equals(path *Path) bool {
 // Clone returns a new copy of the path.
 func (p *Path) Clone() *Path {
 	return &Path{*(&p.PointSet).Clone()}
+}
+
+// ToGeoJSON creates a new geojson feature with a linestring geometry
+// containing all the points.
+func (p *Path) ToGeoJSON() *geojson.Feature {
+	coords := make([][]float64, 0, len(p.PointSet))
+
+	for _, p := range p.PointSet {
+		coords = append(coords, []float64{p[0], p[1]})
+	}
+
+	return geojson.NewLineStringFeature(coords)
 }
 
 // String returns a string representation of the path.

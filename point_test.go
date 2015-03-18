@@ -358,6 +358,15 @@ func TestPointToArray(t *testing.T) {
 	}
 }
 
+func TestPointToGeoJSON(t *testing.T) {
+	p := NewPoint(1, 2.5)
+
+	f := p.ToGeoJSON()
+	if !f.Geometry.IsPoint() {
+		t.Errorf("point, should be point geometry")
+	}
+}
+
 func TestPointString(t *testing.T) {
 	p := NewPoint(1, 2.5)
 

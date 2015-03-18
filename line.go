@@ -3,6 +3,8 @@ package geo
 import (
 	"fmt"
 	"math"
+
+	"github.com/paulmach/go.geojson"
 )
 
 // Line represents the shortest path between A and B.
@@ -277,6 +279,15 @@ func (l *Line) A() *Point {
 // B returns a pointer to the second point in the line.
 func (l *Line) B() *Point {
 	return &l.b
+}
+
+// ToGeoJSON creates a new geojson feature with a linestring geometry
+// containing the two points.
+func (l *Line) ToGeoJSON() *geojson.Feature {
+	return geojson.NewLineStringFeature([][]float64{
+		[]float64{l.a[0], l.a[1]},
+		[]float64{l.b[0], l.b[1]},
+	})
 }
 
 // String returns a string representation of the line.

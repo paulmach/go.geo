@@ -303,6 +303,16 @@ func TestPointSetClone(t *testing.T) {
 	}
 }
 
+func TestPointSetToGeoJSON(t *testing.T) {
+	p := NewPointSet().
+		Push(NewPoint(1, 2))
+
+	f := p.ToGeoJSON()
+	if !f.Geometry.IsMultiPoint() {
+		t.Errorf("pointset, should be linestring geometry")
+	}
+}
+
 func TestPointSetString(t *testing.T) {
 	ps := NewPointSet()
 

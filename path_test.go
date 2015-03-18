@@ -592,6 +592,16 @@ func TestPathWriteOffFile(t *testing.T) {
 	}
 }
 
+func TestPathToGeoJSON(t *testing.T) {
+	p := NewPath().
+		Push(NewPoint(1, 2))
+
+	f := p.ToGeoJSON()
+	if !f.Geometry.IsLineString() {
+		t.Errorf("path, should be linestring geometry")
+	}
+}
+
 func TestPathString(t *testing.T) {
 	p := NewPath()
 

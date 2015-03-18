@@ -377,6 +377,15 @@ func TestLineEquals(t *testing.T) {
 	}
 }
 
+func TestLineToGeoJSON(t *testing.T) {
+	l := NewLine(NewPoint(1, 2), NewPoint(3, 4))
+
+	f := l.ToGeoJSON()
+	if !f.Geometry.IsLineString() {
+		t.Errorf("line, should be linestring geometry")
+	}
+}
+
 func TestLineString(t *testing.T) {
 	l := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 

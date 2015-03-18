@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+
+	"github.com/paulmach/go.geojson"
 )
 
 // A Point is a simple X/Y or Lng/Lat 2d point. [X, Y] or [Lng, Lat]
@@ -300,6 +302,11 @@ func (p *Point) Y() float64 {
 func (p *Point) SetY(y float64) *Point {
 	p[1] = y
 	return p
+}
+
+// ToGeoJSON creates a new geojson feature with a point geometry.
+func (p Point) ToGeoJSON() *geojson.Feature {
+	return geojson.NewPointFeature([]float64{p[0], p[1]})
 }
 
 // String returns a string representation of the point.
