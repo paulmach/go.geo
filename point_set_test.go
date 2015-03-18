@@ -281,7 +281,7 @@ func TestPointSetEquals(t *testing.T) {
 	}
 }
 
-func TestPathClone(t *testing.T) {
+func TestPointSetClone(t *testing.T) {
 	p1 := NewPointSet()
 	p1.Push(NewPoint(0, 0))
 	p1.Push(NewPoint(0.5, .2))
@@ -300,5 +300,26 @@ func TestPathClone(t *testing.T) {
 
 	if !p2.Equals(p1) {
 		t.Error("clone paths should be equal")
+	}
+}
+
+func TestPointSetString(t *testing.T) {
+	ps := NewPointSet()
+
+	answer := "EMPTY"
+	if s := ps.String(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
+	}
+
+	ps.Push(NewPoint(1, 2))
+	answer = "MULTIPOINT(1 2)"
+	if s := ps.String(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
+	}
+
+	ps.Push(NewPoint(3, 4))
+	answer = "MULTIPOINT(1 2, 3 4)"
+	if s := ps.String(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
 	}
 }

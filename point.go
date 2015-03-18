@@ -303,6 +303,7 @@ func (p *Point) SetY(y float64) *Point {
 }
 
 // String returns a string representation of the point.
+// The format is WKT, e.g. POINT(30.5 10.5)
 func (p Point) String() string {
-	return fmt.Sprintf("[%f, %f]", p[0], p[1])
+	return fmt.Sprintf("POINT(%g %g)", p[0], p[1])
 }

@@ -359,9 +359,9 @@ func TestPointToArray(t *testing.T) {
 }
 
 func TestPointString(t *testing.T) {
-	p := NewPoint(1, 2)
+	p := NewPoint(1, 2.5)
 
-	answer := "[1.000000, 2.000000]"
+	answer := "POINT(1 2.5)"
 	if s := p.String(); s != answer {
 		t.Errorf("point, string expected %s, got %s", answer, s)
 	}

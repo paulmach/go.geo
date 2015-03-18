@@ -584,6 +584,25 @@ func (p *Path) Clone() *Path {
 	return &Path{*(&p.PointSet).Clone()}
 }
 
+// String returns a string representation of the path.
+// The format is WKT, e.g.LINESTRING(30 10, 10 30, 40 40)
+// For empty paths the result will be 'EMPTY'.
+func (p *Path) String() string {
+	if len(p.PointSet) == 0 {
+		return "EMPTY"
+	}
+
+	buff := bytes.NewBuffer(nil)
+	fmt.Fprintf(buff, "LINESTRING(%g %g", p.PointSet[0][0], p.PointSet[0][1])
+
+	for i := 1; i < len(p.PointSet); i++ {
+		fmt.Fprintf(buff, ", %g %g", p.PointSet[i][0], p.PointSet[i][1])
+	}
+
+	buff.Write([]byte(")"))
+	return buff.String()
+}
+
 // WriteOffFile writes an Object File Format representation of
 // the points of the path to the writer provided. This is for viewing
 // in MeshLab or something like that. You should close the

@@ -32,7 +32,7 @@ func NewBoundFromPoints(corner, oppositeCorner *Point) *Bound {
 	return b
 }
 
-// NewBoundAroundPoint creates a new bound given a center point,
+// NewGeoBoundAroundPoint creates a new bound given a center point,
 // and a distance from the center point in meters
 func NewGeoBoundAroundPoint(center *Point, distance float64) *Bound {
 	if distance < 0 {

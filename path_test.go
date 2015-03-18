@@ -591,3 +591,24 @@ func TestPathWriteOffFile(t *testing.T) {
 		t.Errorf("path, writeOffFile not right, %v != %v", expected, off)
 	}
 }
+
+func TestPathString(t *testing.T) {
+	p := NewPath()
+
+	answer := "EMPTY"
+	if s := p.String(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+
+	p.Push(NewPoint(1, 2))
+	answer = "LINESTRING(1 2)"
+	if s := p.String(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+
+	p.Push(NewPoint(3, 4))
+	answer = "LINESTRING(1 2, 3 4)"
+	if s := p.String(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+}

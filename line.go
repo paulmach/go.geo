@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -276,4 +277,10 @@ func (l *Line) A() *Point {
 // B returns a pointer to the second point in the line.
 func (l *Line) B() *Point {
 	return &l.b
+}
+
+// String returns a string representation of the line.
+// The format is WKT, e.g.LINESTRING(30 10, 10 30)
+func (l *Line) String() string {
+	return fmt.Sprintf("LINESTRING(%g %g, %g %g)", l.a[0], l.a[1], l.b[0], l.b[1])
 }

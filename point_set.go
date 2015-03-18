@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 )
@@ -189,16 +190,35 @@ func (ps PointSet) Length() int {
 
 // Equals compares two point sets. Returns true if lengths are the same
 // and all points are Equal
-func (ps *PointSet) Equals(pointSet *PointSet) bool {
-	if (*ps).Length() != (*pointSet).Length() {
+func (ps PointSet) Equals(pointSet *PointSet) bool {
+	if (ps).Length() != (*pointSet).Length() {
 		return false
 	}
 
-	for i, v := range *ps {
+	for i, v := range ps {
 		if !v.Equals((*pointSet).GetAt(i)) {
 			return false
 		}
 	}
 
 	return true
+}
+
+// String returns a string representation of the path.
+// The format is WKT, e.g.MULTIPOINT(30 10, 10 30, 40 40)
+// For empty paths the result will be 'EMPTY'.
+func (ps PointSet) String() string {
+	if len(ps) == 0 {
+		return "EMPTY"
+	}
+
+	buff := bytes.NewBuffer(nil)
+	fmt.Fprintf(buff, "MULTIPOINT(%g %g", ps[0][0], ps[0][1])
+
+	for i := 1; i < len(ps); i++ {
+		fmt.Fprintf(buff, ", %g %g", ps[i][0], ps[i][1])
+	}
+
+	buff.Write([]byte(")"))
+	return buff.String()
 }
