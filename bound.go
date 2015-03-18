@@ -331,20 +331,20 @@ func (b *Bound) Clone() *Bound {
 	return NewBoundFromPoints(b.sw, b.ne)
 }
 
-// String returns the string respentation of the bound in the form,
-// [[west, east], [south, north]]
-func (b *Bound) String() string {
-	return fmt.Sprintf("[[%f, %f], [%f, %f]]", b.sw.X(), b.ne.X(), b.sw.Y(), b.ne.Y())
+// ToLine returns a Line from the southwest corner to the northeast.
+func (b *Bound) ToLine() *Line {
+	return NewLine(b.sw, b.ne)
 }
 
-// ToMysqlPolygon converts the bound into a polygon to be used in a MySQL spacial query.
-func (b *Bound) ToMysqlPolygon() string {
+// String returns the string respentation of the bound in WKT format.
+// POLYGON(west, south, west, north, east, north, east, south, west, south)
+func (b *Bound) String() string {
 	// west, south, west, north, east, north, east, south, west, south
-	return fmt.Sprintf("POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))", b.sw[0], b.sw[1], b.sw[0], b.ne[1], b.ne[0], b.ne[1], b.ne[0], b.sw[1], b.sw[0], b.sw[1])
+	return fmt.Sprintf("POLYGON((%g %g, %g %g, %g %g, %g %g, %g %g))", b.sw[0], b.sw[1], b.sw[0], b.ne[1], b.ne[0], b.ne[1], b.ne[0], b.sw[1], b.sw[0], b.sw[1])
 }
 
 // ToMysqlIntersectsCondition returns a condition defining the intersection
 // of the column and the bound. To be used in a MySQL query.
 func (b *Bound) ToMysqlIntersectsCondition(column string) string {
-	return fmt.Sprintf("INTERSECTS(%s, GEOMFROMTEXT('%s'))", column, b.ToMysqlPolygon())
+	return fmt.Sprintf("INTERSECTS(%s, GEOMFROMTEXT('%s'))", column, b.String())
 }
