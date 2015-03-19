@@ -1,17 +1,12 @@
 go.geo
 ======
 
-Go.geo is a geometry/geography library in [Go](http://golang.org). Its purpose is to allow for
-basic point, line and path operations on the server side or while scripting. The primary use
-case being GIS geometry manipulation on the server side vs. in the browser using javascript.
+Go.geo is a geometry/geography library in [Go](http://golang.org). The primary use
+case is GIS geometry manipulation on the server side vs. in the browser using javascript.
 This may be motivated by memory, computation time or data privacy constraints.
 All objects are defined in a 2D context.
 
-#### To install
-	
-	go get github.com/paulmach/go.geo
-
-#### To use, imports as package name `geo`:
+#### Imports as package name `geo`:
 
 	import "github.com/paulmach/go.geo"
 
@@ -32,8 +27,8 @@ All objects are defined in a 2D context.
 * **Line** represents the shortest distance between two points in Euclidean space.
 	In many cases the path object is more useful.
 
-* **PointSet** represents a set of points.
-	with methods such as GeoDistanceFrom and GeoCentroid.
+* **PointSet** represents a set of points 
+	with methods such as `DistanceFrom()` and `Centroid()`.
 
 * **Path** is an extention of PointSet with methods for working with a polyline.
 	Functions for converting to/from
@@ -41,15 +36,6 @@ All objects are defined in a 2D context.
 * **Bound** represents a rectangular 2D area defined by North, South, East, West values.
 	Computable for Line and Path objects, used by the Surface object.
 * **Surface** is used to assign values to points in a 2D area, such as elevation.
-
-### Reducers
-
-The reducers sub-package includes implementations for 
-[Douglas-Peucker](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm),
-[Visvalingam](http://bost.ocks.org/mike/simplify/) 
-and
-[Radial](http://psimpl.sourceforge.net/radial-distance.html) 
-polyline reduction algorithms. See the [reducers godoc](http://godoc.org/github.com/paulmach/go.geo/reducers) for more information.
 
 ## Library conventions
 
@@ -61,7 +47,7 @@ For example:
 	p.SetX(10).Add(geo.NewPoint(10, 10))
 	p.Equals(geo.NewPoint(20, 10))  // == true
 
-If you want to create a copy, all objects support the `Clone` method.
+If you want to create a copy, all objects support the `Clone()` method.
 
 	p1 := geo.NewPoint(10, 10)
 	p2 := p1.SetY(20)
@@ -70,9 +56,58 @@ If you want to create a copy, all objects support the `Clone` method.
 	p2 := p1.Clone().SetY(30)
 	p1.Equals(p2) // == false
 
-These conventions put extra load on the programmer,
+These conventions put a little extra load on the programmer,
 but tests showed that making a copy every time was significantly slower.
-So, **remember to explicitly Clone() your objects**.
+Similar conventions are found in the [math/big](https://golang.org/pkg/math/big/)
+package of the Golang standard library.
+
+### Databases, WKT and WKB
+
+To make it easy to get and set data from spatial databases, all geometries support direct 
+[scanning](https://golang.org/pkg/database/sql/#Scanner) of query results.
+However, they must be retrieved in WKB format using functions such as
+PostGIS' [ST_AsBinary](http://postgis.net/docs/ST_AsBinary.html).
+
+For example, this query from a Postgres/PostGIS database:
+
+	row := db.QueryRow("SELECT ST_AsBinary(point_column) FROM postgis_table")
+
+	var p *geo.Point
+	row.Scan(&p)
+
+For MySQL, Geometry data is stored as SRID+WKB and the library detects and works with
+this prefixed WKB data. So fetching spatial data from a MySQL database is even simpler:
+
+	row := db.QueryRow("SELECT point_column FROM mysql_table")
+
+	var p *geo.Point
+	row.Scan(&p)
+
+Inserts and updates can be made using the `.ToWKT()` methods. For example:
+
+	db.Exec("INSERT INTO mysql_table (point_column) VALUES (GeomFromText(?))", p.ToWKT())
+
+This has been tested using MySQL 5.5, MySQL 5.6 and PostGIS 2.0 using the
+Point, LineString, MultiPoint and Polygon 2d spatial data types. 
+
+### Reducers
+
+The reducers sub-package includes implementations for 
+[Douglas-Peucker](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm),
+[Visvalingam](http://bost.ocks.org/mike/simplify/) 
+and
+[Radial](http://psimpl.sourceforge.net/radial-distance.html) 
+polyline reduction algorithms. See the [reducers godoc](http://godoc.org/github.com/paulmach/go.geo/reducers) for more information.
+
+### GeoJSON
+
+All geometries support `.ToGeoJSON()` that return [*geojson.Feature](https://github.com/paulmach/go.geojson)
+objects with the correct sub-geometry. For example:
+
+	feature := path.ToGeoJSON()
+	feature.SetProperty("type", "road")
+
+	encodedJSON, _ := features.MarshalJSON()
 
 ## Examples
 
@@ -99,7 +134,7 @@ of exported functions. Below are a few usage examples.
 ### Encode/Decode polyline path
 
 	// lng/lat data, in this case, is encoded at 6 decimal place precision
-	path := geo.Decode("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
+	path := geo.NewPathFromEncoding("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
 	
 	// reduce using the Douglas Peucker line reducer from the reducers sub-package.
 	// Note the threshold distance is in the coordinates of the points,
