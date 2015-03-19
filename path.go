@@ -610,7 +610,7 @@ func (p *Path) String() string {
 	fmt.Fprintf(buff, "LINESTRING(%g %g", p.PointSet[0][0], p.PointSet[0][1])
 
 	for i := 1; i < len(p.PointSet); i++ {
-		fmt.Fprintf(buff, ", %g %g", p.PointSet[i][0], p.PointSet[i][1])
+		fmt.Fprintf(buff, ",%g %g", p.PointSet[i][0], p.PointSet[i][1])
 	}
 
 	buff.Write([]byte(")"))

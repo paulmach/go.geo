@@ -293,5 +293,5 @@ func (l *Line) ToGeoJSON() *geojson.Feature {
 // String returns a string representation of the line.
 // The format is WKT, e.g.LINESTRING(30 10, 10 30)
 func (l *Line) String() string {
-	return fmt.Sprintf("LINESTRING(%g %g, %g %g)", l.a[0], l.a[1], l.b[0], l.b[1])
+	return fmt.Sprintf("LINESTRING(%g %g,%g %g)", l.a[0], l.a[1], l.b[0], l.b[1])
 }

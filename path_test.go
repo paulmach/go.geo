@@ -617,7 +617,7 @@ func TestPathString(t *testing.T) {
 	}
 
 	p.Push(NewPoint(3, 4))
-	answer = "LINESTRING(1 2, 3 4)"
+	answer = "LINESTRING(1 2,3 4)"
 	if s := p.String(); s != answer {
 		t.Errorf("path, string expected %s, got %s", answer, s)
 	}

@@ -328,7 +328,7 @@ func TestPointSetString(t *testing.T) {
 	}
 
 	ps.Push(NewPoint(3, 4))
-	answer = "MULTIPOINT(1 2, 3 4)"
+	answer = "MULTIPOINT(1 2,3 4)"
 	if s := ps.String(); s != answer {
 		t.Errorf("pointset, string expected %s, got %s", answer, s)
 	}

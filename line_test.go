@@ -389,7 +389,7 @@ func TestLineToGeoJSON(t *testing.T) {
 func TestLineString(t *testing.T) {
 	l := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 
-	answer := "LINESTRING(1 2, 3 4)"
+	answer := "LINESTRING(1 2,3 4)"
 	if s := l.String(); s != answer {
 		t.Errorf("line, string expected %s, got %s", answer, s)
 	}
