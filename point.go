@@ -309,6 +309,11 @@ func (p Point) ToGeoJSON() *geojson.Feature {
 	return geojson.NewPointFeature([]float64{p[0], p[1]})
 }
 
+// ToWKT returns the point in WKT format, eg. POINT(30.5 10.5)
+func (p Point) ToWKT() string {
+	return p.String()
+}
+
 // String returns a string representation of the point.
 // The format is WKT, e.g. POINT(30.5 10.5)
 func (p Point) String() string {

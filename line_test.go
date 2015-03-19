@@ -386,6 +386,15 @@ func TestLineToGeoJSON(t *testing.T) {
 	}
 }
 
+func TestLineToWKT(t *testing.T) {
+	l := NewLine(NewPoint(1, 2), NewPoint(3, 4))
+
+	answer := "LINESTRING(1 2,3 4)"
+	if s := l.ToWKT(); s != answer {
+		t.Errorf("line, string expected %s, got %s", answer, s)
+	}
+}
+
 func TestLineString(t *testing.T) {
 	l := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 

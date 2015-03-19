@@ -602,6 +602,27 @@ func TestPathToGeoJSON(t *testing.T) {
 	}
 }
 
+func TestPathToWKT(t *testing.T) {
+	p := NewPath()
+
+	answer := "EMPTY"
+	if s := p.ToWKT(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+
+	p.Push(NewPoint(1, 2))
+	answer = "LINESTRING(1 2)"
+	if s := p.ToWKT(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+
+	p.Push(NewPoint(3, 4))
+	answer = "LINESTRING(1 2,3 4)"
+	if s := p.ToWKT(); s != answer {
+		t.Errorf("path, string expected %s, got %s", answer, s)
+	}
+}
+
 func TestPathString(t *testing.T) {
 	p := NewPath()
 

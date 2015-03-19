@@ -367,6 +367,15 @@ func TestPointToGeoJSON(t *testing.T) {
 	}
 }
 
+func TestPointToWKT(t *testing.T) {
+	p := NewPoint(1, 2.5)
+
+	answer := "POINT(1 2.5)"
+	if s := p.ToWKT(); s != answer {
+		t.Errorf("point, string expected %s, got %s", answer, s)
+	}
+}
+
 func TestPointString(t *testing.T) {
 	p := NewPoint(1, 2.5)
 

@@ -237,8 +237,14 @@ func (ps PointSet) ToGeoJSON() *geojson.Feature {
 	return f
 }
 
+// ToWKT returns the point set in WKT format,
+// eg. MULTIPOINT(30 10, 10 30, 40 40)
+func (ps PointSet) ToWKT() string {
+	return ps.String()
+}
+
 // String returns a string representation of the path.
-// The format is WKT, e.g.MULTIPOINT(30 10, 10 30, 40 40)
+// The format is WKT, e.g. MULTIPOINT(30 10,10 30,40 40)
 // For empty paths the result will be 'EMPTY'.
 func (ps PointSet) String() string {
 	if len(ps) == 0 {

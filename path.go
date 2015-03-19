@@ -598,8 +598,14 @@ func (p *Path) ToGeoJSON() *geojson.Feature {
 	return geojson.NewLineStringFeature(coords)
 }
 
+// ToWKT returns the path in WKT format, eg. LINESTRING(30 10,10 30,40 40)
+// For empty paths the result will be 'EMPTY'.
+func (p *Path) ToWKT() string {
+	return p.String()
+}
+
 // String returns a string representation of the path.
-// The format is WKT, e.g.LINESTRING(30 10, 10 30, 40 40)
+// The format is WKT, e.g. LINESTRING(30 10,10 30,40 40)
 // For empty paths the result will be 'EMPTY'.
 func (p *Path) String() string {
 	if len(p.PointSet) == 0 {

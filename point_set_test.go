@@ -313,6 +313,27 @@ func TestPointSetToGeoJSON(t *testing.T) {
 	}
 }
 
+func TestPointSetToWKT(t *testing.T) {
+	ps := NewPointSet()
+
+	answer := "EMPTY"
+	if s := ps.ToWKT(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
+	}
+
+	ps.Push(NewPoint(1, 2))
+	answer = "MULTIPOINT(1 2)"
+	if s := ps.ToWKT(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
+	}
+
+	ps.Push(NewPoint(3, 4))
+	answer = "MULTIPOINT(1 2,3 4)"
+	if s := ps.ToWKT(); s != answer {
+		t.Errorf("pointset, string expected %s, got %s", answer, s)
+	}
+}
+
 func TestPointSetString(t *testing.T) {
 	ps := NewPointSet()
 
