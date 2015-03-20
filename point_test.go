@@ -262,8 +262,7 @@ func TestPointGeoHash(t *testing.T) {
 	}
 
 	for _, c := range citiesGeoHash {
-		GeoHashPrecision = len(c[2].(string))
-		hash := NewPoint(c[1].(float64), c[0].(float64)).GeoHash()
+		hash := NewPoint(c[1].(float64), c[0].(float64)).GeoHash(len(c[2].(string)))
 		if hash != c[2].(string) {
 			t.Errorf("point, geohash expected %s, got %s", c[2].(string), hash)
 		}

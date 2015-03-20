@@ -144,18 +144,23 @@ const base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
 
 // GeoHash returns the geohash string of a point representing a lng/lat location.
 // The resulting hash will be `GeoHashPrecision` characters long, default is 12.
-func (p *Point) GeoHash() string {
+// Optionally one can include their required number of chars precision.
+func (p *Point) GeoHash(chars ...int) string {
+	precision := GeoHashPrecision
+	if len(chars) > 0 {
+		precision = chars[0]
+	}
 
 	// 15 must be greater than GeoHashPrecision. If not, panic!!
 	var result [15]byte
 
-	hash := p.GeoHashInt64(5 * GeoHashPrecision)
-	for i := 1; i <= GeoHashPrecision; i++ {
-		result[GeoHashPrecision-i] = byte(base32[hash&0x1F])
+	hash := p.GeoHashInt64(5 * precision)
+	for i := 1; i <= precision; i++ {
+		result[precision-i] = byte(base32[hash&0x1F])
 		hash >>= 5
 	}
 
-	return string(result[:GeoHashPrecision])
+	return string(result[:precision])
 }
 
 // GeoHashInt64 returns the integer version of the geohash
