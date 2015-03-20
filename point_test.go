@@ -139,7 +139,16 @@ func TestPointSquaredDistanceFrom(t *testing.T) {
 }
 
 func TestPointGeoDistanceFrom(t *testing.T) {
-	// TODO: implement this test
+	p1 := NewPoint(-1.8444, 53.1506)
+	p2 := NewPoint(0.1406, 52.2047)
+
+	if d := p1.GeoDistanceFrom(p2, true); math.Abs(d-170389.801924) > epsilon {
+		t.Errorf("incorrect geodistance, got %v", d)
+	}
+
+	if d := p1.GeoDistanceFrom(p2, false); math.Abs(d-170400.503437) > epsilon {
+		t.Errorf("incorrect geodistance, got %v", d)
+	}
 }
 
 func TestPointBearingTo(t *testing.T) {
@@ -163,6 +172,13 @@ func TestPointBearingTo(t *testing.T) {
 
 	if d := p2.BearingTo(p1); d != -90 {
 		t.Errorf("point, bearingTo expected -90, got %f", d)
+	}
+
+	p1 = NewPoint(-1.8444, 53.1506)
+	p2 = NewPoint(0.1406, 52.2047)
+
+	if d := p1.BearingTo(p2); math.Abs(127.373351-d) > epsilon {
+		t.Errorf("point, bearingTo got %f", d)
 	}
 }
 
@@ -232,7 +248,7 @@ func TestPointScale(t *testing.T) {
 	}
 }
 
-func TestDot(t *testing.T) {
+func TestPointDot(t *testing.T) {
 	p1 := NewPoint(0, 0)
 
 	p2 := NewPoint(1, 2)

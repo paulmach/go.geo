@@ -319,6 +319,16 @@ func TestLineMidpoint(t *testing.T) {
 	}
 }
 
+func TestLineGeoMidpoint(t *testing.T) {
+	var answer *Point
+	l := NewLine(NewPoint(-1.8444, 53.1506), NewPoint(0.1406, 52.2047))
+
+	answer = NewPoint(-0.8519, 52.67765)
+	if p := l.Midpoint(); !p.Equals(answer) {
+		t.Errorf("line, geomidpoint expected %v, got %v", answer, p)
+	}
+}
+
 func TestLineBound(t *testing.T) {
 	var answer *Bound
 	a := NewPoint(1, 2)

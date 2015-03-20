@@ -100,7 +100,7 @@ func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 }
 
 // BearingTo computes the direction one must start traveling on earth
-// to be heading to the given point. WARNING: untested
+// to be heading to the given point.
 func (p *Point) BearingTo(point *Point) float64 {
 	dLng := deg2rad(point.Lng() - p.Lng())
 

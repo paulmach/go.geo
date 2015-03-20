@@ -226,7 +226,6 @@ func (l *Line) Midpoint() *Point {
 }
 
 // GeoMidpoint returns the half-way point along a great circle path between the two points.
-// WARNING: untested
 func (l *Line) GeoMidpoint() *Point {
 	p := &Point{}
 
