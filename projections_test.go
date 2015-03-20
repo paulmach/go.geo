@@ -215,8 +215,7 @@ func TestScalarMercator(t *testing.T) {
 	}
 
 	// specific case
-	ScalarMercator.Level = 20
-	if x, y := ScalarMercator.Project(-87.65005229999997, 41.850033); x != 268988 || y != 389836 {
+	if x, y := ScalarMercator.Project(-87.65005229999997, 41.850033, 20); x != 268988 || y != 389836 {
 		t.Errorf("Scalar Mercator, projection incorrect, got %d %d", x, y)
 	}
 
@@ -233,7 +232,7 @@ func TestScalarMercator(t *testing.T) {
 		p.SetLat(city[0])
 		p.SetLng(city[1])
 
-		x, y := ScalarMercator.Project(p.Lng(), p.Lat())
+		x, y := ScalarMercator.Project(p.Lng(), p.Lat(), 31)
 		lng, lat := ScalarMercator.Inverse(x, y)
 
 		p.SetLat(lat)

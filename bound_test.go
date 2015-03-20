@@ -67,23 +67,26 @@ func TestGeoBoundAroundPoint(t *testing.T) {
 func TestNewBoundFromMapTile(t *testing.T) {
 	bound := NewBoundFromMapTile(7, 8, 9)
 
+	level := uint64(9 + 5) // we're testing point +5 zoom, in same tile
+	factor := uint64(5)
+
 	// edges should be within the bounds
-	lng, lat := ScalarMercator.Inverse(7<<(ScalarMercator.Level-9)+1, 8<<(ScalarMercator.Level-9)+1)
+	lng, lat := ScalarMercator.Inverse(7<<factor+1, 8<<factor+1, level)
 	if !bound.Contains(NewPoint(lng, lat)) {
 		t.Errorf("bound, should contain point")
 	}
 
-	lng, lat = ScalarMercator.Inverse(7<<(ScalarMercator.Level-9)-1, 8<<(ScalarMercator.Level-9)-1)
+	lng, lat = ScalarMercator.Inverse(7<<factor-1, 8<<factor-1, level)
 	if bound.Contains(NewPoint(lng, lat)) {
 		t.Errorf("bound, should not contain point")
 	}
 
-	lng, lat = ScalarMercator.Inverse(8<<(ScalarMercator.Level-9)-1, 9<<(ScalarMercator.Level-9)-1)
+	lng, lat = ScalarMercator.Inverse(8<<factor-1, 9<<factor-1, level)
 	if !bound.Contains(NewPoint(lng, lat)) {
 		t.Errorf("bound, should contain point")
 	}
 
-	lng, lat = ScalarMercator.Inverse(8<<(ScalarMercator.Level-9)+1, 9<<(ScalarMercator.Level-9)+1)
+	lng, lat = ScalarMercator.Inverse(8<<factor+1, 9<<factor+1, level)
 	if bound.Contains(NewPoint(lng, lat)) {
 		t.Errorf("bound, should not contain point")
 	}

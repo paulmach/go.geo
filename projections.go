@@ -100,22 +100,30 @@ var TransverseMercator = Projection{
 }
 
 // ScalarMercator converts from lng/lat float64 to x,y uint64.
-// This is similar to Google's world coordinates.
+// This is the same as Google's world coordinates.
 var ScalarMercator struct {
 	Level   uint64
-	Project func(lng, lat float64) (x, y uint64)
-	Inverse func(x, y uint64) (lng, lat float64)
+	Project func(lng, lat float64, level ...uint64) (x, y uint64)
+	Inverse func(x, y uint64, level ...uint64) (lng, lat float64)
 }
 
 func init() {
 	ScalarMercator.Level = 31
 
-	ScalarMercator.Project = func(lng, lat float64) (x, y uint64) {
-		return scalarMercatorProject(lng, lat, ScalarMercator.Level)
+	ScalarMercator.Project = func(lng, lat float64, level ...uint64) (x, y uint64) {
+		l := ScalarMercator.Level
+		if len(level) != 0 {
+			l = level[0]
+		}
+		return scalarMercatorProject(lng, lat, l)
 	}
 
-	ScalarMercator.Inverse = func(x, y uint64) (lng, lat float64) {
-		return scalarMercatorInverse(x, y, ScalarMercator.Level)
+	ScalarMercator.Inverse = func(x, y uint64, level ...uint64) (lng, lat float64) {
+		l := ScalarMercator.Level
+		if len(level) != 0 {
+			l = level[0]
+		}
+		return scalarMercatorInverse(x, y, l)
 	}
 }
 
@@ -126,7 +134,7 @@ func scalarMercatorProject(lng, lat float64, level uint64) (x, y uint64) {
 	maxtiles := float64(factor)
 
 	lng = lng/360.0 + 0.5
-	x = (uint64)(lng * maxtiles)
+	x = uint64(lng * maxtiles)
 
 	// bound it because we have a top of the world problem
 	siny := math.Sin(lat * math.Pi / 180.0)
@@ -139,7 +147,7 @@ func scalarMercatorProject(lng, lat float64, level uint64) (x, y uint64) {
 		y = factor - 1
 	} else {
 		lat = 0.5 + 0.5*math.Log((1.0+siny)/(1.0-siny))/(-2*math.Pi)
-		y = (uint64)(lat * maxtiles)
+		y = uint64(lat * maxtiles)
 	}
 
 	return
