@@ -29,10 +29,10 @@ func ExamplePointClustering() {
 	}
 	// Output:
 	// cluster 1:
-	//    &{Location:[1.000000, 1.000000]}
-	//    &{Location:[2.000000, 2.000000]}
+	//    &{Location:POINT(1 1)}
+	//    &{Location:POINT(2 2)}
 	// cluster 2:
-	//    &{Location:[5.000000, 5.000000]}
+	//    &{Location:POINT(5 5)}
 }
 
 func ExampleGeoPointClustering() {
@@ -59,13 +59,13 @@ func ExampleGeoPointClustering() {
 	}
 	// Output:
 	// cluster 1:
-	//    &{Location:[-122.548081, 37.905995]}
+	//    &{Location:POINT(-122.548081 37.905995)}
 	// cluster 2:
-	//    &{Location:[-122.548091, 37.905987]}
+	//    &{Location:POINT(-122.548091 37.905987)}
 	// cluster 3:
-	//    &{Location:[-122.548070, 37.905995]}
-	//    &{Location:[-122.548070, 37.905995]}
-	//    &{Location:[-122.548070, 37.905987]}
+	//    &{Location:POINT(-122.54807 37.905995)}
+	//    &{Location:POINT(-122.54807 37.905995)}
+	//    &{Location:POINT(-122.54807 37.905987)}
 }
 
 // example of an object implementing the point_clusting.Pointer interface
