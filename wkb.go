@@ -70,6 +70,7 @@ func NewPathFromWKB(wkb []byte) *Path {
 // point structs to be passed into rows.Scan(...interface{})
 // The column must be of type Point and must be fetched in WKB format.
 // Will attempt to parse MySQL's SRID+WKB format if the data is of the right size.
+// If the column is empty (not null) an empty point (0, 0) will be returned.
 func (p *Point) Scan(value interface{}) error {
 	data, ok := value.([]byte)
 	if !ok {
@@ -86,6 +87,12 @@ func (p *Point) Scan(value interface{}) error {
 		// However, could be a line string or multipoint with only one point.
 		// But those would be invalid for parsing a point.
 		return p.unmarshalWKB(data[4:])
+	}
+
+	if len(data) == 0 {
+		// empty data, return empty go struct which in this case
+		// would be [0,0]
+		return nil
 	}
 
 	return ErrIncorrectGeometry
@@ -116,6 +123,7 @@ func (p *Point) unmarshalWKB(data []byte) error {
 // The column must be of type LineString and contain 2 points,
 // or an error will be returned. Data must be fetched in WKB format.
 // Will attempt to parse MySQL's SRID+WKB format if the data is of the right size.
+// If the column is empty (not null) an empty line [(0, 0), (0, 0)] will be returned.
 func (l *Line) Scan(value interface{}) error {
 	data, ok := value.([]byte)
 	if !ok {
@@ -132,6 +140,10 @@ func (l *Line) Scan(value interface{}) error {
 		// However, could be some encoding of another type.
 		// But those would be invalid for parsing a line.
 		return l.unmarshalWKB(data[4:])
+	}
+
+	if len(data) == 0 {
+		return nil
 	}
 
 	return ErrIncorrectGeometry
@@ -170,10 +182,15 @@ func (l *Line) unmarshalWKB(data []byte) error {
 // or an error will be returned. Data must be fetched in WKB format.
 // Will attempt to parse MySQL's SRID+WKB format if obviously no WKB
 // or parsing as WKB fails.
+// If the column is empty (not null) an empty point set will be returned.
 func (ps *PointSet) Scan(value interface{}) error {
 	data, ok := value.([]byte)
 	if !ok {
 		return ErrUnsupportedDataType
+	}
+
+	if len(data) == 0 {
+		return nil
 	}
 
 	if len(data) < 6 {
@@ -228,6 +245,7 @@ func (ps *PointSet) unmarshalWKB(data []byte) error {
 // or an error will be returned. Data must be fetched in WKB format.
 // Will attempt to parse MySQL's SRID+WKB format if obviously no WKB
 // or parsing as WKB fails.
+// If the column is empty (not null) an empty path will be returned.
 func (p *Path) Scan(value interface{}) error {
 	return p.PointSet.Scan(value)
 }
