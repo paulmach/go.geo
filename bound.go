@@ -310,6 +310,46 @@ func (b *Bound) NorthWest() *Point {
 	return newP
 }
 
+// North returns the top of the bound.
+func (b *Bound) North() float64 {
+	return b.ne[1]
+}
+
+// South returns the bottom of the bound.
+func (b *Bound) South() float64 {
+	return b.sw[1]
+}
+
+// East returns the right of the bound.
+func (b *Bound) East() float64 {
+	return b.ne[0]
+}
+
+// West returns the left of the bound.
+func (b *Bound) West() float64 {
+	return b.sw[0]
+}
+
+// Top returns the north side of the bound.
+func (b *Bound) Top() float64 {
+	return b.ne[1]
+}
+
+// Bottom returns the south side of the bound.
+func (b *Bound) Bottom() float64 {
+	return b.sw[1]
+}
+
+// Right returns the east side of the bound.
+func (b *Bound) Right() float64 {
+	return b.ne[0]
+}
+
+// Left returns the west side of the bound.
+func (b *Bound) Left() float64 {
+	return b.sw[0]
+}
+
 // Empty returns true if it contains zero area or if
 // it's in some malformed negative state where the left point is larger than the right.
 // This can be caused by Padding too much negative.

@@ -287,6 +287,59 @@ func TestBoundEquals(t *testing.T) {
 	}
 }
 
+func TestBoundSides(t *testing.T) {
+	// NewBound(west, east, south, north)
+	b := NewBound(1, 2, 3, 4)
+
+	if v := b.North(); v != 4 {
+		t.Errorf("incorrect north value, got %v", v)
+	}
+
+	if v := b.South(); v != 3 {
+		t.Errorf("incorrect south value, got %v", v)
+	}
+
+	if v := b.East(); v != 2 {
+		t.Errorf("incorrect east value, got %v", v)
+	}
+
+	if v := b.West(); v != 1 {
+		t.Errorf("incorrect west value, got %v", v)
+	}
+
+	if b.SouthWest().Lng() != b.West() {
+		t.Errorf("west value incorrect")
+	}
+
+	if b.SouthWest().Lat() != b.South() {
+		t.Errorf("south value incorrect")
+	}
+
+	if b.NorthEast().Lng() != b.East() {
+		t.Errorf("east value incorrect")
+	}
+
+	if b.NorthEast().Lat() != b.North() {
+		t.Errorf("north value incorrect")
+	}
+
+	if b.SouthWest().Lng() != b.Left() {
+		t.Errorf("left value incorrect")
+	}
+
+	if b.SouthWest().Lat() != b.Bottom() {
+		t.Errorf("bottom value incorrect")
+	}
+
+	if b.NorthEast().Lng() != b.Right() {
+		t.Errorf("right value incorrect")
+	}
+
+	if b.NorthEast().Lat() != b.Top() {
+		t.Errorf("top value incorrect")
+	}
+}
+
 func TestBoundEmpty(t *testing.T) {
 	bound := NewBound(1, 2, 3, 4)
 	if bound.Empty() {
