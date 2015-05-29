@@ -172,7 +172,7 @@ func TestSurfaceJSON(t *testing.T) {
 		}
 		for j := 0; j < 3; j++ {
 			if s1.Grid[i][j] != s2.Grid[i][j] {
-				t.Errorf("grid values incorrect, expected %d, got %d", s1.Grid[i][j], s2.Grid[i][j])
+				t.Errorf("grid values incorrect, expected %f, got %f", s1.Grid[i][j], s2.Grid[i][j])
 			}
 		}
 	}
