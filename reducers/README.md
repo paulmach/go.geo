@@ -48,7 +48,7 @@ Usage:
 -----------------------------
 
 See Mike Bostock's explanation for 
-[algorithm details](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm).
+[algorithm details](http://bost.ocks.org/mike/simplify/).
 
 Usage: 
 
