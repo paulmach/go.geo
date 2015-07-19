@@ -49,6 +49,35 @@ func (ps PointSet) Centroid() *Point {
 	return &Point{x / numPoints, y / numPoints}
 }
 
+// GeoCentroid uses a more advanced algorithm to compute the centroid of points
+// on the earth's surface. The points are first projected into 3D space then
+// averaged. The result is projected back onto the sphere. This method is about
+// 6x slower than the Centroid function, which may be adequate for some datasets.
+// NOTE: Points with longitude outside the standard -180:180 range will be remapped to
+// within the range. The result will always have longitude between -180 and 180 degrees.
+func (ps PointSet) GeoCentroid() *Point {
+
+	// Implementation sourced from Geolib
+	// https://github.com/manuelbieh/Geolib/blob/74593bf93f9a99d5ce7e6bcefa367c5a78f5321b/src/geolib.js#L416
+	var x, y, z float64
+
+	for _, p := range ps {
+		lngSin, lngCos := math.Sincos(deg2rad(p[0]))
+		latSin, latCos := math.Sincos(deg2rad(p[1]))
+
+		x += latCos * lngCos
+		y += latCos * lngSin
+		z += latSin
+	}
+
+	np := float64(len(ps))
+	x /= np
+	y /= np
+	z /= np
+
+	return NewPoint(rad2deg(math.Atan2(y, x)), rad2deg(math.Atan2(z, math.Sqrt(x*x+y*y))))
+}
+
 // DistanceFrom returns the minimum euclidean distance from the point set.
 func (ps PointSet) DistanceFrom(point *Point) (float64, int) {
 	dist := math.Inf(1)
