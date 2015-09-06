@@ -116,7 +116,12 @@ func (l *Line) Project(point *Point) float64 {
 
 	dx := l.b[0] - l.a[0]
 	dy := l.b[1] - l.a[1]
-	return ((point[0]-l.a[0])*dx + (point[1]-l.a[1])*dy) / (dx*dx + dy*dy)
+	d := (dx*dx + dy*dy)
+	if d == 0 {
+		return 0
+	}
+
+	return ((point[0]-l.a[0])*dx + (point[1]-l.a[1])*dy) / d
 }
 
 // Measure returns the distance along the line to the point nearest the given point.

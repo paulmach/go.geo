@@ -127,6 +127,14 @@ func TestLineProject(t *testing.T) {
 	if proj != expected {
 		t.Errorf("line, project expected %v == %v", proj, expected)
 	}
+
+	// line of length 0
+	l3 := NewLine(NewPoint(1, 1), NewPoint(1, 1))
+	proj = l3.Project(NewPoint(1, 2))
+	expected = 0.0
+	if proj != expected {
+		t.Errorf("line, project expected %v == %v", proj, expected)
+	}
 }
 
 func TestLineMeasure(t *testing.T) {
