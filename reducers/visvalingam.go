@@ -90,25 +90,27 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 	heap.Push(linkedListStart)
 
 	// internal path items
+	items := make([]visItem, numPoints, numPoints)
+
 	previous := linkedListStart
 	for i := 1; i < numPoints-1; i++ {
-		current := &visItem{
-			area:       doubleTriangleArea(&points[i-1], &points[i], &points[i+1]),
-			pointIndex: i,
-			previous:   previous,
-		}
+		item := &items[i]
 
-		heap.Push(current)
-		previous.next = current
-		previous = current
+		item.area = doubleTriangleArea(&points[i-1], &points[i], &points[i+1])
+		item.pointIndex = i
+		item.previous = previous
+
+		heap.Push(item)
+		previous.next = item
+		previous = item
 	}
 
 	// final item
-	endItem := &visItem{
-		area:       math.Inf(1),
-		pointIndex: numPoints - 1,
-		previous:   previous,
-	}
+	endItem := &items[numPoints-1]
+	endItem.area = math.Inf(1)
+	endItem.pointIndex = numPoints - 1
+	endItem.previous = previous
+
 	previous.next = endItem
 	heap.Push(endItem)
 
