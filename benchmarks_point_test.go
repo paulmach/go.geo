@@ -92,9 +92,14 @@ func BenchmarkPointEquals(b *testing.B) {
 func BenchmarkPointClone(b *testing.B) {
 	p := geo.NewPoint(5, 6)
 
+	// added so go1.5+ won't optimize out the whole loop
+	var r *geo.Point
+
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		p.Clone()
+		r = p.Clone()
 	}
+
+	_ = r
 }

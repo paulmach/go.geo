@@ -1,10 +1,6 @@
-package reducers_test
+package reducers
 
-import (
-	"testing"
-
-	reducers "."
-)
+import "testing"
 
 func TestRadialBenchmarkData(t *testing.T) {
 	type reduceTest struct {
@@ -24,7 +20,7 @@ func TestRadialBenchmarkData(t *testing.T) {
 	}
 	path := benchmarkData()
 	for i := range tests {
-		p := reducers.Radial(path, tests[i].Threshold)
+		p := Radial(path, tests[i].Threshold)
 		if p.Length() != tests[i].Length {
 			t.Errorf("radial benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
 		}
@@ -37,7 +33,7 @@ func BenchmarkRadial(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		reducers.Radial(path, 0.1)
+		Radial(path, 0.1)
 	}
 }
 
@@ -47,6 +43,6 @@ func BenchmarkRadialIndexMap(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		reducers.RadialIndexMap(path, 0.1)
+		RadialIndexMap(path, 0.1)
 	}
 }

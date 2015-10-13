@@ -1,10 +1,6 @@
-package reducers_test
+package reducers
 
-import (
-	"testing"
-
-	reducers "."
-)
+import "testing"
 
 func TestVisvalingamBenchmarkData(t *testing.T) {
 	type reduceTest struct {
@@ -24,7 +20,7 @@ func TestVisvalingamBenchmarkData(t *testing.T) {
 	}
 	path := benchmarkData()
 	for i := range tests {
-		p := reducers.VisvalingamThreshold(path, tests[i].Threshold)
+		p := VisvalingamThreshold(path, tests[i].Threshold)
 		if p.Length() != tests[i].Length {
 			t.Errorf("visvalingam benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
 		}
@@ -37,7 +33,7 @@ func BenchmarkVisvalingamThreshold(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		reducers.VisvalingamThreshold(path, 0.1)
+		VisvalingamThreshold(path, 0.1)
 	}
 }
 
@@ -48,6 +44,6 @@ func BenchmarkVisvalingamKeep(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		reducers.VisvalingamKeep(path, toKeep)
+		VisvalingamKeep(path, toKeep)
 	}
 }

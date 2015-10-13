@@ -121,6 +121,7 @@ func TestClusterGeoClusters(t *testing.T) {
 func BenchmarkClusterClusters(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cs := ClusterClusters(clusters, CentroidGeoDistance{}, 30)
@@ -135,6 +136,7 @@ func BenchmarkClusterClusters(b *testing.B) {
 func BenchmarkClusterPointers(b *testing.B) {
 	_, pointers := loadPrefilteredTestClusters(b)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cs := ClusterPointers(pointers, CentroidGeoDistance{}, 30)
@@ -149,6 +151,7 @@ func BenchmarkClusterPointers(b *testing.B) {
 func BenchmarkClusterGeoClusters(b *testing.B) {
 	clusters, _ := loadPrefilteredTestClusters(b)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cs := ClusterGeoClusters(clusters, 30)
@@ -170,6 +173,7 @@ func BenchmarkInitClusterDistances(b *testing.B) {
 	factor := geo.MercatorScaleFactor(bound.Center().Lat())
 	threshold := 30 * 30 * factor * factor
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		initClusterDistances(clusters, CentroidSquaredDistance{}, threshold)
