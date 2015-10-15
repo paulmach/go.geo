@@ -24,6 +24,11 @@ func NewPoint(x, y float64) *Point {
 	return &Point{x, y}
 }
 
+// NewPointFromLatLng creates a new point from latlng
+func NewPointFromLatLng(lat, lng float64) *Point {
+	return &Point{lng, lat}
+}
+
 // NewPointFromQuadkey creates a new point from a quadkey.
 // See http://msdn.microsoft.com/en-us/library/bb259689.aspx for more information
 // about this coordinate system.
