@@ -8,7 +8,9 @@ All objects are defined in a 2D context.
 
 #### Imports as package name `geo`:
 
-	import "github.com/paulmach/go.geo"
+```go
+import "github.com/paulmach/go.geo"
+```
 
 <br />
 [![Build Status](https://travis-ci.org/paulmach/go.geo.png?branch=master)](https://travis-ci.org/paulmach/go.geo)
@@ -43,18 +45,22 @@ There are two big conventions that developers should be aware of:
 **functions are chainable** and **operations modify the original object.**
 For example:
 
-	p := geo.NewPoint(0, 0)
-	p.SetX(10).Add(geo.NewPoint(10, 10))
-	p.Equals(geo.NewPoint(20, 10))  // == true
+```go
+p := geo.NewPoint(0, 0)
+p.SetX(10).Add(geo.NewPoint(10, 10))
+p.Equals(geo.NewPoint(20, 10))  // == true
+```
 
 If you want to create a copy, all objects support the `Clone()` method.
 
-	p1 := geo.NewPoint(10, 10)
-	p2 := p1.SetY(20)
-	p1.Equals(p2) // == true, in this case p1 and p2 point to the same memory
+```go
+p1 := geo.NewPoint(10, 10)
+p2 := p1.SetY(20)
+p1.Equals(p2) // == true, in this case p1 and p2 point to the same memory
 
-	p2 := p1.Clone().SetY(30)
-	p1.Equals(p2) // == false
+p2 := p1.Clone().SetY(30)
+p1.Equals(p2) // == false
+```
 
 These conventions put a little extra load on the programmer,
 but tests showed that making a copy every time was significantly slower.
@@ -70,22 +76,28 @@ PostGIS' [ST_AsBinary](http://postgis.net/docs/ST_AsBinary.html).
 
 For example, this query from a Postgres/PostGIS database:
 
-	row := db.QueryRow("SELECT ST_AsBinary(point_column) FROM postgis_table")
+```go
+row := db.QueryRow("SELECT ST_AsBinary(point_column) FROM postgis_table")
 
-	var p *geo.Point
-	row.Scan(&p)
+var p *geo.Point
+row.Scan(&p)
+```
 
 For MySQL, Geometry data is stored as SRID+WKB and the library detects and works with
 this prefixed WKB data. So fetching spatial data from a MySQL database is even simpler:
 
-	row := db.QueryRow("SELECT point_column FROM mysql_table")
+```go
+row := db.QueryRow("SELECT point_column FROM mysql_table")
 
-	var p *geo.Point
-	row.Scan(&p)
+var p *geo.Point
+row.Scan(&p)
+```
 
 Inserts and updates can be made using the `.ToWKT()` methods. For example:
 
-	db.Exec("INSERT INTO mysql_table (point_column) VALUES (GeomFromText(?))", p.ToWKT())
+```go
+db.Exec("INSERT INTO mysql_table (point_column) VALUES (GeomFromText(?))", p.ToWKT())
+```
 
 This has been tested using MySQL 5.5, MySQL 5.6 and PostGIS 2.0 using the
 Point, LineString, MultiPoint and Polygon 2d spatial data types. 
@@ -104,10 +116,12 @@ polyline reduction algorithms. See the [reducers godoc](http://godoc.org/github.
 All geometries support `.ToGeoJSON()` that return [*geojson.Feature](https://github.com/paulmach/go.geojson)
 objects with the correct sub-geometry. For example:
 
-	feature := path.ToGeoJSON()
-	feature.SetProperty("type", "road")
+```go
+feature := path.ToGeoJSON()
+feature.SetProperty("type", "road")
 
-	encodedJSON, _ := features.MarshalJSON()
+encodedJSON, _ := features.MarshalJSON()
+```
 
 ## Examples
 
@@ -116,73 +130,81 @@ of exported functions. Below are a few usage examples.
 
 ### Projections
 
-	lnglatPoint := geo.NewPoint(-122.4167, 37.7833)
+```go
+lnglatPoint := geo.NewPoint(-122.4167, 37.7833)
 
-	// Mercator, EPSG:3857
-	mercator := geo.Mercator.Project(latlngPoint)
-	backToLnglat := geo.Mercator.Inverse(mercator)
+// Mercator, EPSG:3857
+mercator := geo.Mercator.Project(latlngPoint)
+backToLnglat := geo.Mercator.Inverse(mercator)
 
-	// ScalarMercator or Google World Coordinates
-	tileX, TileY := geo.ScalarMercator.Project(latlngPoint.Lng(), latlngPoint.Lat())
-	tileZ := geo.ScalarMercator.Level
+// ScalarMercator or Google World Coordinates
+tileX, TileY := geo.ScalarMercator.Project(latlngPoint.Lng(), latlngPoint.Lat())
+tileZ := geo.ScalarMercator.Level
 
-	// level 16 tile the point is in
-	tileX >>= (geo.ScalarMercator.Level - 16)
-	tileY >>= (geo.ScalarMercator.Level - 16)
-	tileZ = 16
+// level 16 tile the point is in
+tileX >>= (geo.ScalarMercator.Level - 16)
+tileY >>= (geo.ScalarMercator.Level - 16)
+tileZ = 16
+```
 
 ### Encode/Decode polyline path
 
-	// lng/lat data, in this case, is encoded at 6 decimal place precision
-	path := geo.NewPathFromEncoding("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
-	
-	// reduce using the Douglas Peucker line reducer from the reducers sub-package.
-	// Note the threshold distance is in the coordinates of the points,
-	// which in this case is degrees.
-	reducedPath := reducers.DouglasPeucker(path, 1.0e-5)
-	
-	// encode with the default/typical 5 decimal place precision
-	encodedString := reducedPath.Encode() 
+```go
+// lng/lat data, in this case, is encoded at 6 decimal place precision
+path := geo.NewPathFromEncoding("smsqgAtkxvhFwf@{zCeZeYdh@{t@}BiAmu@sSqg@cjE", 1e6)
 
-	// encode as json [[lng1,lat1],[lng2, lat2],...]
-	// using encoding/json from the standard library.
-	encodedJSON, err := json.Marshal(reducedPath)
+// reduce using the Douglas Peucker line reducer from the reducers sub-package.
+// Note the threshold distance is in the coordinates of the points,
+// which in this case is degrees.
+reducedPath := reducers.DouglasPeucker(path, 1.0e-5)
+
+// encode with the default/typical 5 decimal place precision
+encodedString := reducedPath.Encode() 
+
+// encode as json [[lng1,lat1],[lng2, lat2],...]
+// using encoding/json from the standard library.
+encodedJSON, err := json.Marshal(reducedPath)
+```
 
 ### Path, line intersection
 
-	path := geo.NewPath()
-	path.Push(geo.NewPoint(0, 0))
-	path.Push(geo.NewPoint(1, 1))
+```go
+path := geo.NewPath()
+path.Push(geo.NewPoint(0, 0))
+path.Push(geo.NewPoint(1, 1))
 
-	line := geo.NewLine(geo.NewPoint(0, 1), geo.NewPoint(1, 0))
+line := geo.NewLine(geo.NewPoint(0, 1), geo.NewPoint(1, 0))
 
-	// intersects does a simpler check for yes/no
-	if path.Intersects(line) {
-		// intersection will return the actual points and places on intersection
-		points, segments := path.Intersection(line)
+// intersects does a simpler check for yes/no
+if path.Intersects(line) {
+	// intersection will return the actual points and places on intersection
+	points, segments := path.Intersection(line)
 
-		for i, _ := range points {
-			log.Printf("Intersection %d at %v with path segment %d", i, points[i], segments[i][0])
-		}
+	for i, _ := range points {
+		log.Printf("Intersection %d at %v with path segment %d", i, points[i], segments[i][0])
 	}
+}
+```
 
 ## Surface
 
 A surface object is defined by a bound (lng/lat georegion for example) and a width and height 
 defining the number of discrete points in the bound. This allows for access such as:
 
-	surface.Grid[x][y]         // the value at a location in the grid
-	surface.GetPoint(x, y)     // the point, which will be in the space as surface.bound,
-	                           // corresponding to surface.Grid[x][y]
-	surface.ValueAt(*Point)    // the bi-linearly interpolated grid value for any point in the bounds
-	surface.GradientAt(*Point) // the gradient of the surface a any point in the bounds,
-	                           // returns a point object which should be treated as a vector
+```go
+surface.Grid[x][y]         // the value at a location in the grid
+surface.GetPoint(x, y)     // the point, which will be in the space as surface.bound,
+                           // corresponding to surface.Grid[x][y]
+surface.ValueAt(*Point)    // the bi-linearly interpolated grid value for any point in the bounds
+surface.GradientAt(*Point) // the gradient of the surface a any point in the bounds,
+                           // returns a point object which should be treated as a vector
+```
 
 A couple things about how the bound area is discretized in the grid:
  
-* **surface.Grid[0][0]**
+* `surface.Grid[0][0]`
 	corresponds to the surface.Bound.SouthWest() location, or bottom left corner or the bound
-* **surface.Grid[0][surface.Height-1]**
+* `surface.Grid[0][surface.Height-1]`
 	corresponds to the surface.Bound.NorthWest() location,
 	the extreme points in the grid are on the edges of the bound
 
@@ -196,38 +218,41 @@ like [slide](https://github.com/paulmach/slide) for example.
 Thus, performance is very important. Included are a good set of benchmarks covering
 the core functions and efforts have been made to optimize them. Recent improvements:
 
-	                                      old         new        delta
-	BenchmarkPointDistanceFrom             8.16        5.91      -27.57%
-	BenchmarkPointSquaredDistanceFrom      1.63        1.62       -0.61%
-	BenchmarkPointQuadKey                271         265          -2.21%
-	BenchmarkPointQuadKeyString         2888         522         -81.93%
-	BenchmarkPointGeoHash                302         308           1.99%
-	BenchmarkPointGeoHashInt64           165         158          -4.24%
-	BenchmarkPointNormalize               22.3        17.6       -21.08%
-	BenchmarkPointEquals                   1.65        1.29      -21.82%
-	BenchmarkPointClone                    7.46        0.97      -87.00%
+```
+                                      old         new        delta
+BenchmarkPointDistanceFrom             8.16        5.91      -27.57%
+BenchmarkPointSquaredDistanceFrom      1.63        1.62       -0.61%
+BenchmarkPointQuadKey                271         265          -2.21%
+BenchmarkPointQuadKeyString         2888         522         -81.93%
+BenchmarkPointGeoHash                302         308           1.99%
+BenchmarkPointGeoHashInt64           165         158          -4.24%
+BenchmarkPointNormalize               22.3        17.6       -21.08%
+BenchmarkPointEquals                   1.65        1.29      -21.82%
+BenchmarkPointClone                    7.46        0.97      -87.00%
 
-	BenchmarkLineDistanceFrom             15.5        13.2       -14.84%
-	BenchmarkLineSquaredDistanceFrom       9.3         9.24       -0.65%
-	BenchmarkLineProject                   8.75        8.73       -0.23%
-	BenchmarkLineMeasure                  21.3        20          -6.10%
-	BenchmarkLineInterpolate              44.9        44.6        -0.67%
-	BenchmarkLineMidpoint                 47.2         5.13      -89.13%
-	BenchmarkLineEquals                    9.38       10.4        10.87%
-	BenchmarkLineClone                    70.5         3.26      -95.38%
+BenchmarkLineDistanceFrom             15.5        13.2       -14.84%
+BenchmarkLineSquaredDistanceFrom       9.3         9.24       -0.65%
+BenchmarkLineProject                   8.75        8.73       -0.23%
+BenchmarkLineMeasure                  21.3        20          -6.10%
+BenchmarkLineInterpolate              44.9        44.6        -0.67%
+BenchmarkLineMidpoint                 47.2         5.13      -89.13%
+BenchmarkLineEquals                    9.38       10.4        10.87%
+BenchmarkLineClone                    70.5         3.26      -95.38%
 
-	BenchmarkPathDistanceFrom           6190        4662         -24.68%
-	BenchmarkPathSquaredDistanceFrom    5076        4625          -8.88%
-	BenchmarkPathMeasure               10080        7626         -24.35%
-	BenchmarkPathResampleToMorePoints  69380       17255         -75.13%
-	BenchmarkPathResampleToLessPoints  26093        6780         -74.02%
-
+BenchmarkPathDistanceFrom           6190        4662         -24.68%
+BenchmarkPathSquaredDistanceFrom    5076        4625          -8.88%
+BenchmarkPathMeasure               10080        7626         -24.35%
+BenchmarkPathResampleToMorePoints  69380       17255         -75.13%
+BenchmarkPathResampleToLessPoints  26093        6780         -74.02%
+```
 
 Units are Nanoseconds per Operation and run using Golang 1.3.1 on a 2012 Macbook Air with a 2GHz Intel Core i7 processor.
 The old version corresponds to a commit on [Sept. 22, 2014](https://github.com/paulmach/go.geo/tree/984bc95cceb5e8fd7c3b8e9fdb0b2066207790e5) and the new version corresponds to a commit on [Sept 24, 2014](https://github.com/paulmach/go.geo/tree/9eb57f27bd88cdb2c1c96e058fafc74bb9aeaffb). These benchmarks can be run using: 
 
-	go get github.com/paulmach/go.geo
-	go test github.com/paulmach/go.geo -bench .
+```
+go get github.com/paulmach/go.geo
+go test github.com/paulmach/go.geo -bench .
+```
 
 ## Projects making use of this package
 
