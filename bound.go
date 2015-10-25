@@ -273,7 +273,7 @@ func (b *Bound) Width() float64 {
 }
 
 // GeoHeight returns the approximate height in meters.
-// Only applies if the data is Lng/Lat degrees.
+// Only applies if the data is Lng/Lat degrees (EPSG:4326).
 func (b *Bound) GeoHeight() float64 {
 	return 111131.75 * b.Height()
 }
@@ -352,7 +352,7 @@ func (b *Bound) Left() float64 {
 
 // Empty returns true if it contains zero area or if
 // it's in some malformed negative state where the left point is larger than the right.
-// This can be caused by Padding too much negative.
+// This can be caused by padding too much negative.
 func (b *Bound) Empty() bool {
 	return b.sw.X() >= b.ne.X() || b.sw.Y() >= b.ne.Y()
 }

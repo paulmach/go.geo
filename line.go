@@ -125,7 +125,7 @@ func (l *Line) Project(point *Point) float64 {
 }
 
 // Measure returns the distance along the line to the point nearest the given point.
-// Treats the line as a line segment such that is the nearest point is an endpoint of the line,
+// Treats the line as a line segment such that if the nearest point is an endpoint of the line,
 // the function will return 0 or 1 as appropriate.
 func (l *Line) Measure(point *Point) float64 {
 	projFactor := l.Project(point)

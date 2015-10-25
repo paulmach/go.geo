@@ -14,12 +14,12 @@ type Path struct {
 	PointSet
 }
 
-// NewPath simply creates a new path.
+// NewPath creates a new path.
 func NewPath() *Path {
 	return NewPathPreallocate(0, 100)
 }
 
-// NewPathPreallocate simply creates a new path with points array of the given size.
+// NewPathPreallocate creates a new path with points array of the given size.
 func NewPathPreallocate(length, capacity int) *Path {
 	return &Path{PointSet(*NewPointSetPreallocate(length, capacity))}
 }
@@ -100,7 +100,7 @@ func NewPathFromYXData(data [][2]float64) *Path {
 
 // NewPathFromXYSlice creates a path from a slice of []float64 values.
 // The first two elements are taken to be horizontal and vertical components of each point respectively.
-// The rest of the elements of the slide are ignored. Nil slices are skipped.
+// The rest of the elements of the slice are ignored. Nil slices are skipped.
 func NewPathFromXYSlice(data [][]float64) *Path {
 	p := NewPathPreallocate(0, len(data))
 
@@ -115,7 +115,7 @@ func NewPathFromXYSlice(data [][]float64) *Path {
 
 // NewPathFromYXSlice creates a path from a slice of []float64 values.
 // The first two elements are taken to be vertical and horizontal components of each point respectively.
-// The rest of the elements of the slide are ignored. Nil slices are skipped.
+// The rest of the elements of the slice are ignored. Nil slices are skipped.
 func NewPathFromYXSlice(data [][]float64) *Path {
 	p := NewPathPreallocate(0, len(data))
 
@@ -135,7 +135,7 @@ func (p *Path) SetPoints(points []Point) *Path {
 	return p
 }
 
-// Points returns the raw points storred with the path
+// Points returns the raw points storred with the path.
 // Note the output is an array of Points (not pointers to points).
 func (p *Path) Points() []Point {
 	return p.PointSet
@@ -508,7 +508,7 @@ func (p *Path) IntersectsLine(line *Line) bool {
 	return false
 }
 
-// Bound returns a bound around the path. Simply uses rectangular coordinates.
+// Bound returns a bound around the path. Uses rectangular coordinates.
 func (p *Path) Bound() *Bound {
 	if len(p.PointSet) == 0 {
 		return NewBound(0, 0, 0, 0)
@@ -538,7 +538,7 @@ func (p *Path) SetAt(index int, point *Point) *Path {
 	return p
 }
 
-// GetAt returns the pointer to the Point in the page.
+// GetAt returns the pointer to the Point in the path.
 // This function is good for modifying values in place.
 // Returns nil if index is out of range.
 func (p *Path) GetAt(i int) *Point {
