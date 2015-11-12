@@ -211,17 +211,15 @@ func (b *Bound) Contains(point *Point) bool {
 // Intersects determines if two bounds intersect.
 // Returns true if they are touching.
 func (b *Bound) Intersects(bound *Bound) bool {
-	if bound.Contains(b.sw) || bound.Contains(b.ne) ||
-		bound.Contains(b.SouthEast()) || bound.Contains(b.NorthWest()) {
-		return true
+
+	if (b.ne[0] < bound.sw[0]) ||
+		(b.sw[0] > bound.ne[0]) ||
+		(b.ne[1] < bound.sw[1]) ||
+		(b.sw[1] > bound.ne[1]) {
+		return false
 	}
 
-	// now check the completely inside case, only one condition required
-	if b.Contains(bound.sw) {
-		return true
-	}
-
-	return false
+	return true
 }
 
 // Center returns the center of the bound.

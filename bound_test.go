@@ -194,6 +194,20 @@ func TestBoundIntersects(t *testing.T) {
 	if !bound.Intersects(tester) {
 		t.Errorf("bound, intersects expected %v, to intersect %v", tester, bound)
 	}
+
+	a := NewBound(7, 8, 6, 7)
+	b := NewBound(6.1, 8.1, 6.1, 8.1)
+
+	if !a.Intersects(b) || !b.Intersects(a) {
+		t.Errorf("bound, expected to intersect")
+	}
+
+	a = NewBound(1, 4, 2, 3)
+	b = NewBound(2, 3, 1, 4)
+
+	if !a.Intersects(b) || !b.Intersects(a) {
+		t.Errorf("bound, expected to intersect")
+	}
 }
 
 func TestBoundCenter(t *testing.T) {
