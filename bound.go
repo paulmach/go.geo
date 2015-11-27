@@ -166,6 +166,15 @@ func geoHashInt2ranges(hash int64, bits int) (float64, float64, float64, float64
 	return lngMin, lngMax, latMin, latMax
 }
 
+// Set allows for the modification of the bound values in place.
+func (b *Bound) Set(west, east, south, north float64) {
+	b.sw[0] = west
+	b.sw[1] = south
+
+	b.ne[0] = east
+	b.ne[1] = north
+}
+
 // Extend grows the bound to include the new point.
 func (b *Bound) Extend(point *Point) *Bound {
 

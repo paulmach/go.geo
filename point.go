@@ -64,6 +64,11 @@ func NewPointFromGeoHashInt64(hash int64, bits int) *Point {
 	return NewPoint((west+east)/2.0, (north+south)/2.0)
 }
 
+// Point, so point implements the pointer interface on itself.
+func (p *Point) Point() *Point {
+	return p
+}
+
 // Transform applies a given projection or inverse projection to the current point.
 func (p *Point) Transform(projector Projector) *Point {
 	projector(p)

@@ -1,8 +1,6 @@
 package geo
 
-import (
-	"math"
-)
+import "math"
 
 var epsilon = 1e-6
 
