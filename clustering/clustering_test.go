@@ -11,9 +11,9 @@ import (
 
 func TestClusteringClusterClusters(t *testing.T) {
 	preclusters, pointers := loadPrefilteredTestClusters(t)
-	bound := geo.NewBoundFromPoints(pointers[0].CenterPoint(), pointers[1].CenterPoint())
+	bound := geo.NewBoundFromPoints(pointers[0].Point(), pointers[1].Point())
 	for _, p := range pointers {
-		bound.Extend(p.CenterPoint())
+		bound.Extend(p.Point())
 	}
 	bound.GeoPad(1) // for round off
 
@@ -49,8 +49,8 @@ func TestClusteringClusterClusters(t *testing.T) {
 		}
 
 		for _, pointer := range c.Pointers {
-			if !bound.Contains(pointer.CenterPoint()) {
-				t.Errorf("pointer must at least be within original bound, got %v", pointer.CenterPoint())
+			if !bound.Contains(pointer.Point()) {
+				t.Errorf("pointer must at least be within original bound, got %v", pointer.Point())
 			}
 		}
 	}
@@ -58,9 +58,9 @@ func TestClusteringClusterClusters(t *testing.T) {
 
 func TestClusterGeoClusters(t *testing.T) {
 	preclusters, pointers := loadPrefilteredTestClusters(t)
-	bound := geo.NewBoundFromPoints(pointers[0].CenterPoint(), pointers[1].CenterPoint())
+	bound := geo.NewBoundFromPoints(pointers[0].Point(), pointers[1].Point())
 	for _, p := range pointers {
-		bound.Extend(p.CenterPoint())
+		bound.Extend(p.Point())
 	}
 	bound.GeoPad(1) // for projection loop round off
 
@@ -96,8 +96,8 @@ func TestClusterGeoClusters(t *testing.T) {
 		}
 
 		for _, pointer := range c.Pointers {
-			if !bound.Contains(pointer.CenterPoint()) {
-				t.Errorf("pointer must at least be within original bound, got %v", pointer.CenterPoint())
+			if !bound.Contains(pointer.Point()) {
+				t.Errorf("pointer must at least be within original bound, got %v", pointer.Point())
 			}
 		}
 	}
@@ -109,8 +109,8 @@ func TestClusterGeoClusters(t *testing.T) {
 		}
 
 		for _, pointer := range c.Pointers {
-			if !bound.Contains(pointer.CenterPoint()) {
-				t.Errorf("pointer must at least be within original bound, got %v", pointer.CenterPoint())
+			if !bound.Contains(pointer.Point()) {
+				t.Errorf("pointer must at least be within original bound, got %v", pointer.Point())
 			}
 		}
 	}
@@ -180,7 +180,7 @@ func BenchmarkInitClusterDistances(b *testing.B) {
 	}
 }
 
-func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []Pointer) {
+func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []geo.Pointer) {
 	f, err := os.Open("testdata/prefiltered.json.gz")
 	if err != nil {
 		tb.Fatalf("unable to open test file %v", err)
@@ -201,7 +201,7 @@ func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []Pointer) {
 
 	var clusters []*Cluster
 	for _, s := range sets {
-		var pointers []Pointer
+		var pointers []geo.Pointer
 		for _, p := range s {
 			pointers = append(pointers, &event{Location: p})
 		}
@@ -209,7 +209,7 @@ func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []Pointer) {
 		clusters = append(clusters, NewCluster(pointers...))
 	}
 
-	var pointers []Pointer
+	var pointers []geo.Pointer
 	for _, c := range clusters {
 		pointers = append(pointers, c.Pointers...)
 	}
@@ -221,6 +221,6 @@ type event struct {
 	Location *geo.Point
 }
 
-func (e *event) CenterPoint() *geo.Point {
+func (e *event) Point() *geo.Point {
 	return e.Location
 }

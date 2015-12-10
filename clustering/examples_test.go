@@ -8,7 +8,7 @@ import (
 )
 
 func ExamplePointClustering() {
-	pointers := []clustering.Pointer{
+	pointers := []geo.Pointer{
 		&Event{Location: geo.NewPoint(1, 1)},
 		&Event{Location: geo.NewPoint(2, 2)},
 		&Event{Location: geo.NewPoint(5, 5)},
@@ -36,7 +36,7 @@ func ExamplePointClustering() {
 }
 
 func ExampleGeoPointClustering() {
-	pointers := []clustering.Pointer{
+	pointers := []geo.Pointer{
 		&Event{Location: geo.NewPoint(-122.548081, 37.905995)},
 		&Event{Location: geo.NewPoint(-122.548091, 37.905987)},
 		&Event{Location: geo.NewPoint(-122.54807, 37.905995)},
@@ -73,6 +73,6 @@ type Event struct {
 	Location *geo.Point
 }
 
-func (e *Event) CenterPoint() *geo.Point {
+func (e *Event) Point() *geo.Point {
 	return e.Location
 }

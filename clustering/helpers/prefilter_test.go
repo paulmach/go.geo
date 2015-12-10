@@ -59,7 +59,7 @@ func BenchmarkPrefilteredGeoProjectedClustering(b *testing.B) {
 	}
 }
 
-func loadTestPointers(tb testing.TB) []clustering.Pointer {
+func loadTestPointers(tb testing.TB) []geo.Pointer {
 	f, err := os.Open("../testdata/points.csv.gz")
 	if err != nil {
 		tb.Fatalf("unable to open test file %v", err)
@@ -73,7 +73,7 @@ func loadTestPointers(tb testing.TB) []clustering.Pointer {
 	defer gzReader.Close()
 
 	// read in events
-	var pointers []clustering.Pointer
+	var pointers []geo.Pointer
 	scanner := bufio.NewScanner(gzReader)
 	for scanner.Scan() {
 		parts := strings.Split(scanner.Text(), ",")

@@ -3,6 +3,7 @@ package helpers
 import (
 	"math"
 
+	"github.com/paulmach/go.geo"
 	"github.com/paulmach/go.geo/clustering"
 )
 
@@ -11,7 +12,7 @@ import (
 // Will return a new list.
 func RematchPointersToClusters(
 	clusters []*clustering.Cluster,
-	pointers []clustering.Pointer,
+	pointers []geo.Pointer,
 	distancer clustering.ClusterDistancer,
 	threshold float64,
 ) []*clustering.Cluster {

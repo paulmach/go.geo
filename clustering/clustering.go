@@ -8,7 +8,7 @@ import (
 
 // ClusterPointers will take a set of Pointers and cluster them using
 // the distancer and threshold.
-func ClusterPointers(pointers []Pointer, distancer ClusterDistancer, threshold float64) []*Cluster {
+func ClusterPointers(pointers []geo.Pointer, distancer ClusterDistancer, threshold float64) []*Cluster {
 	clusters := make([]*Cluster, 0, len(pointers))
 	for _, p := range pointers {
 		clusters = append(clusters, NewCluster(p))
@@ -61,7 +61,7 @@ func cluster(clusters []*Cluster, distancer ClusterDistancer, threshold float64)
 // It will project the points using mercator, scale the threshold, cluster, and project back.
 // Performace is about 40% than simply using a geo distancer.
 // This may not make sense for all geo datasets.
-func ClusterGeoPointers(pointers []Pointer, threshold float64) []*Cluster {
+func ClusterGeoPointers(pointers []geo.Pointer, threshold float64) []*Cluster {
 	clusters := make([]*Cluster, 0, len(pointers))
 	for _, p := range pointers {
 		clusters = append(clusters, NewCluster(p))
@@ -184,7 +184,7 @@ func clusterClusters(
 		}
 
 		// merge these two
-		clusters[lower] = CombineClusters(clusters[lower], clusters[higher])
+		clusters[lower].merge(clusters[higher])
 		s.ResetDistances(lower, higher)
 		clusters[higher] = nil
 
