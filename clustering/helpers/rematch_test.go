@@ -8,7 +8,7 @@ import (
 )
 
 func TestRematchPointersToClusters(t *testing.T) {
-	c := RematchPointersToClusters([]*clustering.Cluster{}, []clustering.Pointer{}, clustering.CentroidGeoDistance{}, 30)
+	c := RematchPointersToClusters([]*clustering.Cluster{}, []geo.Pointer{}, clustering.CentroidGeoDistance{}, 30)
 	if c == nil {
 		t.Errorf("result should not be nil")
 	}
@@ -22,7 +22,7 @@ func TestRematchPointersToClusters(t *testing.T) {
 		clustering.NewClusterWithCentroid(geo.NewPoint(2, 2)),
 	}
 
-	testPointers := []clustering.Pointer{
+	testPointers := []geo.Pointer{
 		&event{Location: geo.NewPoint(1, 1)},
 		&event{Location: geo.NewPoint(1, 1)},
 		&event{Location: geo.NewPoint(2, 2)},

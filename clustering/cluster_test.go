@@ -21,7 +21,7 @@ func TestNewCluster(t *testing.T) {
 	// one pointer
 	c1 = NewCluster(&event{Location: geo.NewPoint(1, 0)})
 
-	if c1.Centroid == c1.Pointers[0].CenterPoint() {
+	if c1.Centroid == c1.Pointers[0].Point() {
 		t.Errorf("should make a copy for center point")
 	}
 
@@ -67,7 +67,7 @@ func TestCombineClusters(t *testing.T) {
 	c1 := NewCluster(&event{Location: geo.NewPoint(1, 0)})
 	c2 := NewCluster(&event{Location: geo.NewPoint(2, 1)})
 
-	c1 = CombineClusters(c1, c2)
+	c1.merge(c2)
 	if !c1.Centroid.Equals(geo.NewPoint(1.5, 0.5)) {
 		t.Errorf("centroid not adjusted correctly, got %v", c1.Centroid)
 	}
@@ -77,7 +77,7 @@ func TestCombineClusters(t *testing.T) {
 	}
 
 	c3 := NewCluster(&event{Location: geo.NewPoint(3, 2)})
-	c1 = CombineClusters(c1, c3)
+	c1.merge(c3)
 	if !c1.Centroid.Equals(geo.NewPoint(2.0, 1.0)) {
 		t.Errorf("centroid not adjusted correctly, got %v", c1.Centroid)
 	}

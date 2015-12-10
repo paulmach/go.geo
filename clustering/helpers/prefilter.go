@@ -1,14 +1,17 @@
 package helpers
 
-import "github.com/paulmach/go.geo/clustering"
+import (
+	"github.com/paulmach/go.geo"
+	"github.com/paulmach/go.geo/clustering"
+)
 
 // RemoveOutlierPointersByQuadkey will bucket all pointers by quad key (defined by the level)
 // and remove the buckets with less than threshold pointers. The buckets become the resulting point_clustering.Clusters.
-func RemoveOutlierPointersByQuadkey(pointers []clustering.Pointer, level, threshold int) []*clustering.Cluster {
+func RemoveOutlierPointersByQuadkey(pointers []geo.Pointer, level, threshold int) []*clustering.Cluster {
 
-	buckets := make(map[int64][]clustering.Pointer)
+	buckets := make(map[int64][]geo.Pointer)
 	for _, p := range pointers {
-		key := p.CenterPoint().Quadkey(level)
+		key := p.Point().Quadkey(level)
 
 		buckets[key] = append(buckets[key], p)
 	}
