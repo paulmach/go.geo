@@ -64,7 +64,7 @@ func NewPointFromGeoHashInt64(hash int64, bits int) *Point {
 	return NewPoint((west+east)/2.0, (north+south)/2.0)
 }
 
-// Point, so point implements the pointer interface on itself.
+// Point returns itself, so it implements the pointer interface.
 func (p *Point) Point() *Point {
 	return p
 }
