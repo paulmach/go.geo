@@ -199,9 +199,7 @@ func (ps *PointSet) Scan(value interface{}) error {
 
 	// first byte of real WKB data indicates endian and should 1 or 0.
 	if data[0] == 0 || data[0] == 1 {
-		if err := ps.unmarshalWKB(data); err == nil {
-			return nil
-		}
+		return ps.unmarshalWKB(data)
 	}
 
 	return ps.unmarshalWKB(data[4:])
@@ -222,16 +220,28 @@ func (ps *PointSet) unmarshalWKB(data []byte) error {
 		return ErrIncorrectGeometry
 	}
 
-	length := int(scanUint32(data[5:9], littleEndian))
+	if typeCode == 3 {
+		// For polygons there is a ring count.
+		// We only allow one ring here.
+		rings := int(scanUint32(data[5:9], littleEndian))
+		if rings != 1 {
+			return ErrIncorrectGeometry
+		}
 
-	if len(data) != 9+16*length {
+		data = data[9:]
+	} else {
+		data = data[5:]
+	}
+
+	length := int(scanUint32(data[:4], littleEndian))
+	if len(data) != 4+16*length {
 		return ErrNotWKB
 	}
 
 	points := make([]Point, length, length)
 	for i := 0; i < length; i++ {
-		points[i][0] = scanFloat64(data[9+i*16:9+i*16+8], littleEndian)
-		points[i][1] = scanFloat64(data[9+i*16+8:9+i*16+16], littleEndian)
+		points[i][0] = scanFloat64(data[4+i*16:4+i*16+8], littleEndian)
+		points[i][1] = scanFloat64(data[4+i*16+8:4+i*16+16], littleEndian)
 	}
 
 	ps.SetPoints(points)
