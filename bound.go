@@ -12,7 +12,7 @@ type Bound struct {
 	sw, ne *Point
 }
 
-// NewBound creates a new bound given the paramters.
+// NewBound creates a new bound given the parameters.
 func NewBound(west, east, south, north float64) *Bound {
 	return &Bound{
 		sw: &Point{math.Min(east, west), math.Min(north, south)},
