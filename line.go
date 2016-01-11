@@ -289,8 +289,8 @@ func (l *Line) B() *Point {
 // containing the two points.
 func (l *Line) ToGeoJSON() *geojson.Feature {
 	return geojson.NewLineStringFeature([][]float64{
-		[]float64{l.a[0], l.a[1]},
-		[]float64{l.b[0], l.b[1]},
+		{l.a[0], l.a[1]},
+		{l.b[0], l.b[1]},
 	})
 }
 

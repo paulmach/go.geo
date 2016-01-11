@@ -16,14 +16,14 @@ func TestDouglasPeuckerBenchmarkData(t *testing.T) {
 	}
 
 	tests := []reduceTest{
-		reduceTest{0.1, 1118},
-		reduceTest{0.5, 257},
-		reduceTest{1.0, 144},
-		reduceTest{1.5, 95},
-		reduceTest{2.0, 71},
-		reduceTest{3.0, 46},
-		reduceTest{4.0, 39},
-		reduceTest{5.0, 33},
+		{0.1, 1118},
+		{0.5, 257},
+		{1.0, 144},
+		{1.5, 95},
+		{2.0, 71},
+		{3.0, 46},
+		{4.0, 39},
+		{5.0, 33},
 	}
 	path := benchmarkData()
 	for i := range tests {

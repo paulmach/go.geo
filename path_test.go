@@ -54,8 +54,8 @@ func TestNewPathFromEncoding(t *testing.T) {
 
 func TestNewPathFromXYData(t *testing.T) {
 	data := [][2]float64{
-		[2]float64{1, 2},
-		[2]float64{3, 4},
+		{1, 2},
+		{3, 4},
 	}
 
 	p := NewPathFromXYData(data)
@@ -74,8 +74,8 @@ func TestNewPathFromXYData(t *testing.T) {
 
 func TestNewPathFromYXData(t *testing.T) {
 	data := [][2]float64{
-		[2]float64{1, 2},
-		[2]float64{3, 4},
+		{1, 2},
+		{3, 4},
 	}
 
 	p := NewPathFromYXData(data)
@@ -94,9 +94,9 @@ func TestNewPathFromYXData(t *testing.T) {
 
 func TestNewPathFromXYSlice(t *testing.T) {
 	data := [][]float64{
-		[]float64{1, 2, -1},
+		{1, 2, -1},
 		nil,
-		[]float64{3, 4},
+		{3, 4},
 	}
 
 	p := NewPathFromXYSlice(data)
@@ -115,8 +115,8 @@ func TestNewPathFromXYSlice(t *testing.T) {
 
 func TestNewPathFromYXSlice(t *testing.T) {
 	data := [][]float64{
-		[]float64{1, 2},
-		[]float64{3, 4, -1},
+		{1, 2},
+		{3, 4, -1},
 	}
 
 	p := NewPathFromYXSlice(data)
