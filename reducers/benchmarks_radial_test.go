@@ -9,14 +9,14 @@ func TestRadialBenchmarkData(t *testing.T) {
 	}
 
 	tests := []reduceTest{
-		reduceTest{0.1, 8282},
-		reduceTest{0.5, 2023},
-		reduceTest{1.0, 1043},
-		reduceTest{1.5, 703},
-		reduceTest{2.0, 527},
-		reduceTest{3.0, 350},
-		reduceTest{4.0, 262},
-		reduceTest{5.0, 209},
+		{0.1, 8282},
+		{0.5, 2023},
+		{1.0, 1043},
+		{1.5, 703},
+		{2.0, 527},
+		{3.0, 350},
+		{4.0, 262},
+		{5.0, 209},
 	}
 	path := benchmarkData()
 	for i := range tests {

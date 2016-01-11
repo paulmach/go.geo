@@ -41,15 +41,15 @@ func TestPointUnmarshalWKB(t *testing.T) {
 	}
 
 	tests := []testData{
-		testData{ // little endian
+		{ // little endian
 			x: -122.4546440212, y: 37.7382859071,
 			data: []byte{1, 1, 0, 0, 0, 15, 152, 60, 227, 24, 157, 94, 192, 205, 11, 17, 39, 128, 222, 66, 64},
 		},
-		testData{ // big endian
+		{ // big endian
 			x: -122.4546440212, y: 37.7382859071,
 			data: []byte{0, 0, 0, 0, 1, 192, 94, 157, 24, 227, 60, 152, 15, 64, 66, 222, 128, 39, 17, 11, 205},
 		},
-		testData{
+		{
 			x: -93.787988, y: 32.392335,
 			data: []byte{1, 1, 0, 0, 0, 253, 104, 56, 101, 110, 114, 87, 192, 192, 9, 133, 8, 56, 50, 64, 64},
 		},
@@ -124,11 +124,11 @@ func TestLineUnmarshalWKB(t *testing.T) {
 	}
 
 	tests := []testData{
-		testData{
+		{
 			line: NewLine(NewPoint(-123.016508, 38.040608), NewPoint(-122.670176, 38.548019)),
 			data: []byte{1, 2, 0, 0, 0, 2, 0, 0, 0, 213, 7, 146, 119, 14, 193, 94, 192, 93, 250, 151, 164, 50, 5, 67, 64, 26, 164, 224, 41, 228, 170, 94, 192, 22, 75, 145, 124, 37, 70, 67, 64},
 		},
-		testData{
+		{
 			line: NewLine(NewPoint(-72.796408, -45.407131), NewPoint(-72.688541, -45.384987)),
 			data: []byte{1, 2, 0, 0, 0, 2, 0, 0, 0, 117, 145, 66, 89, 248, 50, 82, 192, 9, 24, 93, 222, 28, 180, 70, 192, 33, 61, 69, 14, 17, 44, 82, 192, 77, 49, 7, 65, 71, 177, 70, 192},
 		},
@@ -193,7 +193,7 @@ func TestPathUnmarshalWKB(t *testing.T) {
 		Push(NewPoint(-93.78788, 32.39184)).Push(NewPoint(-93.78839, 32.39166)).Push(NewPoint(-93.78784, 32.39209))
 
 	tests := []testData{
-		testData{
+		{
 			path: path,
 			data: testPathWKB,
 		},
