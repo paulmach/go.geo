@@ -24,7 +24,7 @@ var minLongitude = deg2rad(-180)
 //MaxLongitude is the maxiumum possible longitude
 var maxLongitude = deg2rad(180)
 
-// GeoHashPrecision is the number of charactors of a encoded GeoHash.
+// GeoHashPrecision is the number of characters of a encoded GeoHash.
 var GeoHashPrecision = 12
 
 func yesHaversine(haversine []bool) bool {

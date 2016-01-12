@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleQuadtreeFind() {
-	r := rand.New(rand.NewSource(42)) // to make things reproducable
+	r := rand.New(rand.NewSource(42)) // to make things reproducible
 
 	qt := quadtree.New(geo.NewBound(0, 1, 0, 1))
 
@@ -26,7 +26,7 @@ func ExampleQuadtreeFind() {
 }
 
 func ExampleQuadtreeInBound() {
-	r := rand.New(rand.NewSource(52)) // to make things reproducable
+	r := rand.New(rand.NewSource(52)) // to make things reproducible
 
 	qt := quadtree.New(geo.NewBound(0, 1, 0, 1))
 

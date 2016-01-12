@@ -41,7 +41,7 @@ func cluster(clusters []*Cluster, distancer ClusterDistancer, threshold float64)
 
 	clusters, found := clusterClusters(
 		clusters,
-		// Default intialization, TODO: better bucketing/prefiltering will greatly increase performance.
+		// Default initialization, TODO: better bucketing/prefiltering will greatly increase performance.
 		initClusterDistances(clusters, distancer, threshold),
 		distancer,
 		threshold,
@@ -108,7 +108,7 @@ func geocluster(clusters []*Cluster, threshold float64) []*Cluster {
 
 	clusteredClusters, found := clusterClusters(
 		clusters,
-		// Default intialization, TODO: better bucketing/prefiltering will greatly increase performance.
+		// Default initialization, TODO: better bucketing/prefiltering will greatly increase performance.
 		// can use the bound above to help with this.
 		initClusterDistances(clusters, CentroidSquaredDistance{}, scaledThreshold),
 		CentroidSquaredDistance{},
