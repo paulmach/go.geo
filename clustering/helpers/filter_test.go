@@ -43,9 +43,9 @@ func TestFilterSmallClusters(t *testing.T) {
 }
 
 type event struct {
-	Location *geo.Point
+	Location geo.Point
 }
 
-func (e *event) Point() *geo.Point {
+func (e *event) Point() geo.Point {
 	return e.Location
 }

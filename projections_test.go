@@ -26,13 +26,13 @@ var cities = [][2]float64{
 
 func TestMercator(t *testing.T) {
 	for _, city := range cities {
-		p := &Point{}
+		p := Point{
+			city[1],
+			city[0],
+		}
 
-		p.SetLat(city[0])
-		p.SetLng(city[1])
-
-		Mercator.Project(p)
-		Mercator.Inverse(p)
+		p = Mercator.Project(p)
+		p = Mercator.Inverse(p)
 
 		if math.Abs(p.Lat()-city[0]) > epsilon {
 			t.Errorf("Mercator, latitude miss match: %f != %f", p.Lat(), city[0])
@@ -70,17 +70,17 @@ func TestTransverseMercator(t *testing.T) {
 	tested := 0
 
 	for _, city := range cities {
-		p := &Point{}
-
-		p.SetLat(city[0])
-		p.SetLng(city[1])
+		p := Point{
+			city[1],
+			city[0],
+		}
 
 		if math.Abs(p.Lng()) > 10 {
 			continue
 		}
 
-		TransverseMercator.Project(p)
-		TransverseMercator.Inverse(p)
+		p = TransverseMercator.Project(p)
+		p = TransverseMercator.Inverse(p)
 
 		if math.Abs(p.Lat()-city[0]) > epsilon {
 			t.Errorf("TransverseMercator, latitude miss match: %f != %f", p.Lat(), city[0])
@@ -107,8 +107,8 @@ func TestTransverseMercatorScaling(t *testing.T) {
 
 	geoDistance := p1.GeoDistanceFrom(p2)
 
-	TransverseMercator.Project(p1)
-	TransverseMercator.Project(p2)
+	p1 = TransverseMercator.Project(p1)
+	p2 = TransverseMercator.Project(p2)
 	projectedDistance := p1.DistanceFrom(p2)
 
 	if math.Abs(geoDistance-projectedDistance) > epsilon {
@@ -118,16 +118,16 @@ func TestTransverseMercatorScaling(t *testing.T) {
 
 func TestBuildTransverseMercator(t *testing.T) {
 	for _, city := range cities {
-		p := &Point{}
-
-		p.SetLat(city[0])
-		p.SetLng(city[1])
+		p := Point{
+			city[1],
+			city[0],
+		}
 
 		offset := math.Floor(p.Lng()/10.0) * 10.0
 		projector := BuildTransverseMercator(offset)
 
-		projector.Project(p)
-		projector.Inverse(p)
+		p = projector.Project(p)
+		p = projector.Inverse(p)
 
 		if math.Abs(p.Lat()-city[0]) > epsilon {
 			t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), city[0])
@@ -143,9 +143,9 @@ func TestBuildTransverseMercator(t *testing.T) {
 
 	test := NewPoint(-175.0, 30)
 
-	p := test.Clone()
-	projector.Project(p)
-	projector.Inverse(p)
+	p := test
+	p = projector.Project(p)
+	p = projector.Inverse(p)
 
 	if math.Abs(p.Lat()-test.Lat()) > epsilon {
 		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
@@ -157,9 +157,9 @@ func TestBuildTransverseMercator(t *testing.T) {
 
 	test = NewPoint(179.0, 30)
 
-	p = test.Clone()
-	projector.Project(p)
-	projector.Inverse(p)
+	p = test
+	p = projector.Project(p)
+	p = projector.Inverse(p)
 
 	if math.Abs(p.Lat()-test.Lat()) > epsilon {
 		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
@@ -174,9 +174,9 @@ func TestBuildTransverseMercator(t *testing.T) {
 
 	test = NewPoint(175.0, 30)
 
-	p = test.Clone()
-	projector.Project(p)
-	projector.Inverse(p)
+	p = test
+	p = projector.Project(p)
+	p = projector.Inverse(p)
 
 	if math.Abs(p.Lat()-test.Lat()) > epsilon {
 		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
@@ -188,9 +188,9 @@ func TestBuildTransverseMercator(t *testing.T) {
 
 	test = NewPoint(-179.0, 30)
 
-	p = test.Clone()
-	projector.Project(p)
-	projector.Inverse(p)
+	p = test
+	p = projector.Project(p)
+	p = projector.Inverse(p)
 
 	if math.Abs(p.Lat()-test.Lat()) > epsilon {
 		t.Errorf("BuildTransverseMercator, latitude miss match: %f != %f", p.Lat(), test.Lat())
@@ -227,16 +227,18 @@ func TestScalarMercator(t *testing.T) {
 	// default level
 	ScalarMercator.Level = 31
 	for _, city := range cities {
-		p := &Point{}
-
-		p.SetLat(city[0])
-		p.SetLng(city[1])
+		p := Point{
+			city[1],
+			city[0],
+		}
 
 		x, y := ScalarMercator.Project(p.Lng(), p.Lat(), 31)
 		lng, lat := ScalarMercator.Inverse(x, y)
 
-		p.SetLat(lat)
-		p.SetLng(lng)
+		p = Point{
+			lng,
+			lat,
+		}
 
 		if math.Abs(p.Lat()-city[0]) > epsilon {
 			t.Errorf("Scalar Mercator, latitude miss match: %f != %f", p.Lat(), city[0])

@@ -2,41 +2,39 @@ package geo
 
 // Resample converts the path into totalPoints-1 evenly spaced segments.
 // Assumes euclidean geometry.
-func (p *Path) Resample(totalPoints int) *Path {
+func (p Path) Resample(totalPoints int) Path {
 	if totalPoints <= 0 {
-		p.PointSet = make([]Point, 0)
-		return p
+		return Path(make([]Point, 0))
 	}
 
-	if p.resampleEdgeCases(totalPoints) {
+	p, ret := p.resampleEdgeCases(totalPoints)
+	if ret {
 		return p
 	}
 
 	// precomputes the total distance and intermediate distances
-	total, dists := precomputeDistances(p.PointSet)
-	p.resample(dists, total, totalPoints)
-	return p
+	total, dists := precomputeDistances([]Point(p))
+	return p.resample(dists, total, totalPoints)
 }
 
 // ResampleWithInterval coverts the path into evenly spaced points of
 // about the given distance. The total distance is computed using euclidean
 // geometry and then divided by the given distance to get the number of segments.
-func (p *Path) ResampleWithInterval(dist float64) *Path {
+func (p Path) ResampleWithInterval(dist float64) Path {
 	if dist <= 0 {
-		p.PointSet = make([]Point, 0)
-		return p
+		return Path(make([]Point, 0))
 	}
 
 	// precomputes the total distance and intermediate distances
-	total, dists := precomputeDistances(p.PointSet)
+	total, dists := precomputeDistances([]Point(p))
 
 	totalPoints := int(total/dist) + 1
-	if p.resampleEdgeCases(totalPoints) {
+	p, ret := p.resampleEdgeCases(totalPoints)
+	if ret {
 		return p
 	}
 
-	p.resample(dists, total, totalPoints)
-	return p
+	return p.resample(dists, total, totalPoints)
 }
 
 // ResampleWithGeoInterval converts the path into about evenly spaced points of
@@ -44,41 +42,40 @@ func (p *Path) ResampleWithInterval(dist float64) *Path {
 // and divided by the given distance. The new points are chosen by linearly interpolating
 // between two given points. This may not make sense in some contexts, especially if
 // the path covers a large range of latitude.
-func (p *Path) ResampleWithGeoInterval(meters float64) *Path {
+func (p Path) ResampleWithGeoInterval(meters float64) Path {
 	if meters <= 0 {
-		p.PointSet = make([]Point, 0)
-		return p
+		return Path(make([]Point, 0))
 	}
 
 	// precomputes the total geo distance and intermediate distances
 	totalDistance := 0.0
-	distances := make([]float64, len(p.PointSet)-1)
-	for i := 0; i < len(p.PointSet)-1; i++ {
-		distances[i] = p.PointSet[i].GeoDistanceFrom(&p.PointSet[i+1])
+	distances := make([]float64, len(p)-1)
+	for i := 0; i < len(p)-1; i++ {
+		distances[i] = p[i].GeoDistanceFrom(p[i+1])
 		totalDistance += distances[i]
 	}
 
 	totalPoints := int(totalDistance/meters) + 1
-	if p.resampleEdgeCases(totalPoints) {
+	p, ret := p.resampleEdgeCases(totalPoints)
+	if ret {
 		return p
 	}
 
-	p.resample(distances, totalDistance, totalPoints)
-	return p
+	return p.resample(distances, totalDistance, totalPoints)
 }
 
-func (p *Path) resample(distances []float64, totalDistance float64, totalPoints int) {
+func (p Path) resample(distances []float64, totalDistance float64, totalPoints int) Path {
 	points := make([]Point, 1, totalPoints)
-	points[0] = p.PointSet[0] // start stays the same
+	points[0] = p[0] // start stays the same
 
 	step := 1
 	distance := 0.0
 
 	currentDistance := totalDistance / float64(totalPoints-1)
-	currentLine := &Line{} // declare here and update has nice performance benefits
-	for i := 0; i < len(p.PointSet)-1; i++ {
-		currentLine.a = p.PointSet[i]
-		currentLine.b = p.PointSet[i+1]
+	currentLine := Line{} // declare here and update has nice performance benefits
+	for i := 0; i < len(p)-1; i++ {
+		currentLine.a = p[i]
+		currentLine.b = p[i+1]
 
 		currentLineDistance := distances[i]
 		nextDistance := distance + currentLineDistance
@@ -105,56 +102,55 @@ func (p *Path) resample(distances []float64, totalDistance float64, totalPoints 
 
 	// end stays the same, to handle round off errors
 	if totalPoints != 1 { // for 1, we want the first point
-		points[totalPoints-1] = p.PointSet[len(p.PointSet)-1]
+		points[totalPoints-1] = p[len(p)-1]
 	}
 
-	(&p.PointSet).SetPoints(points)
-	return
+	return Path(points)
 }
 
 // resampleEdgeCases is used to handle edge case for
 // resampling like not enough points and the path is all the same point.
 // will return nil if there are no edge cases. If return true if
 // one of these edge cases was found and handled.
-func (p *Path) resampleEdgeCases(totalPoints int) bool {
+func (p Path) resampleEdgeCases(totalPoints int) (Path, bool) {
 	// degenerate case
-	if len(p.PointSet) <= 1 {
-		return true
+	if len(p) <= 1 {
+		return p, true
 	}
 
 	// if all the points are the same, treat as special case.
 	equal := true
-	for _, point := range p.PointSet {
-		if !p.PointSet[0].Equals(&point) {
+	for _, point := range p {
+		if !p[0].Equal(point) {
 			equal = false
 			break
 		}
 	}
 
 	if equal {
-		if totalPoints > p.Length() {
+		if totalPoints > len(p) {
 			// extend to be requested length
-			for p.Length() != totalPoints {
-				p.PointSet = append(p.PointSet, p.PointSet[0])
+			for len(p) != totalPoints {
+				p = append(p, p[0])
 			}
 
-			return true
+			return p, true
 		}
 
 		// contract to be requested length
-		p.PointSet = p.PointSet[:totalPoints]
-		return true
+		p = p[:totalPoints]
+		return p, true
 	}
 
-	return false
+	return p, false
 }
 
 // precomputeDistances precomputes the total distance and intermediate distances.
-func precomputeDistances(p PointSet) (float64, []float64) {
+func precomputeDistances(p []Point) (float64, []float64) {
 	total := 0.0
 	dists := make([]float64, len(p)-1)
 	for i := 0; i < len(p)-1; i++ {
-		dists[i] = p[i].DistanceFrom(&p[i+1])
+		dists[i] = p[i].DistanceFrom(p[i+1])
 		total += dists[i]
 	}
 

@@ -64,10 +64,10 @@ func BenchmarkLineUnmarshalWKB(b *testing.B) {
 	}
 }
 
-func BenchmarkPathScan(b *testing.B) {
-	p := NewPath()
+func BenchmarkPoinstSetScan(b *testing.B) {
+	ps := NewPointSet()
 
-	err := p.Scan(testPathWKB)
+	err := ps.Scan(testPathWKB)
 	if err != nil {
 		b.Fatalf("should scan without error, got %v", err)
 	}
@@ -75,14 +75,14 @@ func BenchmarkPathScan(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		p.Scan(testPathWKB)
+		ps.Scan(testPathWKB)
 	}
 }
 
-func BenchmarkPathUnmarshalWKB(b *testing.B) {
-	p := NewPath()
+func BenchmarkPointSetUnmarshalWKB(b *testing.B) {
+	ps := NewPointSet()
 
-	err := p.unmarshalWKB(testPathWKB)
+	err := ps.unmarshalWKB(testPathWKB)
 	if err != nil {
 		b.Fatalf("should scan without error, got %v", err)
 	}
@@ -90,6 +90,6 @@ func BenchmarkPathUnmarshalWKB(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		p.unmarshalWKB(testPathWKB)
+		ps.unmarshalWKB(testPathWKB)
 	}
 }

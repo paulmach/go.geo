@@ -6,7 +6,7 @@ import (
 )
 
 // A Projector is a function that converts the given point to a different space.
-type Projector func(p *Point)
+type Projector func(p Point) Point
 
 // A Projection is a set of projectors to map forward and backwards to the projected space.
 type Projection struct {
@@ -18,15 +18,18 @@ const mercatorPole = 20037508.34
 
 // Mercator projection, performs EPSG:3857, sometimes also described as EPSG:900913.
 var Mercator = Projection{
-	Project: func(p *Point) {
-		p.SetX(mercatorPole / 180.0 * p.Lng())
-
+	Project: func(p Point) Point {
 		y := math.Log(math.Tan((90.0+p.Lat())*math.Pi/360.0)) / math.Pi * mercatorPole
-		p.SetY(math.Max(-mercatorPole, math.Min(y, mercatorPole)))
+		return Point{
+			mercatorPole / 180.0 * p.Lng(),
+			math.Max(-mercatorPole, math.Min(y, mercatorPole)),
+		}
 	},
-	Inverse: func(p *Point) {
-		p.SetLng(p.X() * 180.0 / mercatorPole)
-		p.SetLat(180.0 / math.Pi * (2*math.Atan(math.Exp((p.Y()/mercatorPole)*math.Pi)) - math.Pi/2.0))
+	Inverse: func(p Point) Point {
+		return Point{
+			p.X() * 180.0 / mercatorPole,
+			180.0 / math.Pi * (2*math.Atan(math.Exp((p.Y()/mercatorPole)*math.Pi)) - math.Pi/2.0),
+		}
 	},
 }
 
@@ -45,7 +48,7 @@ func MercatorScaleFactor(degreesLatitude float64) float64 {
 // http://en.wikipedia.org/wiki/Transverse_Mercator_projection
 func BuildTransverseMercator(centerLng float64) Projection {
 	return Projection{
-		Project: func(p *Point) {
+		Project: func(p Point) Point {
 			lng := p.Lng() - centerLng
 			if lng < 180 {
 				lng += 360.0
@@ -55,11 +58,11 @@ func BuildTransverseMercator(centerLng float64) Projection {
 				lng -= 360.0
 			}
 
-			p.SetLng(lng)
-			TransverseMercator.Project(p)
+			p[0] = lng
+			return TransverseMercator.Project(p)
 		},
-		Inverse: func(p *Point) {
-			TransverseMercator.Inverse(p)
+		Inverse: func(p Point) Point {
+			p = TransverseMercator.Inverse(p)
 
 			lng := p.Lng() + centerLng
 			if lng < 180 {
@@ -70,7 +73,8 @@ func BuildTransverseMercator(centerLng float64) Projection {
 				lng -= 360.0
 			}
 
-			p.SetLng(lng)
+			p[0] = lng
+			return p
 		},
 	}
 }
@@ -78,24 +82,27 @@ func BuildTransverseMercator(centerLng float64) Projection {
 // TransverseMercator implements a default transverse Mercator projector
 // that will only work well +-10 degrees around longitude 0.
 var TransverseMercator = Projection{
-	Project: func(p *Point) {
+	Project: func(p Point) Point {
 		radLat := deg2rad(p.Lat())
 		radLng := deg2rad(p.Lng())
 
 		sincos := math.Sin(radLng) * math.Cos(radLat)
-		p.SetX(0.5 * math.Log((1+sincos)/(1-sincos)) * EarthRadius)
-
-		p.SetY(math.Atan(math.Tan(radLat)/math.Cos(radLng)) * EarthRadius)
+		return Point{
+			0.5 * math.Log((1+sincos)/(1-sincos)) * EarthRadius,
+			math.Atan(math.Tan(radLat)/math.Cos(radLng)) * EarthRadius,
+		}
 	},
-	Inverse: func(p *Point) {
+	Inverse: func(p Point) Point {
 		x := p.X() / EarthRadius
 		y := p.Y() / EarthRadius
 
 		lng := math.Atan(math.Sinh(x) / math.Cos(y))
 		lat := math.Asin(math.Sin(y) / math.Cosh(x))
 
-		p.SetLng(rad2deg(lng))
-		p.SetLat(rad2deg(lat))
+		return Point{
+			rad2deg(lng),
+			rad2deg(lat),
+		}
 	},
 }
 

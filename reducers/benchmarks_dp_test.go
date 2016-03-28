@@ -28,8 +28,8 @@ func TestDouglasPeuckerBenchmarkData(t *testing.T) {
 	path := benchmarkData()
 	for i := range tests {
 		p := DouglasPeucker(path, tests[i].Threshold)
-		if p.Length() != tests[i].Length {
-			t.Errorf("douglas peucker benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
+		if len(p) != tests[i].Length {
+			t.Errorf("douglas peucker benchmark data reduced poorly, got %d, expected %d", len(p), tests[i].Length)
 		}
 	}
 }
@@ -54,7 +54,7 @@ func BenchmarkDouglasPeuckerIndexMap(b *testing.B) {
 	}
 }
 
-func benchmarkData() *geo.Path {
+func benchmarkData() geo.Path {
 	// Data taken from the simplify-js example at http://mourner.github.io/simplify-js/
 	f, err := os.Open("lisbon2portugal.json.gz")
 	if err != nil {
@@ -75,7 +75,7 @@ func benchmarkData() *geo.Path {
 	// create the geo path
 	path := geo.NewPathPreallocate(0, len(points)/2)
 	for i := 0; i < len(points); i += 2 {
-		path.Push(geo.NewPoint(points[i], points[i+1]))
+		path = append(path, geo.NewPoint(points[i], points[i+1]))
 	}
 
 	return path

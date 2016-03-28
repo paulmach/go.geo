@@ -54,7 +54,7 @@ func BenchmarkLineInterpolate(b *testing.B) {
 	l := geo.NewLine(geo.NewPoint(1, 2), geo.NewPoint(3, 4))
 
 	// added so go1.5+ won't optimize out the whole loop
-	var r *geo.Point
+	var r geo.Point
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -69,7 +69,7 @@ func BenchmarkLineMidpoint(b *testing.B) {
 	l := geo.NewLine(geo.NewPoint(1, 2), geo.NewPoint(3, 4))
 
 	// added so go1.5+ won't optimize out the whole loop
-	var r *geo.Point
+	var r geo.Point
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -84,7 +84,7 @@ func BenchmarkLineGeoMidpoint(b *testing.B) {
 	l := geo.NewLine(geo.NewPoint(1, 2), geo.NewPoint(3, 4))
 
 	// added so go1.5+ won't optimize out the whole loop
-	var r *geo.Point
+	var r geo.Point
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -102,21 +102,6 @@ func BenchmarkLineEquals(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		l1.Equals(l2)
+		l1.Equal(l2)
 	}
-}
-
-func BenchmarkLineClone(b *testing.B) {
-	l := geo.NewLine(geo.NewPoint(1, 2), geo.NewPoint(3, 4))
-
-	// added so go1.5+ won't optimize out the whole loop
-	var r *geo.Line
-
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		r = l.Clone()
-	}
-
-	_ = r
 }

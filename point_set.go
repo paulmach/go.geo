@@ -12,33 +12,31 @@ import (
 type PointSet []Point
 
 // NewPointSet simply creates a new point set with points array of the given size.
-func NewPointSet() *PointSet {
-	return &PointSet{}
+func NewPointSet() PointSet {
+	return PointSet{}
 }
 
 // NewPointSetPreallocate simply creates a new point set with points array of the given size.
-func NewPointSetPreallocate(length, capacity int) *PointSet {
+func NewPointSetPreallocate(length, capacity int) PointSet {
 	if length > capacity {
 		capacity = length
 	}
 
 	ps := make([]Point, length, capacity)
-	p := PointSet(ps)
-	return &p
+	return PointSet(ps)
 }
 
 // Clone returns a new copy of the point set.
-func (ps PointSet) Clone() *PointSet {
+func (ps PointSet) Clone() PointSet {
 	points := make([]Point, len(ps))
 	copy(points, ps)
 
-	nps := PointSet(points)
-	return &nps
+	return PointSet(points)
 }
 
 // Centroid returns the average x and y coordinate of the point set.
 // This can also be used for small clusters of lat/lng points.
-func (ps PointSet) Centroid() *Point {
+func (ps PointSet) Centroid() Point {
 	x := 0.0
 	y := 0.0
 	numPoints := float64(len(ps))
@@ -46,7 +44,7 @@ func (ps PointSet) Centroid() *Point {
 		x += point[0]
 		y += point[1]
 	}
-	return &Point{x / numPoints, y / numPoints}
+	return Point{x / numPoints, y / numPoints}
 }
 
 // GeoCentroid uses a more advanced algorithm to compute the centroid of points
@@ -55,7 +53,7 @@ func (ps PointSet) Centroid() *Point {
 // 6x slower than the Centroid function, which may be adequate for some datasets.
 // NOTE: Points with longitude outside the standard -180:180 range will be remapped to
 // within the range. The result will always have longitude between -180 and 180 degrees.
-func (ps PointSet) GeoCentroid() *Point {
+func (ps PointSet) GeoCentroid() Point {
 
 	// Implementation sourced from Geolib
 	// https://github.com/manuelbieh/Geolib/blob/74593bf93f9a99d5ce7e6bcefa367c5a78f5321b/src/geolib.js#L416
@@ -75,11 +73,14 @@ func (ps PointSet) GeoCentroid() *Point {
 	y /= np
 	z /= np
 
-	return NewPoint(rad2deg(math.Atan2(y, x)), rad2deg(math.Atan2(z, math.Sqrt(x*x+y*y))))
+	return Point{
+		rad2deg(math.Atan2(y, x)),
+		rad2deg(math.Atan2(z, math.Sqrt(x*x+y*y))),
+	}
 }
 
 // DistanceFrom returns the minimum euclidean distance from the point set.
-func (ps PointSet) DistanceFrom(point *Point) (float64, int) {
+func (ps PointSet) DistanceFrom(point Point) (float64, int) {
 	dist := math.Inf(1)
 	index := 0
 
@@ -95,7 +96,7 @@ func (ps PointSet) DistanceFrom(point *Point) (float64, int) {
 
 // GeoDistanceFrom returns the minimum geo distance from the point set,
 // along with the index of the point with minimum index.
-func (ps PointSet) GeoDistanceFrom(point *Point) (float64, int) {
+func (ps PointSet) GeoDistanceFrom(point Point) (float64, int) {
 	dist := math.Inf(1)
 	index := 0
 
@@ -110,7 +111,7 @@ func (ps PointSet) GeoDistanceFrom(point *Point) (float64, int) {
 }
 
 // Bound returns a bound around the point set. Simply uses rectangular coordinates.
-func (ps PointSet) Bound() *Bound {
+func (ps PointSet) Bound() Bound {
 	if len(ps) == 0 {
 		return NewBound(0, 0, 0, 0)
 	}
@@ -133,12 +134,12 @@ func (ps PointSet) Bound() *Bound {
 }
 
 // SetAt updates a position at i in the point set
-func (ps *PointSet) SetAt(index int, point *Point) *PointSet {
+func (ps *PointSet) SetAt(index int, point Point) *PointSet {
 	deref := *ps
 	if index >= len(deref) || index < 0 {
 		panic(fmt.Sprintf("geo: set index out of range, requested: %d, length: %d", index, len(deref)))
 	}
-	deref[index] = *point
+	deref[index] = point
 	*ps = deref
 	return ps
 }
@@ -146,108 +147,34 @@ func (ps *PointSet) SetAt(index int, point *Point) *PointSet {
 // GetAt returns the pointer to the Point in the page.
 // This function is good for modifying values in place.
 // Returns nil if index is out of range.
-func (ps *PointSet) GetAt(i int) *Point {
+func (ps *PointSet) GetAt(i int) Point {
 	deref := *ps
 	if i >= len(deref) || i < 0 {
-		return nil
+		panic("TODO")
 	}
 
-	return &deref[i]
+	return deref[i]
 }
 
 // First returns the first point in the point set.
-// Will return nil if there are no points in the set.
-func (ps PointSet) First() *Point {
-	if len(ps) == 0 {
-		return nil
-	}
-
-	return &ps[0]
+func (ps PointSet) First() Point {
+	return ps[0]
 }
 
 // Last returns the last point in the point set.
-// Will return nil if there are no points in the set.
-func (ps PointSet) Last() *Point {
-	if len(ps) == 0 {
-		return nil
-	}
-
-	return &ps[len(ps)-1]
-}
-
-// InsertAt inserts a Point at i in the point set.
-// Panics if index is out of range.
-func (ps *PointSet) InsertAt(index int, point *Point) *PointSet {
-	deref := *ps
-	if index > len(deref) || index < 0 {
-		panic(fmt.Sprintf("geo: insert index out of range, requested: %d, length: %d", index, len(deref)))
-	}
-
-	if index == len(deref) {
-		deref = append(deref, *point)
-		*ps = deref
-		return ps
-	}
-
-	deref = append(deref, Point{})
-	copy(deref[index+1:], deref[index:])
-	deref[index] = *point
-	*ps = deref
-	return ps
-}
-
-// RemoveAt removes a Point at i in the point set.
-// Panics if index is out of range.
-func (ps *PointSet) RemoveAt(index int) *PointSet {
-	deref := *ps
-	if index >= len(deref) || index < 0 {
-		panic(fmt.Sprintf("geo: remove index out of range, requested: %d, length: %d", index, len(deref)))
-	}
-
-	deref = append(deref[:index], deref[index+1:]...)
-	*ps = deref
-	return ps
-}
-
-// Push appends a point to the end of the point set.
-func (ps *PointSet) Push(point *Point) *PointSet {
-	*ps = append(*ps, *point)
-	return ps
-}
-
-// Pop removes and returns the last point in the point set
-func (ps *PointSet) Pop() *Point {
-	deref := *ps
-	if len(deref) == 0 {
-		return nil
-	}
-
-	x := deref[len(deref)-1]
-	*ps = deref[:len(deref)-1]
-
-	return &x
-}
-
-//SetPoints sets the points in the point set
-func (ps *PointSet) SetPoints(points []Point) *PointSet {
-	*ps = points
-	return ps
-}
-
-// Length returns the number of points in the point set.
-func (ps PointSet) Length() int {
-	return len(ps)
+func (ps PointSet) Last() Point {
+	return ps[len(ps)-1]
 }
 
 // Equals compares two point sets. Returns true if lengths are the same
 // and all points are Equal
-func (ps PointSet) Equals(pointSet *PointSet) bool {
-	if (ps).Length() != (*pointSet).Length() {
+func (ps PointSet) Equal(pointSet PointSet) bool {
+	if len(ps) != len(pointSet) {
 		return false
 	}
 
-	for i, v := range ps {
-		if !v.Equals((*pointSet).GetAt(i)) {
+	for i := range ps {
+		if !ps[i].Equal(pointSet[i]) {
 			return false
 		}
 	}

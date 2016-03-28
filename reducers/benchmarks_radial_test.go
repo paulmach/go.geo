@@ -21,8 +21,8 @@ func TestRadialBenchmarkData(t *testing.T) {
 	path := benchmarkData()
 	for i := range tests {
 		p := Radial(path, tests[i].Threshold)
-		if p.Length() != tests[i].Length {
-			t.Errorf("radial benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
+		if len(p) != tests[i].Length {
+			t.Errorf("radial benchmark data reduced poorly, got %d, expected %d", len(p), tests[i].Length)
 		}
 	}
 }

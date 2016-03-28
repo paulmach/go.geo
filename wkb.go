@@ -20,50 +20,47 @@ var (
 )
 
 // NewPointFromWKB will take raw WKB and set the data for a new point.
-// The WKB data must be of type Point. Will return nil if invalid WKB point.
-func NewPointFromWKB(wkb []byte) *Point {
+// The WKB data must be of type Point.
+func NewPointFromWKB(wkb []byte) (Point, error) {
 	p := &Point{}
 	if err := p.unmarshalWKB(wkb); err != nil {
-		return nil
+		return Point{}, err
 	}
 
-	return p
+	return *p, nil
 }
 
 // NewLineFromWKB will take raw WKB and set the data for a new line.
 // The WKB data must of type LineString and only contain 2 points.
-// Will return nil if invalid WKB.
-func NewLineFromWKB(wkb []byte) *Line {
+func NewLineFromWKB(wkb []byte) (Line, error) {
 	l := &Line{}
 	if err := l.unmarshalWKB(wkb); err != nil {
-		return nil
+		return Line{}, err
 	}
 
-	return l
+	return *l, nil
 }
 
 // NewPointSetFromWKB will take raw WKB and set the data for a new point set.
 // The WKB data must be of type LineString, Polygon or MultiPoint.
-// Will return nil if invalid WKB.
-func NewPointSetFromWKB(wkb []byte) *PointSet {
+func NewPointSetFromWKB(wkb []byte) (PointSet, error) {
 	ps := &PointSet{}
 	if err := ps.unmarshalWKB(wkb); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return ps
+	return *ps, nil
 }
 
 // NewPathFromWKB will take raw WKB and set the data for a new path.
 // The WKB data must be of type LineString, Polygon or MultiPoint.
-// Will return nil if invalid WKB.
-func NewPathFromWKB(wkb []byte) *Path {
-	p := NewPath()
-	if err := p.PointSet.unmarshalWKB(wkb); err != nil {
-		return nil
+func NewPathFromWKB(wkb []byte) (Path, error) {
+	ps := &PointSet{}
+	if err := ps.unmarshalWKB(wkb); err != nil {
+		return nil, err
 	}
 
-	return p
+	return Path(*ps), nil
 }
 
 // Scan implements the sql.Scanner interface allowing
@@ -244,7 +241,7 @@ func (ps *PointSet) unmarshalWKB(data []byte) error {
 		points[i][1] = scanFloat64(data[4+i*16+8:4+i*16+16], littleEndian)
 	}
 
-	ps.SetPoints(points)
+	*ps = append(*ps, points...)
 
 	return nil
 }
@@ -253,11 +250,12 @@ func (ps *PointSet) unmarshalWKB(data []byte) error {
 // line structs to be passed into rows.Scan(...interface{})
 // The column must be of type LineString, Polygon or MultiPoint
 // or an error will be returned. Data must be fetched in WKB format.
-// Will attempt to parse MySQL's SRID+WKB format if obviously no WKB
+// Will attempt to parse MySQL's SRID+WKB format if obviously not WKB
 // or parsing as WKB fails.
 // If the column is empty (not null) an empty path will be returned.
 func (p *Path) Scan(value interface{}) error {
-	return p.PointSet.Scan(value)
+	// TODO
+	return nil
 }
 
 func scanPrefix(data []byte) (bool, uint32, error) {

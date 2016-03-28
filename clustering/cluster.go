@@ -5,7 +5,7 @@ import "github.com/paulmach/go.geo"
 // A Cluster is a cluster of pointers plus their centroid.
 // It defines a center/centroid for easy centroid distance computation.
 type Cluster struct {
-	Centroid *geo.Point
+	Centroid geo.Point
 	Pointers []geo.Pointer
 }
 
@@ -26,7 +26,7 @@ func NewCluster(pointers ...geo.Pointer) *Cluster {
 	}
 
 	if len(pointers) == 1 {
-		c.Centroid = pointers[0].Point().Clone()
+		c.Centroid = pointers[0].Point()
 		return c
 	}
 
@@ -45,9 +45,9 @@ func NewCluster(pointers ...geo.Pointer) *Cluster {
 
 // NewClusterWithCentroid creates a point cluster stub from the given centroid
 // and optional pointers.
-func NewClusterWithCentroid(centroid *geo.Point, pointers ...geo.Pointer) *Cluster {
+func NewClusterWithCentroid(centroid geo.Point, pointers ...geo.Pointer) *Cluster {
 	return &Cluster{
-		Centroid: centroid.Clone(),
+		Centroid: centroid,
 		Pointers: pointers,
 	}
 }
@@ -56,7 +56,7 @@ func (c *Cluster) merge(c2 *Cluster) {
 
 	percent := 1 - float64(len(c.Pointers))/float64(len(c.Pointers)+len(c2.Pointers))
 
-	c.Centroid.SetX(c.Centroid[0] + percent*(c2.Centroid[0]-c.Centroid[0]))
-	c.Centroid.SetY(c.Centroid[1] + percent*(c2.Centroid[1]-c.Centroid[1]))
+	c.Centroid[0] = c.Centroid[0] + percent*(c2.Centroid[0]-c.Centroid[0])
+	c.Centroid[1] = c.Centroid[1] + percent*(c2.Centroid[1]-c.Centroid[1])
 	c.Pointers = append(c.Pointers, c2.Pointers...)
 }

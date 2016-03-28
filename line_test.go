@@ -10,18 +10,12 @@ func TestLineNew(t *testing.T) {
 	b := NewPoint(2, 2)
 
 	l := NewLine(a, b)
-	if !l.A().Equals(a) {
+	if !l.A().Equal(a) {
 		t.Errorf("line, expected %v == %v", l.A(), a)
 	}
 
-	if !l.B().Equals(b) {
+	if !l.B().Equal(b) {
 		t.Errorf("line, expected %v == %v", l.B(), b)
-	}
-
-	// verify there is a clone
-	b.Scale(10)
-	if l.B().Equals(b) {
-		t.Errorf("line, expected %v != %v", l.B(), b)
 	}
 }
 
@@ -160,7 +154,7 @@ func TestLineMeasure(t *testing.T) {
 }
 
 func TestDirection(t *testing.T) {
-	lines := []*Line{
+	lines := []Line{
 		NewLine(NewPoint(0, 0), NewPoint(1, 0)),
 		NewLine(NewPoint(0, 1), NewPoint(1, 0)),
 	}
@@ -179,11 +173,6 @@ func TestLineDistance(t *testing.T) {
 	if d := l.Distance(); d != 5 {
 		t.Errorf("line, distance expected 5, got %f", d)
 	}
-
-	l.B().Scale(2)
-	if d := l.Distance(); d != 10 {
-		t.Errorf("line, distance expected 10, got %f", d)
-	}
 }
 
 func TestLineSquaredDistance(t *testing.T) {
@@ -191,34 +180,29 @@ func TestLineSquaredDistance(t *testing.T) {
 	if d := l.SquaredDistance(); d != 25 {
 		t.Errorf("line, squaredDistance expected 25, got %f", d)
 	}
-
-	l.B().Scale(2)
-	if d := l.SquaredDistance(); d != 100 {
-		t.Errorf("line, squaredDistance expected 10, got %f", d)
-	}
 }
 
 func TestLineInterpolate(t *testing.T) {
-	var answer *Point
+	var answer Point
 	l := NewLine(NewPoint(0, 0), NewPoint(5, 10))
 
 	answer = NewPoint(1, 2)
-	if p := l.Interpolate(.20); !p.Equals(answer) {
+	if p := l.Interpolate(.20); !p.Equal(answer) {
 		t.Errorf("line, interpolate expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(4, 8)
-	if p := l.Interpolate(.80); !p.Equals(answer) {
+	if p := l.Interpolate(.80); !p.Equal(answer) {
 		t.Errorf("line, interpolate expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(-1, -2)
-	if p := l.Interpolate(-.20); !p.Equals(answer) {
+	if p := l.Interpolate(-.20); !p.Equal(answer) {
 		t.Errorf("line, interpolate expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(6, 12)
-	if p := l.Interpolate(1.20); !p.Equals(answer) {
+	if p := l.Interpolate(1.20); !p.Equal(answer) {
 		t.Errorf("line, interpolate expected %v, got %v", answer, p)
 	}
 }
@@ -243,46 +227,42 @@ func TestLineSide(t *testing.T) {
 }
 
 func TestLineIntersection(t *testing.T) {
-	var answer *Point
 	l := NewLine(NewPoint(0, 0), NewPoint(1, 1))
 
-	answer = nil
-	if p := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(2, 1))); p != nil {
-		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	if p, err := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(2, 1))); err == nil {
+		t.Errorf("line, no intersection expected, got %v", p)
 	}
 
-	answer = nil
-	if p := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(3, 1))); p != nil {
-		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	if p, err := l.Intersection(NewLine(NewPoint(1, 0), NewPoint(3, 1))); err == nil {
+		t.Errorf("line, no intersection expected, got %v", p)
 	}
 
-	answer = InfinityPoint
-	if p := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 2))); !p.Equals(answer) {
-		t.Errorf("line, intersection expected %v, got %v", answer, p)
+	if p, err := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 2))); err == nil {
+		t.Errorf("line, no intersection expected, got %v", p)
 	}
 
-	answer = NewPoint(1, 1)
-	if p := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 3))); !p.Equals(answer) {
+	answer := NewPoint(1, 1)
+	if p, _ := l.Intersection(NewLine(NewPoint(1, 1), NewPoint(2, 3))); !p.Equal(answer) {
 		t.Errorf("line, intersection expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(0, 0)
-	if p := l.Intersection(NewLine(NewPoint(1, 10), NewPoint(0, 0))); !p.Equals(answer) {
+	if p, _ := l.Intersection(NewLine(NewPoint(1, 10), NewPoint(0, 0))); !p.Equal(answer) {
 		t.Errorf("line, intersection expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(0.5, 0.5)
-	if p := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(1, 0))); !p.Equals(answer) {
+	if p, _ := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(1, 0))); !p.Equal(answer) {
 		t.Errorf("line, intersection expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(0.5, 0.5)
-	if p := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(2, -1))); !p.Equals(answer) {
+	if p, _ := l.Intersection(NewLine(NewPoint(0, 1), NewPoint(2, -1))); !p.Equal(answer) {
 		t.Errorf("line, intersection expected %v, got %v", answer, p)
 	}
 
 	answer = NewPoint(0.5, 0.5)
-	if p := l.Intersection(NewLine(NewPoint(0.5, 0.5), NewPoint(2, -1))); !p.Equals(answer) {
+	if p, _ := l.Intersection(NewLine(NewPoint(0.5, 0.5), NewPoint(2, -1))); !p.Equal(answer) {
 		t.Errorf("line, intersection expected %v, got %v", answer, p)
 	}
 }
@@ -318,38 +298,38 @@ func TestLineIntersects(t *testing.T) {
 }
 
 func TestLineMidpoint(t *testing.T) {
-	var answer *Point
+	var answer Point
 	l := NewLine(NewPoint(0, 0), NewPoint(10, 20))
 
 	answer = NewPoint(5, 10)
-	if p := l.Midpoint(); !p.Equals(answer) {
+	if p := l.Midpoint(); !p.Equal(answer) {
 		t.Errorf("line, midpoint expected %v, got %v", answer, p)
 	}
 }
 
 func TestLineGeoMidpoint(t *testing.T) {
-	var answer *Point
+	var answer Point
 	l := NewLine(NewPoint(-1.8444, 53.1506), NewPoint(0.1406, 52.2047))
 
 	answer = NewPoint(-0.8519, 52.67765)
-	if p := l.Midpoint(); !p.Equals(answer) {
+	if p := l.Midpoint(); !p.Equal(answer) {
 		t.Errorf("line, geomidpoint expected %v, got %v", answer, p)
 	}
 }
 
 func TestLineBound(t *testing.T) {
-	var answer *Bound
+	var answer Bound
 	a := NewPoint(1, 2)
 	b := NewPoint(3, 4)
 
 	l := NewLine(a, b)
 
 	answer = NewBound(1, 3, 2, 4)
-	if b := l.Bound(); !b.Equals(answer) {
+	if b := l.Bound(); !b.Equal(answer) {
 		t.Errorf("line, bounds expected %v, got %v", answer, b)
 	}
 
-	if b := l.Reverse().Bound(); !b.Equals(answer) {
+	if b := l.Reverse().Bound(); !b.Equal(answer) {
 		t.Errorf("line, bounds expected %v, got %v", answer, b)
 	}
 }
@@ -360,37 +340,21 @@ func TestLineReverse(t *testing.T) {
 
 	l := NewLine(a, b).Reverse()
 
-	if !l.A().Equals(b) || !l.B().Equals(a) {
+	if !l.A().Equal(b) || !l.B().Equal(a) {
 		t.Error("line, reverse did not work")
 	}
 }
 
-func TestLineClone(t *testing.T) {
-	l1 := NewLine(NewPoint(1, 1), NewPoint(2, 2))
-	l2 := l1.Clone()
-
-	l1.A().Scale(10)
-	l2.B().Scale(15)
-
-	if l1.A().Equals(l2.A()) {
-		t.Errorf("line, clone expected %v != %v", l1.A(), l2.A())
-	}
-
-	if l2.B().Equals(l1.B()) {
-		t.Errorf("line, clone expected %v != %v", l2.B(), l1.B())
-	}
-}
-
-func TestLineEquals(t *testing.T) {
+func TestLineEqual(t *testing.T) {
 	l1 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 	l2 := NewLine(NewPoint(1, 2), NewPoint(3, 4))
 
-	if !l1.Equals(l2) || !l2.Equals(l1) {
+	if !l1.Equal(l2) || !l2.Equal(l1) {
 		t.Errorf("line, equals expcted %v == %v", l1, l2)
 	}
 
 	l3 := NewLine(NewPoint(3, 4), NewPoint(1, 2))
-	if !l1.Equals(l3) || !l3.Equals(l1) {
+	if !l1.Equal(l3) || !l3.Equal(l1) {
 		t.Errorf("line, equals expcted %v == %v", l1, l3)
 	}
 }

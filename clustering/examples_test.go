@@ -70,9 +70,9 @@ func ExampleGeoPointClustering() {
 
 // example of an object implementing the point_clusting.Pointer interface
 type Event struct {
-	Location *geo.Point
+	Location geo.Point
 }
 
-func (e *Event) Point() *geo.Point {
+func (e *Event) Point() geo.Point {
 	return e.Location
 }

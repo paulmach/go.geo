@@ -30,7 +30,7 @@ type Quadtree struct {
 	// sometimes but not very often.
 	Threshold float64
 
-	bound     *geo.Bound
+	bound     geo.Bound
 	root      *node
 	freeNodes []node
 	freeIndex int
@@ -46,7 +46,7 @@ type node struct {
 
 // New creates a new quadtree for the given bound. Added points
 // must be within this bound.
-func New(bound *geo.Bound) *Quadtree {
+func New(bound geo.Bound) *Quadtree {
 	return &Quadtree{
 		Threshold: math.Max(bound.Width(), bound.Height()) / float64(1<<12),
 		bound:     bound,
@@ -56,13 +56,12 @@ func New(bound *geo.Bound) *Quadtree {
 // NewFromPointSet creates a quadtree from a pointset.
 // Copies the points into the quad tree. Modifying the points later
 // will invalidate the quad tree and lead to unexpected result.
-func NewFromPointSet(set *geo.PointSet) *Quadtree {
+func NewFromPointSet(set geo.PointSet) *Quadtree {
 	q := New(set.Bound())
-	q.freeNodes = make([]node, set.Length(), set.Length())
+	q.freeNodes = make([]node, len(set), len(set))
 
-	ps := []geo.Point(*set)
-	for i := range ps {
-		q.Insert(&ps[i])
+	for i := range set {
+		q.Insert(set[i])
 	}
 
 	return q
@@ -92,7 +91,7 @@ func NewFromPointers(points []geo.Pointer) *Quadtree {
 }
 
 // Bound returns the bounds used for the quad tree.
-func (q *Quadtree) Bound() *geo.Bound {
+func (q *Quadtree) Bound() geo.Bound {
 	return q.bound
 }
 
@@ -106,10 +105,6 @@ func (q *Quadtree) Insert(p geo.Pointer) error {
 	}
 
 	point := p.Point()
-	if point == nil {
-		return nil
-	}
-
 	if !q.bound.Contains(point) {
 		return ErrPointOutsideOfBounds
 	}
@@ -218,14 +213,14 @@ func (q *Quadtree) insert(n *node, p geo.Pointer, left, right, bottom, top float
 // Find returns the closest Value/Pointer in the quadtree.
 // This function is thread safe. Multiple goroutines can read from
 // a pre-created tree.
-func (q *Quadtree) Find(p *geo.Point) geo.Pointer {
+func (q *Quadtree) Find(p geo.Point) geo.Pointer {
 	if q.root == nil {
 		return nil
 	}
 
 	v := &findVisitor{
 		point:          p,
-		closestBound:   q.bound.Clone(),
+		closestBound:   q.bound,
 		minDistSquared: math.MaxFloat64,
 	}
 
@@ -241,7 +236,7 @@ func (q *Quadtree) Find(p *geo.Point) geo.Pointer {
 // within the given bound. An optional buffer parameter is provided to allow
 // for the reuse of result slice memory. This function is thread safe.
 // Multiple goroutines can read from a pre-created tree.
-func (q *Quadtree) InBound(b *geo.Bound, buf ...[]geo.Pointer) []geo.Pointer {
+func (q *Quadtree) InBound(b geo.Bound, buf ...[]geo.Pointer) []geo.Pointer {
 	if q.root == nil {
 		return nil
 	}
@@ -270,13 +265,13 @@ func (q *Quadtree) InBound(b *geo.Bound, buf ...[]geo.Pointer) []geo.Pointer {
 type visitor interface {
 	// Bound returns the current relevant bound so we can prune irrelevant nodes
 	// from the search.
-	Bound() *geo.Bound
+	Bound() geo.Bound
 	Visit(p geo.Pointer)
 
 	// Point should return the specific point being search for, or null if there
 	// isn't one (ie. searching by bound). This helps guide the search to the
 	// best child node first.
-	Point() *geo.Point
+	Point() geo.Point
 }
 
 // visit provides a framework for walking the quad tree.
@@ -333,17 +328,17 @@ func (v *visit) Visit(n *node, left, right, bottom, top float64) {
 }
 
 type findVisitor struct {
-	point          *geo.Point
+	point          geo.Point
 	closest        geo.Pointer
-	closestBound   *geo.Bound
+	closestBound   geo.Bound
 	minDistSquared float64
 }
 
-func (v *findVisitor) Bound() *geo.Bound {
+func (v *findVisitor) Bound() geo.Bound {
 	return v.closestBound
 }
 
-func (v *findVisitor) Point() *geo.Point {
+func (v *findVisitor) Point() geo.Point {
 	return v.point
 }
 
@@ -363,15 +358,15 @@ func (v *findVisitor) Visit(p geo.Pointer) {
 }
 
 type inBoundVisitor struct {
-	bound    *geo.Bound
+	bound    geo.Bound
 	pointers []geo.Pointer
 }
 
-func (v *inBoundVisitor) Bound() *geo.Bound {
+func (v *inBoundVisitor) Bound() geo.Bound {
 	return v.bound
 }
 
-func (v *inBoundVisitor) Point() *geo.Point {
+func (v *inBoundVisitor) Point() geo.Point {
 	return nil
 }
 
@@ -381,13 +376,13 @@ func (v *inBoundVisitor) Visit(p geo.Pointer) {
 	}
 }
 
-func childIndex(cx, cy float64, point *geo.Point) int {
+func childIndex(cx, cy float64, point geo.Point) int {
 	i := 0
-	if point.Y() <= cy {
+	if point[1] <= cy {
 		i = 2
 	}
 
-	if point.X() >= cx {
+	if point[0] >= cx {
 		i++
 	}
 

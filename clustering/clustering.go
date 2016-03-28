@@ -99,8 +99,8 @@ func geocluster(clusters []*Cluster, threshold float64) []*Cluster {
 
 	bound := geo.NewBoundFromPoints(clusters[0].Centroid, clusters[0].Centroid)
 	for _, cluster := range clusters {
-		bound.Extend(cluster.Centroid)
-		geo.Mercator.Project(cluster.Centroid)
+		bound = bound.Extend(cluster.Centroid)
+		cluster.Centroid = geo.Mercator.Project(cluster.Centroid)
 	}
 
 	factor := geo.MercatorScaleFactor(bound.Center().Lat())
@@ -118,7 +118,7 @@ func geocluster(clusters []*Cluster, threshold float64) []*Cluster {
 	result := make([]*Cluster, 0, found)
 	for _, cluster := range clusteredClusters {
 		if cluster != nil {
-			geo.Mercator.Inverse(cluster.Centroid)
+			cluster.Centroid = geo.Mercator.Inverse(cluster.Centroid)
 			result = append(result, cluster)
 		}
 	}

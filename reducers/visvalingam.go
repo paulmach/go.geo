@@ -14,21 +14,21 @@ type VisvalingamReducer struct {
 }
 
 // NewVisvalingamReducer creates a new VisvalingamReducer.
-func NewVisvalingamReducer(threshold float64, minPointsToKeep int) *VisvalingamReducer {
-	return &VisvalingamReducer{
+func NewVisvalingamReducer(threshold float64, minPointsToKeep int) VisvalingamReducer {
+	return VisvalingamReducer{
 		Threshold: threshold,
 		ToKeep:    minPointsToKeep,
 	}
 }
 
 // Reduce runs the Visvalingam reduction using the values of the Visvalingam.
-func (r VisvalingamReducer) Reduce(path *geo.Path) *geo.Path {
+func (r VisvalingamReducer) Reduce(path geo.Path) geo.Path {
 	return Visvalingam(path, r.Threshold, r.ToKeep)
 }
 
 // GeoReduce runs the Visvalingam reduction on a lng/lat path.
 // The threshold is expected to be in meters squared.
-func (r VisvalingamReducer) GeoReduce(path *geo.Path) *geo.Path {
+func (r VisvalingamReducer) GeoReduce(path geo.Path) geo.Path {
 	factor := geo.MercatorScaleFactor(path.Bound().Center().Lat())
 	path.Transform(geo.Mercator.Project)
 
@@ -39,14 +39,14 @@ func (r VisvalingamReducer) GeoReduce(path *geo.Path) *geo.Path {
 // VisvalingamThreshold runs the Visvalingam-Whyatt algorithm removing
 // triangles whose area is below the threshold. This function is here to simplify the interface.
 // Returns a new path and DOES NOT modify the original.
-func VisvalingamThreshold(path *geo.Path, threshold float64) *geo.Path {
+func VisvalingamThreshold(path geo.Path, threshold float64) geo.Path {
 	return Visvalingam(path, threshold, 0)
 }
 
 // VisvalingamKeep runs the Visvalingam-Whyatt algorithm removing
 // triangles of minimum area until we're down to `toKeep` number of points.
 // Returns a new path and DOES NOT modify the original.
-func VisvalingamKeep(path *geo.Path, toKeep int) *geo.Path {
+func VisvalingamKeep(path geo.Path, toKeep int) geo.Path {
 	return Visvalingam(path, math.MaxFloat64, toKeep)
 }
 
@@ -60,16 +60,16 @@ func VisvalingamKeep(path *geo.Path, toKeep int) *geo.Path {
 // To just use minPointsToKeep, set the threshold to something big like math.MaxFloat64
 //
 // http://bost.ocks.org/mike/simplify/
-func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Path {
+func Visvalingam(path geo.Path, threshold float64, minPointsToKeep int) geo.Path {
 	if threshold < 0 {
 		panic("threshold must be >= 0")
 	}
 
-	if path.Length() <= minPointsToKeep {
+	if len(path) <= minPointsToKeep {
 		return path.Clone()
 	}
 
-	if path.Length() <= 2 {
+	if len(path) <= 2 {
 		return path.Clone()
 	}
 
@@ -77,8 +77,7 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 	threshold *= 2 // triangle area is doubled to save the multiply :)
 	removed := 0
 
-	points := path.Points()
-	numPoints := len(points)
+	numPoints := len(path)
 
 	// build the initial minheap linked list.
 	heap := minHeap(make([]*visItem, 0, numPoints))
@@ -96,7 +95,7 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 	for i := 1; i < numPoints-1; i++ {
 		item := &items[i]
 
-		item.area = doubleTriangleArea(&points[i-1], &points[i], &points[i+1])
+		item.area = doubleTriangleArea(&path[i-1], &path[i], &path[i+1])
 		item.pointIndex = i
 		item.previous = previous
 
@@ -133,9 +132,9 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 		// figure out the new areas
 		if previous.previous != nil {
 			area := doubleTriangleArea(
-				&points[previous.previous.pointIndex],
-				&points[previous.pointIndex],
-				&points[next.pointIndex],
+				&path[previous.previous.pointIndex],
+				&path[previous.pointIndex],
+				&path[next.pointIndex],
 			)
 
 			area = math.Max(area, current.area)
@@ -144,9 +143,9 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 
 		if next.next != nil {
 			area := doubleTriangleArea(
-				&points[previous.pointIndex],
-				&points[next.pointIndex],
-				&points[next.next.pointIndex],
+				&path[previous.pointIndex],
+				&path[next.pointIndex],
+				&path[next.next.pointIndex],
 			)
 
 			area = math.Max(area, current.area)
@@ -155,15 +154,14 @@ func Visvalingam(path *geo.Path, threshold float64, minPointsToKeep int) *geo.Pa
 	}
 
 	item := linkedListStart
-	newPoints := make([]geo.Point, 0, len(heap)+2)
+	newPath := geo.NewPathPreallocate(0, len(heap)+2)
 
 	for item != nil {
-		newPoints = append(newPoints, points[item.pointIndex])
+		newPath = append(newPath, path[item.pointIndex])
 		item = item.next
 	}
 
-	reduced := &geo.Path{}
-	return reduced.SetPoints(newPoints)
+	return newPath
 }
 
 // Stuff to create the priority queue, or min heap.

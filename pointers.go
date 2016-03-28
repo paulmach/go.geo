@@ -5,7 +5,7 @@ type Pointer interface {
 	// Point should return the "center" or other canonical point
 	// for the object. The caller is expected to Clone
 	// the point if changes need to be make.
-	Point() *Point
+	Point() Point
 }
 
 // TODO: add some functionality around sets of pointers,

@@ -68,13 +68,13 @@ func BenchmarkPointGeoHashInt64(b *testing.B) {
 	}
 }
 
-func BenchmarkPointNormalize(b *testing.B) {
-	p := geo.NewPoint(5, 6)
+func BenchmarkVectorNormalize(b *testing.B) {
+	v := geo.NewVector(5, 6)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		p.Normalize()
+		v.Normalize()
 	}
 }
 
@@ -85,21 +85,6 @@ func BenchmarkPointEquals(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		p1.Equals(p2)
+		p1.Equal(p2)
 	}
-}
-
-func BenchmarkPointClone(b *testing.B) {
-	p := geo.NewPoint(5, 6)
-
-	// added so go1.5+ won't optimize out the whole loop
-	var r *geo.Point
-
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		r = p.Clone()
-	}
-
-	_ = r
 }

@@ -21,8 +21,8 @@ func TestVisvalingamBenchmarkData(t *testing.T) {
 	path := benchmarkData()
 	for i := range tests {
 		p := VisvalingamThreshold(path, tests[i].Threshold)
-		if p.Length() != tests[i].Length {
-			t.Errorf("visvalingam benchmark data reduced poorly, got %d, expected %d", p.Length(), tests[i].Length)
+		if len(p) != tests[i].Length {
+			t.Errorf("visvalingam benchmark data reduced poorly, got %d, expected %d", len(p), tests[i].Length)
 		}
 	}
 }
@@ -39,7 +39,7 @@ func BenchmarkVisvalingamThreshold(b *testing.B) {
 
 func BenchmarkVisvalingamKeep(b *testing.B) {
 	path := benchmarkData()
-	toKeep := int(float64(path.Length()) / 1.616)
+	toKeep := int(float64(len(path)) / 1.616)
 
 	b.ReportAllocs()
 	b.ResetTimer()

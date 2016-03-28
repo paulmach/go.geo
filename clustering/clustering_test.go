@@ -13,9 +13,9 @@ func TestClusteringClusterClusters(t *testing.T) {
 	preclusters, pointers := loadPrefilteredTestClusters(t)
 	bound := geo.NewBoundFromPoints(pointers[0].Point(), pointers[1].Point())
 	for _, p := range pointers {
-		bound.Extend(p.Point())
+		bound = bound.Extend(p.Point())
 	}
-	bound.GeoPad(1) // for round off
+	bound = bound.GeoPad(1) // for round off
 
 	clusters := ClusterClusters(preclusters, CentroidGeoDistance{}, 30)
 
@@ -34,10 +34,6 @@ func TestClusteringClusterClusters(t *testing.T) {
 	for i, c := range clusters {
 		if c == nil {
 			t.Errorf("cluster %d nil", i)
-		}
-
-		if c.Centroid == nil {
-			t.Errorf("cluster %d center nil", i)
 		}
 
 		if !bound.Contains(c.Centroid) {
@@ -60,9 +56,9 @@ func TestClusterGeoClusters(t *testing.T) {
 	preclusters, pointers := loadPrefilteredTestClusters(t)
 	bound := geo.NewBoundFromPoints(pointers[0].Point(), pointers[1].Point())
 	for _, p := range pointers {
-		bound.Extend(p.Point())
+		bound = bound.Extend(p.Point())
 	}
-	bound.GeoPad(1) // for projection loop round off
+	bound = bound.GeoPad(1) // for projection loop round off
 
 	clusters := ClusterGeoClusters(preclusters, 30)
 
@@ -81,10 +77,6 @@ func TestClusterGeoClusters(t *testing.T) {
 	for i, c := range clusters {
 		if c == nil {
 			t.Errorf("cluster %d nil", i)
-		}
-
-		if c.Centroid == nil {
-			t.Errorf("clusters %d center nil", i)
 		}
 
 		if !bound.Contains(c.Centroid) {
@@ -125,7 +117,7 @@ func BenchmarkClusterClusters(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cs := ClusterClusters(clusters, CentroidGeoDistance{}, 30)
-		if len(cs) != 27 {
+		if len(cs) != 26 {
 			b.Fatalf("incorrect number of clusters, got %v", len(cs))
 		}
 	}
@@ -167,8 +159,8 @@ func BenchmarkInitClusterDistances(b *testing.B) {
 
 	bound := geo.NewBoundFromPoints(clusters[0].Centroid, clusters[1].Centroid)
 	for _, cluster := range clusters {
-		bound.Extend(cluster.Centroid)
-		geo.Mercator.Project(cluster.Centroid)
+		bound = bound.Extend(cluster.Centroid)
+		cluster.Centroid = geo.Mercator.Project(cluster.Centroid)
 	}
 	factor := geo.MercatorScaleFactor(bound.Center().Lat())
 	threshold := 30 * 30 * factor * factor
@@ -193,7 +185,7 @@ func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []geo.Pointer) {
 	}
 	defer gzReader.Close()
 
-	var sets [][]*geo.Point
+	var sets [][]geo.Point
 	err = json.NewDecoder(gzReader).Decode(&sets)
 	if err != nil {
 		tb.Fatalf("could not unmarshal data: %v", err)
@@ -218,9 +210,9 @@ func loadPrefilteredTestClusters(tb testing.TB) ([]*Cluster, []geo.Pointer) {
 }
 
 type event struct {
-	Location *geo.Point
+	Location geo.Point
 }
 
-func (e *event) Point() *geo.Point {
+func (e *event) Point() geo.Point {
 	return e.Location
 }
