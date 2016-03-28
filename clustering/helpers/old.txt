@@ -1,0 +1,5 @@
+PASS
+BenchmarkRemoveOutlierPointersByQuadkey-4   	     300	   5326279 ns/op
+BenchmarkPrefilteredClusterClustering-4     	      10	 141421397 ns/op
+BenchmarkPrefilteredGeoProjectedClustering-4	      20	  78800726 ns/op
+ok  	github.com/paulmach/go.geo/clustering/helpers	5.407s

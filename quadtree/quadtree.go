@@ -268,10 +268,9 @@ type visitor interface {
 	Bound() geo.Bound
 	Visit(p geo.Pointer)
 
-	// Point should return the specific point being search for, or null if there
-	// isn't one (ie. searching by bound). This helps guide the search to the
-	// best child node first.
-	Point() geo.Point
+	// Point should return the specific point being search for.
+	// If there isn't one, it should return false as the second result.
+	Point() (geo.Point, bool)
 }
 
 // visit provides a framework for walking the quad tree.
@@ -305,7 +304,7 @@ func (v *visit) Visit(n *node, left, right, bottom, top float64) {
 	cy := (bottom + top) / 2.0
 
 	i := 0
-	if p := v.visitor.Point(); p != nil {
+	if p, ok := v.visitor.Point(); ok {
 		// go to the child node the point is in first.
 		i = childIndex(cx, cy, p)
 	}
@@ -338,8 +337,8 @@ func (v *findVisitor) Bound() geo.Bound {
 	return v.closestBound
 }
 
-func (v *findVisitor) Point() geo.Point {
-	return v.point
+func (v *findVisitor) Point() (geo.Point, bool) {
+	return v.point, true
 }
 
 func (v *findVisitor) Visit(p geo.Pointer) {
@@ -366,8 +365,8 @@ func (v *inBoundVisitor) Bound() geo.Bound {
 	return v.bound
 }
 
-func (v *inBoundVisitor) Point() geo.Point {
-	return nil
+func (v *inBoundVisitor) Point() (geo.Point, bool) {
+	return geo.Point{}, false
 }
 
 func (v *inBoundVisitor) Visit(p geo.Pointer) {

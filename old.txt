@@ -1,0 +1,35 @@
+PASS
+BenchmarkPointSetCentroid-4        	30000000	        46.4 ns/op	      16 B/op	       1 allocs/op
+BenchmarkPointSetGeoCentroid-4     	 3000000	       459 ns/op	      16 B/op	       1 allocs/op
+BenchmarkPointScan-4               	20000000	        67.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointUnmarshalWKB-4       	50000000	        32.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineScan-4                	20000000	        95.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineUnmarshalWKB-4        	30000000	        58.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPathScan-4                	 5000000	       285 ns/op	      96 B/op	       1 allocs/op
+BenchmarkPathUnmarshalWKB-4        	 5000000	       247 ns/op	      96 B/op	       1 allocs/op
+BenchmarkLineDistanceFrom-4        	200000000	         9.80 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineSquaredDistanceFrom-4 	200000000	         7.95 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineProject-4             	200000000	         6.53 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineMeasure-4             	100000000	        16.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineInterpolate-4         	50000000	        28.6 ns/op	      16 B/op	       1 allocs/op
+BenchmarkLineMidpoint-4            	50000000	        27.6 ns/op	      16 B/op	       1 allocs/op
+BenchmarkLineGeoMidpoint-4         	 5000000	       261 ns/op	      16 B/op	       1 allocs/op
+BenchmarkLineEquals-4              	200000000	         7.27 ns/op	       0 B/op	       0 allocs/op
+BenchmarkLineClone-4               	50000000	        32.0 ns/op	      32 B/op	       1 allocs/op
+BenchmarkPathDistanceFrom-4        	  500000	      3528 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPathSquaredDistanceFrom-4 	  500000	      3567 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPathMeasure-4             	  300000	      5655 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPathResampleToMorePoints-4	  200000	     10627 ns/op	    9728 B/op	       2 allocs/op
+BenchmarkPathResampleToLessPoints-4	  300000	      4286 ns/op	    3840 B/op	       2 allocs/op
+BenchmarkPathEncode-4              	  100000	     13676 ns/op	    3168 B/op	       6 allocs/op
+BenchmarkPathFromEncoding-4        	  300000	      5907 ns/op	    8208 B/op	      10 allocs/op
+BenchmarkPointDistanceFrom-4       	300000000	         4.68 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointSquaredDistanceFrom-4	2000000000	         1.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointQuadKey-4            	 5000000	       284 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointQuadKeyString-4      	 3000000	       496 ns/op	      80 B/op	       2 allocs/op
+BenchmarkPointGeoHash-4            	10000000	       227 ns/op	      16 B/op	       1 allocs/op
+BenchmarkPointGeoHashInt64-4       	10000000	       159 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointNormalize-4          	100000000	        14.4 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointEquals-4             	2000000000	         1.03 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPointClone-4              	50000000	        28.9 ns/op	      16 B/op	       1 allocs/op
+ok  	github.com/paulmach/go.geo	60.707s

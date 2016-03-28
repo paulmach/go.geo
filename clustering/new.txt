@@ -1,0 +1,7 @@
+PASS
+BenchmarkClusterClusters-4     	--- FAIL: BenchmarkClusterClusters-4
+	clustering_test.go:121: incorrect number of clusters, got 27
+BenchmarkClusterPointers-4     	       1	3366076842 ns/op	325592432 B/op	  264005 allocs/op
+BenchmarkClusterGeoClusters-4  	      20	  71998192 ns/op	11823827 B/op	    4009 allocs/op
+BenchmarkInitClusterDistances-4	     100	  22131264 ns/op	11436306 B/op	    2076 allocs/op
+ok  	github.com/paulmach/go.geo/clustering	7.535s

@@ -16,8 +16,8 @@ func TestNew(t *testing.T) {
 	}
 
 	ps := geo.NewPointSet()
-	ps.Push(geo.NewPoint(0, 2))
-	ps.Push(geo.NewPoint(1, 3))
+	ps = append(ps, geo.NewPoint(0, 2))
+	ps = append(geo.NewPoint(1, 3))
 
 	qt = NewFromPointSet(ps)
 	if !qt.Bound().Equals(ps.Bound()) {
