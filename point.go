@@ -93,7 +93,7 @@ func (p *Point) SquaredDistanceFrom(point *Point) float64 {
 // GeoDistanceFrom returns the geodesic distance in meters.
 func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 	dLat := deg2rad(point.Lat() - p.Lat())
-	dLng := deg2rad(point.Lng() - p.Lng())
+	dLng := math.Abs(deg2rad(point.Lng() - p.Lng()))
 
 	if yesHaversine(haversine) {
 		// yes trig functions
@@ -102,6 +102,10 @@ func (p *Point) GeoDistanceFrom(point *Point, haversine ...bool) float64 {
 		a := dLat2Sin*dLat2Sin + math.Cos(deg2rad(p.Lat()))*math.Cos(deg2rad(point.Lat()))*dLng2Sin*dLng2Sin
 
 		return 2.0 * EarthRadius * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	}
+
+	if dLng > math.Pi {
+		dLng = 2*math.Pi - dLng
 	}
 
 	// fast way using pythagorean theorem on an equirectangular projection
