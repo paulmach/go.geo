@@ -28,6 +28,28 @@ func BenchmarkPointSquaredDistanceFrom(b *testing.B) {
 	}
 }
 
+func BenchmarkPointGeoDistanceFrom(b *testing.B) {
+	p1 := geo.NewPoint(-122.4167, 37.7833)
+	p2 := geo.NewPoint(37.7833, -122.4167)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p1.GeoDistanceFrom(p2)
+	}
+}
+
+func BenchmarkPointGeoDistanceFromHaversine(b *testing.B) {
+	p1 := geo.NewPoint(-122.4167, 37.7833)
+	p2 := geo.NewPoint(37.7833, -122.4167)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p1.GeoDistanceFrom(p2, true)
+	}
+}
+
 func BenchmarkPointQuadKey(b *testing.B) {
 	p := geo.NewPoint(-122.4167, 37.7833)
 
