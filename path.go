@@ -300,6 +300,31 @@ func (p *Path) Measure(point *Point) float64 {
 	return measure
 }
 
+// Interpolate performs a linear interpolation along the path
+func (p *Path) Interpolate(percent float64) *Point {
+
+	if percent <= 0 {
+		return p.First()
+	} else if percent >= 1 {
+		return p.Last()
+	}
+
+	destination := p.Distance() * percent
+	travelled := 0.0
+
+	for i := 0; i < len(p.PointSet)-1; i++ {
+		seg := NewLine(&p.PointSet[i], &p.PointSet[i+1])
+		segDistance := seg.Distance()
+		if (travelled + segDistance) > destination {
+			var remainder = destination - travelled
+			return seg.Interpolate(remainder / segDistance)
+		}
+		travelled += segDistance
+	}
+
+	return p.First()
+}
+
 // Project computes the measure along this path closest to the given point,
 // normalized to the length of the path.
 func (p *Path) Project(point *Point) float64 {
