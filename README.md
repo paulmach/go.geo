@@ -120,7 +120,7 @@ objects with the correct sub-geometry. For example:
 feature := path.ToGeoJSON()
 feature.SetProperty("type", "road")
 
-encodedJSON, _ := features.MarshalJSON()
+encodedJSON, _ := feature.MarshalJSON()
 ```
 
 ## Examples
