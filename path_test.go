@@ -324,6 +324,63 @@ func TestPathMeasure(t *testing.T) {
 	}
 }
 
+func TestPathInterpolate(t *testing.T) {
+	p := NewPath()
+	p.Push(NewPoint(0, 0))
+	p.Push(NewPoint(1, 1))
+	p.Push(NewPoint(2, 2))
+	p.Push(NewPoint(3, 3))
+
+	// out-of-range - percent too low
+	result := p.Interpolate(-0.1)
+	expected := p.First()
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// start
+	result = p.Interpolate(0)
+	expected = p.First()
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// quarter
+	result = p.Interpolate(0.25)
+	expected = NewPoint(0.75, 0.75)
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// half
+	result = p.Interpolate(0.5)
+	expected = NewPoint(1.50, 1.50)
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// three quarters
+	result = p.Interpolate(0.75)
+	expected = NewPoint(2.25, 2.25)
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// end
+	result = p.Interpolate(1)
+	expected = p.Last()
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+
+	// out-of-range - percent too high
+	result = p.Interpolate(1.1)
+	expected = p.Last()
+	if !expected.Equals(result) {
+		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+	}
+}
+
 func TestPathProject(t *testing.T) {
 	p := NewPath()
 	p.Push(NewPoint(0, 0))
