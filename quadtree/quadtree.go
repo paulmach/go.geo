@@ -46,19 +46,23 @@ type node struct {
 
 // New creates a new quadtree for the given bound. Added points
 // must be within this bound.
-func New(bound *geo.Bound) *Quadtree {
-	return &Quadtree{
+func New(bound *geo.Bound, preallocateSize ...int) *Quadtree {
+	qt := &Quadtree{
 		Threshold: math.Max(bound.Width(), bound.Height()) / float64(1<<12),
 		bound:     bound,
 	}
+	if len(preallocateSize) == 1 {
+		qt.freeNodes = make([]node, preallocateSize[0], preallocateSize[0])
+
+	}
+	return qt
 }
 
 // NewFromPointSet creates a quadtree from a pointset.
 // Copies the points into the quad tree. Modifying the points later
 // will invalidate the quad tree and lead to unexpected result.
 func NewFromPointSet(set *geo.PointSet) *Quadtree {
-	q := New(set.Bound())
-	q.freeNodes = make([]node, set.Length(), set.Length())
+	q := New(set.Bound(), set.Length())
 
 	ps := []geo.Point(*set)
 	for i := range ps {
@@ -81,8 +85,7 @@ func NewFromPointers(points []geo.Pointer) *Quadtree {
 		b.Extend(p.Point())
 	}
 
-	q := New(b)
-	q.freeNodes = make([]node, len(points), len(points))
+	q := New(b, len(points))
 
 	for _, p := range points {
 		q.Insert(p)
