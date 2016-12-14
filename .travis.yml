@@ -9,3 +9,5 @@ after_script:
 script:
   - go test -v .
   - go test -v ./reducers/
+  - go test -v ./quadtree/
+  - go test -v ./clustering/

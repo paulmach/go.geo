@@ -15,6 +15,16 @@ func TestNew(t *testing.T) {
 		t.Errorf("should use provided bound, got %v", qt.Bound)
 	}
 
+	if qt.freeNodes != nil {
+		t.Errorf("freeNodes should not be preallocated")
+	}
+
+	qt = New(bound, 12)
+
+	if len(qt.freeNodes) != 12 {
+		t.Errorf("should preallocate %d freeNodes", 12)
+	}
+
 	ps := geo.NewPointSet()
 	ps.Push(geo.NewPoint(0, 2))
 	ps.Push(geo.NewPoint(1, 3))
@@ -22,6 +32,10 @@ func TestNew(t *testing.T) {
 	qt = NewFromPointSet(ps)
 	if !qt.Bound().Equals(ps.Bound()) {
 		t.Errorf("should take bound from pointset, got %v", qt.Bound())
+	}
+
+	if len(qt.freeNodes) != ps.Length() {
+		t.Errorf("should preallocate %d freeNodes", ps.Length())
 	}
 }
 
