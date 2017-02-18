@@ -335,49 +335,49 @@ func TestPathInterpolate(t *testing.T) {
 	result := p.Interpolate(-0.1)
 	expected := p.First()
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// start
 	result = p.Interpolate(0)
 	expected = p.First()
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// quarter
 	result = p.Interpolate(0.25)
 	expected = NewPoint(0.75, 0.75)
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// half
 	result = p.Interpolate(0.5)
 	expected = NewPoint(1.50, 1.50)
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// three quarters
 	result = p.Interpolate(0.75)
 	expected = NewPoint(2.25, 2.25)
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// end
 	result = p.Interpolate(1)
 	expected = p.Last()
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 
 	// out-of-range - percent too high
 	result = p.Interpolate(1.1)
 	expected = p.Last()
 	if !expected.Equals(result) {
-		t.Errorf("path, interpolate expected %f, got %f", expected, result)
+		t.Errorf("path, interpolate expected %v, got %v", expected, result)
 	}
 }
 

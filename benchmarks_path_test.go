@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	geo "."
+	geo "github.com/paulmach/go.geo"
 )
 
 func BenchmarkPathDistanceFrom(b *testing.B) {

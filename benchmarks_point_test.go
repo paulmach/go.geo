@@ -3,7 +3,7 @@ package geo_test
 import (
 	"testing"
 
-	geo "."
+	geo "github.com/paulmach/go.geo"
 )
 
 func BenchmarkPointDistanceFrom(b *testing.B) {
