@@ -260,6 +260,37 @@ func TestWKBPolygon(t *testing.T) {
 	}
 }
 
+func TestWKBMultiPoint(t *testing.T) {
+	// raw WKB MultiPoint data
+	data := []byte{1, 4, 0, 0, 0, 2, 0, 0, 0, 1, 1, 0, 0, 0, 222, 90, 38, 195, 241, 110, 73, 64, 229, 179, 60, 15, 238, 190, 22, 64, 1, 1, 0, 0, 0, 94, 189, 138, 140, 14, 110, 73, 64, 24, 11, 67, 228, 244, 213, 22, 64}
+
+	// pointset
+	ps := NewPointSet()
+
+	expected := "MULTIPOINT(50.866753 5.686455,50.859819 5.708942)"
+	err := ps.Scan(data)
+	if err != nil {
+		t.Errorf("should not return error, got %v", err)
+	}
+
+	if ps.String() != expected {
+		t.Errorf("incorrect point set, got %v", ps)
+	}
+
+	// path
+	path := NewPath()
+
+	expected = "LINESTRING(50.866753 5.686455,50.859819 5.708942)"
+	err = path.Scan(data)
+	if err != nil {
+		t.Errorf("should not return error, got %v", err)
+	}
+
+	if path.String() != expected {
+		t.Errorf("incorrect path, got %v", path)
+	}
+}
+
 func TestScanUint32(t *testing.T) {
 	if v := scanUint32([]byte{1, 0, 0, 0}, true); v != 1 {
 		t.Errorf("parsed to wrong value, got %v", v)
