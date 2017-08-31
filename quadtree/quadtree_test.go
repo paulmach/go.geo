@@ -12,7 +12,7 @@ func TestNew(t *testing.T) {
 	qt := New(bound)
 
 	if qt.Bound() != bound {
-		t.Errorf("should use provided bound, got %v", qt.Bound)
+		t.Errorf("should use provided bound, got %v", qt.Bound())
 	}
 
 	if qt.freeNodes != nil {
