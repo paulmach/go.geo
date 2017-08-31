@@ -98,6 +98,11 @@ func (p *Point) Scan(value interface{}) error {
 	return ErrIncorrectGeometry
 }
 
+func (p *Point) unmarshalXY(data []byte, littleEndian bool) {
+	p[0] = scanFloat64(data[:8], littleEndian)
+	p[1] = scanFloat64(data[8:16], littleEndian)
+}
+
 func (p *Point) unmarshalWKB(data []byte) error {
 	if len(data) != 21 {
 		return ErrNotWKB
@@ -112,8 +117,7 @@ func (p *Point) unmarshalWKB(data []byte) error {
 		return ErrIncorrectGeometry
 	}
 
-	p[0] = scanFloat64(data[5:13], littleEndian)
-	p[1] = scanFloat64(data[13:21], littleEndian)
+	p.unmarshalXY(data[5:], littleEndian)
 
 	return nil
 }
@@ -168,10 +172,8 @@ func (l *Line) unmarshalWKB(data []byte) error {
 		return ErrIncorrectGeometry
 	}
 
-	l.a[0] = scanFloat64(data[9:17], littleEndian)
-	l.a[1] = scanFloat64(data[17:25], littleEndian)
-	l.b[0] = scanFloat64(data[25:33], littleEndian)
-	l.b[1] = scanFloat64(data[33:41], littleEndian)
+	l.a.unmarshalXY(data[9:], littleEndian)
+	l.b.unmarshalXY(data[25:], littleEndian)
 
 	return nil
 }
@@ -205,6 +207,20 @@ func (ps *PointSet) Scan(value interface{}) error {
 	return ps.unmarshalWKB(data[4:])
 }
 
+func (ps *PointSet) unmarshalLinearRing(data []byte, littleEndian bool) error {
+	const pointSize = 16
+	length := int(scanUint32(data[:4], littleEndian))
+	if len(data) != 4+pointSize*length {
+		return ErrNotWKB
+	}
+	points := make([]Point, length)
+	for i := 0; i < length; i++ {
+		points[i].unmarshalXY(data[4+pointSize*i:], littleEndian)
+	}
+	ps.SetPoints(points)
+	return nil
+}
+
 func (ps *PointSet) unmarshalWKB(data []byte) error {
 	if len(data) < 6 {
 		return ErrNotWKB
@@ -215,36 +231,33 @@ func (ps *PointSet) unmarshalWKB(data []byte) error {
 		return err
 	}
 
-	// must be LineString, Polygon or MultiPoint
-	if typeCode != 2 && typeCode != 3 && typeCode != 4 {
-		return ErrIncorrectGeometry
-	}
-
-	if typeCode == 3 {
+	switch typeCode {
+	case 2: // LineString
+		return ps.unmarshalLinearRing(data[5:], littleEndian)
+	case 3: // Polygon
 		// For polygons there is a ring count.
 		// We only allow one ring here.
-		rings := int(scanUint32(data[5:9], littleEndian))
-		if rings != 1 {
+		numRings := int(scanUint32(data[5:9], littleEndian))
+		if numRings != 1 {
 			return ErrIncorrectGeometry
 		}
-
-		data = data[9:]
-	} else {
-		data = data[5:]
+		return ps.unmarshalLinearRing(data[9:], littleEndian)
+	case 4: // MultiPoint
+		const wkbPointSize = 1 + 4 + 16
+		length := int(scanUint32(data[5:9], littleEndian))
+		if len(data) != 9+wkbPointSize*length {
+			return ErrNotWKB
+		}
+		points := make([]Point, length)
+		for i := 0; i < length; i++ {
+			if err := points[i].unmarshalWKB(data[9+wkbPointSize*i : 9+wkbPointSize*i+wkbPointSize]); err != nil {
+				return err
+			}
+		}
+		ps.SetPoints(points)
+	default:
+		return ErrIncorrectGeometry
 	}
-
-	length := int(scanUint32(data[:4], littleEndian))
-	if len(data) != 4+16*length {
-		return ErrNotWKB
-	}
-
-	points := make([]Point, length, length)
-	for i := 0; i < length; i++ {
-		points[i][0] = scanFloat64(data[4+i*16:4+i*16+8], littleEndian)
-		points[i][1] = scanFloat64(data[4+i*16+8:4+i*16+16], littleEndian)
-	}
-
-	ps.SetPoints(points)
 
 	return nil
 }
