@@ -94,6 +94,42 @@ func TestQuadtreeFindRandom(t *testing.T) {
 	}
 }
 
+func TestQuadtreeFindMatching(t *testing.T) {
+	type dataPointer struct {
+		geo.Pointer
+		visible bool
+	}
+
+	q := NewFromPointers([]geo.Pointer{
+		dataPointer{geo.NewPoint(0, 0), false},
+		dataPointer{geo.NewPoint(1, 1), true},
+	})
+
+	// filters
+	filters := map[bool]Filter{
+		false: nil,
+		true:  func(p geo.Pointer) bool { return p.(dataPointer).visible },
+	}
+
+	// table test
+	type findTest struct {
+		Filtered bool
+		Point    *geo.Point
+		Expected *geo.Point
+	}
+
+	tests := []findTest{
+		{Filtered: false, Point: geo.NewPoint(0.1, 0.1), Expected: geo.NewPoint(0, 0)},
+		{Filtered: true, Point: geo.NewPoint(0.1, 0.1), Expected: geo.NewPoint(1, 1)},
+	}
+
+	for i, test := range tests {
+		if v := q.FindMatching(test.Point, filters[test.Filtered]); !v.Point().Equals(test.Expected) {
+			t.Errorf("incorrect point on %d, got %v", i, v)
+		}
+	}
+}
+
 func TestQuadtreeInBoundRandom(t *testing.T) {
 	r := rand.New(rand.NewSource(43))
 

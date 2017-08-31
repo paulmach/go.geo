@@ -36,6 +36,9 @@ type Quadtree struct {
 	freeIndex int
 }
 
+// A Filter is a function that returns a boolean value for a given geo.Pointer.
+type Filter func(p geo.Pointer) bool
+
 // node represents a node of the quad tree. Each node stores a Value
 // and has links to its 4 children
 type node struct {
@@ -222,12 +225,20 @@ func (q *Quadtree) insert(n *node, p geo.Pointer, left, right, bottom, top float
 // This function is thread safe. Multiple goroutines can read from
 // a pre-created tree.
 func (q *Quadtree) Find(p *geo.Point) geo.Pointer {
+	return q.FindMatching(p, nil)
+}
+
+// FindMatching returns the closest Value/Pointer in the quadtree for which
+// the given filter function returns true. This function is thread safe.
+// Multiple goroutines can read from a pre-created tree.
+func (q *Quadtree) FindMatching(p *geo.Point, f Filter) geo.Pointer {
 	if q.root == nil {
 		return nil
 	}
 
 	v := &findVisitor{
 		point:          p,
+		filter:         f,
 		closestBound:   q.bound.Clone(),
 		minDistSquared: math.MaxFloat64,
 	}
@@ -337,6 +348,7 @@ func (v *visit) Visit(n *node, left, right, bottom, top float64) {
 
 type findVisitor struct {
 	point          *geo.Point
+	filter         Filter
 	closest        geo.Pointer
 	closestBound   *geo.Bound
 	minDistSquared float64
@@ -351,6 +363,11 @@ func (v *findVisitor) Point() *geo.Point {
 }
 
 func (v *findVisitor) Visit(p geo.Pointer) {
+	// skip this pointer if we have a filter and it doesn't match
+	if v.filter != nil && !v.filter(p) {
+		return
+	}
+
 	point := p.Point()
 	if d := point.SquaredDistanceFrom(v.point); d < v.minDistSquared {
 		v.minDistSquared = d
