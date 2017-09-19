@@ -271,7 +271,7 @@ func (q *Quadtree) FindKNearestMatching(p *geo.Point, k int, f Filter) []geo.Poi
 		point:              p,
 		filter:             f,
 		k:                  k,
-		closest:            NewPointsQueue(k),
+		closest:            newPointsQueue(k),
 		closestBound:       q.bound.Clone(),
 		maxAllowedDistance: math.MaxFloat64,
 	}
@@ -426,7 +426,7 @@ type pointsQueueItem struct {
 
 type pointsQueue []pointsQueueItem
 
-func NewPointsQueue(capacity int) pointsQueue {
+func newPointsQueue(capacity int) pointsQueue {
 	// We make capacity+1 because we need additional place for the greatest element
 	return make([]pointsQueueItem, 0, capacity+1)
 }
