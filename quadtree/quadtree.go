@@ -416,8 +416,6 @@ func (v *findVisitor) Visit(p geo.Pointer) {
 		y := v.point.Y()
 		v.closestBound.Set(x-d, x+d, y-d, y+d)
 	}
-
-	return
 }
 
 type pointsQueueItem struct {
@@ -426,11 +424,11 @@ type pointsQueueItem struct {
 	index    int     // point index in queue
 }
 
-type pointsQueue []*pointsQueueItem
+type pointsQueue []pointsQueueItem
 
 func NewPointsQueue(capacity int) pointsQueue {
 	// We make capacity+1 because we need additional place for the greatest element
-	return make([]*pointsQueueItem, 0, capacity+1)
+	return make([]pointsQueueItem, 0, capacity+1)
 }
 
 func (pq pointsQueue) Len() int { return len(pq) }
@@ -448,7 +446,7 @@ func (pq pointsQueue) Swap(i, j int) {
 
 func (pq *pointsQueue) Push(x interface{}) {
 	n := len(*pq)
-	item := x.(*pointsQueueItem)
+	item := x.(pointsQueueItem)
 	item.index = n
 	*pq = append(*pq, item)
 }
@@ -487,7 +485,7 @@ func (v *kNearestVisitor) Visit(p geo.Pointer) {
 
 	point := p.Point()
 	if d := point.SquaredDistanceFrom(v.point); d < v.maxAllowedDistance {
-		heap.Push(&v.closest, &pointsQueueItem{point: p, distance: d})
+		heap.Push(&v.closest, pointsQueueItem{point: p, distance: d})
 		if v.closest.Len() > v.k {
 			heap.Pop(&v.closest)
 
@@ -503,8 +501,6 @@ func (v *kNearestVisitor) Visit(p geo.Pointer) {
 			v.closestBound.Set(x-d, x+d, y-d, y+d)
 		}
 	}
-
-	return
 }
 
 type inBoundVisitor struct {
