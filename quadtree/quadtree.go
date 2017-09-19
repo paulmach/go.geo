@@ -6,6 +6,7 @@
 package quadtree
 
 import (
+	"container/heap"
 	"errors"
 	"math"
 
@@ -228,6 +229,13 @@ func (q *Quadtree) Find(p *geo.Point) geo.Pointer {
 	return q.FindMatching(p, nil)
 }
 
+// FindKNearest returns k closest Value/Pointer in the quadtree.
+// This function is thread safe. Multiple goroutines can read from
+// a pre-created tree.
+func (q *Quadtree) FindKNearest(p *geo.Point, k int) []geo.Pointer {
+	return q.FindKNearestMatching(p, k, nil)
+}
+
 // FindMatching returns the closest Value/Pointer in the quadtree for which
 // the given filter function returns true. This function is thread safe.
 // Multiple goroutines can read from a pre-created tree.
@@ -249,6 +257,36 @@ func (q *Quadtree) FindMatching(p *geo.Point, f Filter) geo.Pointer {
 	)
 
 	return v.closest
+}
+
+// FindKNearestMatching returns k closest Value/Pointer in the quadtree for which
+// the given filter function returns true. This function is thread safe.
+// Multiple goroutines can read from a pre-created tree.
+func (q *Quadtree) FindKNearestMatching(p *geo.Point, k int, f Filter) []geo.Pointer {
+	if q.root == nil {
+		return nil
+	}
+
+	v := &kNearestVisitor{
+		point:              p,
+		filter:             f,
+		k:                  k,
+		closest:            newPointsQueue(k),
+		closestBound:       q.bound.Clone(),
+		maxAllowedDistance: math.MaxFloat64,
+	}
+
+	newVisit(v).Visit(q.root,
+		q.bound.Left(), q.bound.Right(),
+		q.bound.Bottom(), q.bound.Top(),
+	)
+
+	//repack result
+	result := make([]geo.Pointer, 0, k)
+	for _, element := range v.closest {
+		result = append(result, element.point)
+	}
+	return result
 }
 
 // InBound returns a slice with all the pointers in the quadtree that are
@@ -378,8 +416,91 @@ func (v *findVisitor) Visit(p geo.Pointer) {
 		y := v.point.Y()
 		v.closestBound.Set(x-d, x+d, y-d, y+d)
 	}
+}
 
-	return
+type pointsQueueItem struct {
+	point    geo.Pointer
+	distance float64 // distance to point and priority inside the queue
+	index    int     // point index in queue
+}
+
+type pointsQueue []pointsQueueItem
+
+func newPointsQueue(capacity int) pointsQueue {
+	// We make capacity+1 because we need additional place for the greatest element
+	return make([]pointsQueueItem, 0, capacity+1)
+}
+
+func (pq pointsQueue) Len() int { return len(pq) }
+
+func (pq pointsQueue) Less(i, j int) bool {
+	// We want pop longest distances so Less was inverted
+	return pq[i].distance > pq[j].distance
+}
+
+func (pq pointsQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
+}
+
+func (pq *pointsQueue) Push(x interface{}) {
+	n := len(*pq)
+	item := x.(pointsQueueItem)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *pointsQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	item.index = -1
+	*pq = old[0 : n-1]
+	return item
+}
+
+type kNearestVisitor struct {
+	point              *geo.Point
+	filter             Filter
+	k                  int
+	closest            pointsQueue
+	closestBound       *geo.Bound
+	maxAllowedDistance float64
+}
+
+func (v *kNearestVisitor) Bound() *geo.Bound {
+	return v.closestBound
+}
+
+func (v *kNearestVisitor) Point() *geo.Point {
+	return v.point
+}
+
+func (v *kNearestVisitor) Visit(p geo.Pointer) {
+	// skip this pointer if we have a filter and it doesn't match
+	if v.filter != nil && !v.filter(p) {
+		return
+	}
+
+	point := p.Point()
+	if d := point.SquaredDistanceFrom(v.point); d < v.maxAllowedDistance {
+		heap.Push(&v.closest, pointsQueueItem{point: p, distance: d})
+		if v.closest.Len() > v.k {
+			heap.Pop(&v.closest)
+
+			// Actually this is a hack. We know how heap works and obtain top element without function call
+			top := v.closest[0]
+
+			v.maxAllowedDistance = top.distance
+
+			// We have filled queue, so we start to restrict searching range
+			d = math.Sqrt(top.distance)
+			x := v.point.X()
+			y := v.point.Y()
+			v.closestBound.Set(x-d, x+d, y-d, y+d)
+		}
+	}
 }
 
 type inBoundVisitor struct {
