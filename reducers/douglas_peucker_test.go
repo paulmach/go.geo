@@ -45,7 +45,7 @@ func TestDouglasPeucker(t *testing.T) {
 	dp := NewDouglasPeucker(0.1)
 	p1 := p.Clone()
 	dp.GeoReduce(p)
-	if !p.Equals(p1){
+	if !p.Equals(p1) {
 		t.Errorf("dp GeoReduce should not modify original path")
 	}
 }
@@ -127,7 +127,6 @@ func TestDouglasPeuckerIndexMap(t *testing.T) {
 	}
 }
 
-
 func TestDouglasPeuckerGeoIndexMap(t *testing.T) {
 	p := geo.NewPath()
 
@@ -192,7 +191,7 @@ func TestDouglasPeuckerGeoIndexMap(t *testing.T) {
 	}
 
 	// 3 length, doesn't reduce
-	reduced, indexMap = DouglasPeuckerGeoIndexMap(p, threshold / 2)
+	reduced, indexMap = DouglasPeuckerGeoIndexMap(p, threshold/2)
 	if l := reduced.Length(); l != 3 {
 		t.Errorf("dpim reduce to incorrect number of points, expected 3, got %d", l)
 	}
