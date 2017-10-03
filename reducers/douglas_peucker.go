@@ -26,8 +26,8 @@ func (r DouglasPeuckerReducer) Reduce(path *geo.Path) *geo.Path {
 // The threshold is expected to be in meters.
 func (r DouglasPeuckerReducer) GeoReduce(path *geo.Path) *geo.Path {
 	factor := geo.MercatorScaleFactor(path.Bound().Center().Lat())
-	path.Transform(geo.Mercator.Project)
-	reduced := DouglasPeucker(path, r.Threshold*factor)
+	merc := path.Clone().Transform(geo.Mercator.Project)
+	reduced := DouglasPeucker(merc, r.Threshold*factor)
 
 	return reduced.Transform(geo.Mercator.Inverse)
 }
@@ -91,6 +91,44 @@ func DouglasPeuckerIndexMap(path *geo.Path, threshold float64) (reduced *geo.Pat
 
 	reduced = &geo.Path{}
 	return reduced.SetPoints(points), indexMap
+}
+
+// DouglasPeuckerGeoIndexMap is similar to GeoReduce but returns an array that maps
+// each new path index to its original path index.
+// Returns a new path and DOES NOT modify the original.
+func DouglasPeuckerGeoIndexMap(path *geo.Path, meters float64) (reduced *geo.Path, indexMap []int) {
+	if path.Length() == 0 {
+		return path.Clone(), []int{}
+	}
+
+	if path.Length() == 1 {
+		return path.Clone(), []int{0}
+	}
+
+	if path.Length() == 2 {
+		return path.Clone(), []int{0, 1}
+	}
+
+	mask := make([]byte, path.Length())
+	mask[0] = 1
+	mask[path.Length()-1] = 1
+
+	factor := geo.MercatorScaleFactor(path.Bound().Center().Lat())
+	originalPoints := path.Clone().Transform(geo.Mercator.Project).Points()
+	found := dpWorker(originalPoints, meters*factor, mask)
+
+	points := make([]geo.Point, 0, found)
+	for i, v := range mask {
+		if v == 1 {
+			points = append(points, originalPoints[i])
+			indexMap = append(indexMap, i)
+		}
+	}
+
+	reduced = &geo.Path{}
+	reduced.SetPoints(points)
+	reduced.Transform(geo.Mercator.Inverse)
+	return reduced, indexMap
 }
 
 // dpWorker does the recursive threshold checks.
