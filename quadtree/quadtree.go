@@ -232,8 +232,9 @@ func (q *Quadtree) Find(p *geo.Point) geo.Pointer {
 // FindKNearest returns k closest Value/Pointer in the quadtree.
 // This function is thread safe. Multiple goroutines can read from
 // a pre-created tree.
-func (q *Quadtree) FindKNearest(p *geo.Point, k int) []geo.Pointer {
-	return q.FindKNearestMatching(p, k, nil)
+// This function allows defining a maximum distance in order to reduce search iterations.
+func (q *Quadtree) FindKNearest(p *geo.Point, k int, maxDistance ...float64) []geo.Pointer {
+	return q.FindKNearestMatching(p, k, nil, maxDistance...)
 }
 
 // FindMatching returns the closest Value/Pointer in the quadtree for which
@@ -248,7 +249,7 @@ func (q *Quadtree) FindMatching(p *geo.Point, f Filter) geo.Pointer {
 		point:          p,
 		filter:         f,
 		closestBound:   q.bound.Clone(),
-		minDistSquared: math.MaxFloat64,
+		maxDistSquared: math.MaxFloat64,
 	}
 
 	newVisit(v).Visit(q.root,
@@ -262,18 +263,23 @@ func (q *Quadtree) FindMatching(p *geo.Point, f Filter) geo.Pointer {
 // FindKNearestMatching returns k closest Value/Pointer in the quadtree for which
 // the given filter function returns true. This function is thread safe.
 // Multiple goroutines can read from a pre-created tree.
-func (q *Quadtree) FindKNearestMatching(p *geo.Point, k int, f Filter) []geo.Pointer {
+// This function allows defining a maximum distance in order to reduce search iterations.
+func (q *Quadtree) FindKNearestMatching(p *geo.Point, k int, f Filter, maxDistance ...float64) []geo.Pointer {
 	if q.root == nil {
 		return nil
 	}
 
-	v := &kNearestVisitor{
-		point:              p,
-		filter:             f,
-		k:                  k,
-		closest:            newPointsQueue(k),
-		closestBound:       q.bound.Clone(),
-		maxAllowedDistance: math.MaxFloat64,
+	v := &nearestVisitor{
+		point:          p,
+		filter:         f,
+		k:              k,
+		closest:        newPointsQueue(k),
+		closestBound:   q.bound.Clone(),
+		maxDistSquared: math.MaxFloat64,
+	}
+
+	if len(maxDistance) > 0 {
+		v.maxDistSquared = math.Pow(maxDistance[0], 2)
 	}
 
 	newVisit(v).Visit(q.root,
@@ -389,7 +395,7 @@ type findVisitor struct {
 	filter         Filter
 	closest        geo.Pointer
 	closestBound   *geo.Bound
-	minDistSquared float64
+	maxDistSquared float64
 }
 
 func (v *findVisitor) Bound() *geo.Bound {
@@ -407,8 +413,8 @@ func (v *findVisitor) Visit(p geo.Pointer) {
 	}
 
 	point := p.Point()
-	if d := point.SquaredDistanceFrom(v.point); d < v.minDistSquared {
-		v.minDistSquared = d
+	if d := point.SquaredDistanceFrom(v.point); d < v.maxDistSquared {
+		v.maxDistSquared = d
 		v.closest = p
 
 		d = math.Sqrt(d)
@@ -460,31 +466,31 @@ func (pq *pointsQueue) Pop() interface{} {
 	return item
 }
 
-type kNearestVisitor struct {
-	point              *geo.Point
-	filter             Filter
-	k                  int
-	closest            pointsQueue
-	closestBound       *geo.Bound
-	maxAllowedDistance float64
+type nearestVisitor struct {
+	point          *geo.Point
+	filter         Filter
+	k              int
+	closest        pointsQueue
+	closestBound   *geo.Bound
+	maxDistSquared float64
 }
 
-func (v *kNearestVisitor) Bound() *geo.Bound {
+func (v *nearestVisitor) Bound() *geo.Bound {
 	return v.closestBound
 }
 
-func (v *kNearestVisitor) Point() *geo.Point {
+func (v *nearestVisitor) Point() *geo.Point {
 	return v.point
 }
 
-func (v *kNearestVisitor) Visit(p geo.Pointer) {
+func (v *nearestVisitor) Visit(p geo.Pointer) {
 	// skip this pointer if we have a filter and it doesn't match
 	if v.filter != nil && !v.filter(p) {
 		return
 	}
 
 	point := p.Point()
-	if d := point.SquaredDistanceFrom(v.point); d < v.maxAllowedDistance {
+	if d := point.SquaredDistanceFrom(v.point); d < v.maxDistSquared {
 		heap.Push(&v.closest, pointsQueueItem{point: p, distance: d})
 		if v.closest.Len() > v.k {
 			heap.Pop(&v.closest)
@@ -492,7 +498,7 @@ func (v *kNearestVisitor) Visit(p geo.Pointer) {
 			// Actually this is a hack. We know how heap works and obtain top element without function call
 			top := v.closest[0]
 
-			v.maxAllowedDistance = top.distance
+			v.maxDistSquared = top.distance
 
 			// We have filled queue, so we start to restrict searching range
 			d = math.Sqrt(top.distance)
