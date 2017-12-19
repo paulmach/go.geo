@@ -8,7 +8,7 @@ import (
 	"github.com/paulmach/go.geo/quadtree"
 )
 
-func ExampleQuadtreeFind() {
+func ExampleQuadtree_Find() {
 	r := rand.New(rand.NewSource(42)) // to make things reproducible
 
 	qt := quadtree.New(geo.NewBound(0, 1, 0, 1))
@@ -25,7 +25,7 @@ func ExampleQuadtreeFind() {
 	// nearest: POINT(0.4930591659434973 0.5196585530161364)
 }
 
-func ExampleQuadtreeFindKNearest() {
+func ExampleQuadtree_FindKNearest() {
 	r := rand.New(rand.NewSource(42)) // to make things reproducible
 
 	qt := quadtree.New(geo.NewBound(0, 1, 0, 1))
@@ -46,7 +46,7 @@ func ExampleQuadtreeFindKNearest() {
 	// nearest: POINT(0.4930591659434973 0.5196585530161364)
 }
 
-func ExampleQuadtreeFindMatching() {
+func ExampleQuadtree_FindMatching() {
 	r := rand.New(rand.NewSource(42)) // to make things reproducible
 
 	type dataPoint struct {
@@ -74,7 +74,7 @@ func ExampleQuadtreeFindMatching() {
 	// nearest: {Pointer:POINT(0 0) visible:true}
 }
 
-func ExampleQuadtreeFindKNearestMatching() {
+func ExampleQuadtree_FindKNearestMatching() {
 	r := rand.New(rand.NewSource(42)) // to make things reproducible
 
 	type dataPoint struct {
@@ -104,7 +104,7 @@ func ExampleQuadtreeFindKNearestMatching() {
 	// nearest: [{Pointer:POINT(0 0) visible:true} {Pointer:POINT(0.6 0.6) visible:true}]
 }
 
-func ExampleQuadtreeInBound() {
+func ExampleQuadtree_InBound() {
 	r := rand.New(rand.NewSource(52)) // to make things reproducible
 
 	qt := quadtree.New(geo.NewBound(0, 1, 0, 1))
