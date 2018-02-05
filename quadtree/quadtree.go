@@ -300,6 +300,14 @@ func (q *Quadtree) FindKNearestMatching(p *geo.Point, k int, f Filter, maxDistan
 // for the reuse of result slice memory. This function is thread safe.
 // Multiple goroutines can read from a pre-created tree.
 func (q *Quadtree) InBound(b *geo.Bound, buf ...[]geo.Pointer) []geo.Pointer {
+	return q.InBoundMatching(b, nil, buf...)
+}
+
+// InBoundMatching returns a slice with all the pointers in the quadtree that are
+// within the given bound and for which the given filter function returns true.
+// An optional buffer parameter is provided to allow for the reuse of result slice memory.
+// This function is thread safe. Multiple goroutines can read from a pre-created tree.
+func (q *Quadtree) InBoundMatching(b *geo.Bound, f Filter, buf ...[]geo.Pointer) []geo.Pointer {
 	if q.root == nil {
 		return nil
 	}
@@ -311,6 +319,7 @@ func (q *Quadtree) InBound(b *geo.Bound, buf ...[]geo.Pointer) []geo.Pointer {
 	v := &inBoundVisitor{
 		bound:    b,
 		pointers: p,
+		filter:   f,
 	}
 
 	newVisit(v).Visit(q.root,
@@ -512,6 +521,7 @@ func (v *nearestVisitor) Visit(p geo.Pointer) {
 type inBoundVisitor struct {
 	bound    *geo.Bound
 	pointers []geo.Pointer
+	filter   Filter
 }
 
 func (v *inBoundVisitor) Bound() *geo.Bound {
@@ -523,6 +533,11 @@ func (v *inBoundVisitor) Point() *geo.Point {
 }
 
 func (v *inBoundVisitor) Visit(p geo.Pointer) {
+	// skip this pointer if we have a filter and it doesn't match
+	if v.filter != nil && !v.filter(p) {
+		return
+	}
+
 	if v.bound.Contains(p.Point()) {
 		v.pointers = append(v.pointers, p)
 	}

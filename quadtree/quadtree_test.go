@@ -266,3 +266,71 @@ func TestQuadtreeInBoundRandom(t *testing.T) {
 		}
 	}
 }
+
+func TestQuadtreeInBoundMatching(t *testing.T) {
+	type dataPointer struct {
+		geo.Pointer
+		visible bool
+	}
+
+	q := NewFromPointers([]geo.Pointer{
+		dataPointer{geo.NewPoint(0, 0), false},
+		dataPointer{geo.NewPoint(1, 1), true},
+		dataPointer{geo.NewPoint(2, 2), false},
+		dataPointer{geo.NewPoint(3, 3), true},
+		dataPointer{geo.NewPoint(4, 4), false},
+		dataPointer{geo.NewPoint(5, 5), true},
+	})
+
+	// filters
+	filters := map[bool]Filter{
+		false: nil,
+		true:  func(p geo.Pointer) bool { return p.(dataPointer).visible },
+	}
+
+	// table test
+	type findTest struct {
+		Filtered bool
+		Bound    *geo.Bound
+		Expected []*geo.Point
+	}
+
+	tests := []findTest{
+		{
+			Filtered: false,
+			Bound:    geo.NewBound(1, 3, 1, 3),
+			Expected: []*geo.Point{
+				geo.NewPoint(1, 1),
+				geo.NewPoint(2, 2),
+				geo.NewPoint(3, 3),
+			},
+		},
+		{
+			Filtered: true,
+			Bound:    geo.NewBound(1, 3, 1, 3),
+			Expected: []*geo.Point{
+				geo.NewPoint(1, 1),
+				geo.NewPoint(3, 3),
+			},
+		},
+	}
+
+	for i, test := range tests {
+		v := q.InBoundMatching(test.Bound, filters[test.Filtered])
+		if len(v) != len(test.Expected) {
+			t.Errorf("incorrect response length on %d", i)
+		}
+		for _, answer := range v {
+			found := false
+			for _, expected := range test.Expected {
+				if answer.Point().Equals(expected) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("incorrect point on %d, got %v", i, v)
+			}
+		}
+	}
+}
