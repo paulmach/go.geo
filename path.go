@@ -43,7 +43,7 @@ func NewPathFromEncoding(encoded string, factor ...int) *Path {
 		var b = 0x20
 		var shift uint
 
-		for b >= 0x20 {
+		for b >= 0x20 && index < len(encoded) {
 			b = int(encoded[index]) - 63
 			index++
 
