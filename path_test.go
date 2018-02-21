@@ -52,6 +52,13 @@ func TestNewPathFromEncoding(t *testing.T) {
 	}
 }
 
+func TestNewPathFromEncodingShouldFailedOnMalformedPolyline(t *testing.T) {
+	path := NewPathFromEncoding("xxxxxx")
+	if path.Length() > 0 {
+		t.Errorf("path should be empty, %v", path)
+	}
+}
+
 func TestNewPathFromXYData(t *testing.T) {
 	data := [][2]float64{
 		{1, 2},
