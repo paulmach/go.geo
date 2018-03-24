@@ -79,6 +79,26 @@ func TestNewPathFromXYData(t *testing.T) {
 	}
 }
 
+func TestNewPathFromFlatXYData(t *testing.T) {
+	data := []float64{
+		1, 2,
+		3, 4,
+	}
+
+	p := NewPathFromFlatXYData(data)
+	if l := p.Length(); l != len(data) / 2 {
+		t.Errorf("path, should take full length of data, expected %d, got %d", len(data) / 2, l)
+	}
+
+	if point := p.GetAt(0); !point.Equals(&Point{1, 2}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+
+	if point := p.GetAt(1); !point.Equals(&Point{3, 4}) {
+		t.Errorf("path, first point incorrect, got %v", point)
+	}
+}
+
 func TestNewPathFromYXData(t *testing.T) {
 	data := [][2]float64{
 		{1, 2},
