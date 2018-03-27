@@ -86,8 +86,8 @@ func TestNewPathFromFlatXYData(t *testing.T) {
 	}
 
 	p := NewPathFromFlatXYData(data)
-	if l := p.Length(); l != len(data) / 2 {
-		t.Errorf("path, should take full length of data, expected %d, got %d", len(data) / 2, l)
+	if l := p.Length(); l != len(data)/2 {
+		t.Errorf("path, should take full length of data, expected %d, got %d", len(data)/2, l)
 	}
 
 	if point := p.GetAt(0); !point.Equals(&Point{1, 2}) {

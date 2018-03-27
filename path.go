@@ -88,15 +88,16 @@ func NewPathFromXYData(data [][2]float64) *Path {
 }
 
 // NewPathFromFlatXYData creates a path from a slice of float64 values
-// representing horizontal, vertical type data, for example lng/lat values from geojson.
+// representing horizontal, vertical type data.
+// Coordinates in even positions correspond to X values. Coordinates in odd positions correspond to Y values
 func NewPathFromFlatXYData(data []float64) *Path {
-	if (len(data) % 2 != 0) {
-		log.Fatal("Flat path requires an even number of coordinates")
+	if len(data)%2 != 0 {
+		panic("Flat path requires an even number of coordinates")
 	}
-	p := NewPathPreallocate(0, len(data) / 2)
+	p := NewPathPreallocate(0, len(data)/2)
 
-	for i := 0; i < len(data) / 2; i++ {
-		p.PointSet = append(p.PointSet, Point{data[2 * i], data[2 * i + 1]})
+	for i := 0; i < len(data)/2; i++ {
+		p.PointSet = append(p.PointSet, Point{data[2*i], data[2*i+1]})
 	}
 
 	return p
