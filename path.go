@@ -7,7 +7,6 @@ import (
 	"math"
 
 	"github.com/paulmach/go.geojson"
-	"log"
 )
 
 // Path represents a set of points to be thought of as a polyline.
