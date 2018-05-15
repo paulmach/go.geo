@@ -22,7 +22,7 @@ func TestPointScan(t *testing.T) {
 	}
 
 	// string of hex
-	err := p.Scan([]byte{"010100000000000000000024c00000000000003e40"})
+	err := p.Scan([]byte("010100000000000000000024c00000000000003e40"))
 	if err != nil {
 		t.Errorf("should not get error, got %v", err)
 	}
