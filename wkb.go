@@ -86,6 +86,7 @@ func (p *Point) Scan(value interface{}) error {
 		if err != nil {
 			return err
 		}
+		data = dst
 	}
 
 	if len(data) == 21 {
