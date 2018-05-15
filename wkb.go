@@ -78,13 +78,14 @@ func (p *Point) Scan(value interface{}) error {
 		return ErrUnsupportedDataType
 	}
 
-	//hex string
+	//string of hex workaround
+	//[]byte passed is a string of hex hence the need to decode hex string to real []byte
 	if len(data) == 42 {
-		decoded, err := hex.DecodeString(string(data))
+		dst := make([]byte, 21)
+		_, err := hex.Decode(dst, data)
 		if err != nil {
 			return err
 		}
-		data = decoded
 	}
 
 	if len(data) == 21 {

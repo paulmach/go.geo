@@ -21,6 +21,12 @@ func TestPointScan(t *testing.T) {
 		t.Errorf("incorrect point, got %v", p)
 	}
 
+	// string of hex
+	err := p.Scan([]byte{"010100000000000000000024c00000000000003e40"})
+	if err != nil {
+		t.Errorf("should not get error, got %v", err)
+	}
+
 	// mysql's SRID+WKB data
 	err = p.Scan([]byte{215, 15, 0, 0, 1, 1, 0, 0, 0, 107, 153, 12, 199, 243, 170, 94, 192, 25, 200, 179, 203, 183, 22, 67, 64})
 	if err != nil {
