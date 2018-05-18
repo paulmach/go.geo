@@ -1,6 +1,7 @@
 package geo
 
 import (
+	"encoding/hex"
 	"errors"
 	"math"
 )
@@ -75,6 +76,17 @@ func (p *Point) Scan(value interface{}) error {
 	data, ok := value.([]byte)
 	if !ok {
 		return ErrUnsupportedDataType
+	}
+
+	//string of hex workaround
+	//[]byte passed is a string of hex hence the need to decode hex string to real []byte
+	if len(data) == 42 {
+		dst := make([]byte, 21)
+		_, err := hex.Decode(dst, data)
+		if err != nil {
+			return err
+		}
+		data = dst
 	}
 
 	if len(data) == 21 {
