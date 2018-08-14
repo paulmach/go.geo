@@ -340,12 +340,16 @@ func (p Point) String() string {
 }
 
 // Round returns a point which coordinates are rounded
-func (p *Point) Round(decimalPlaces int) *Point {
-	exp := math.Pow(10, float64(decimalPlaces))
+// Factor defaults to 1.0e5
+func (p *Point) Round(factor ...int) *Point {
+	f := 1.0e5
+	if len(factor) != 0 {
+		f = float64(factor[0])
+	}
 
 	res := Point{}
 	for idx, val := range p {
-		x := val * exp
+		x := val * f
 
 		t := math.Trunc(x)
 		if math.Abs(x-t) >= 0.5 {
@@ -354,7 +358,7 @@ func (p *Point) Round(decimalPlaces int) *Point {
 			x = t
 		}
 
-		res[idx] = x / exp
+		res[idx] = x / f
 	}
 
 	return &res
