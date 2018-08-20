@@ -350,15 +350,7 @@ func (p *Point) Round(factor ...int) *Point {
 	res := Point{}
 	for idx, val := range p {
 		x := val * f
-
-		t := math.Trunc(x)
-		if math.Abs(x-t) >= 0.5 {
-			x = t + math.Copysign(1, x)
-		} else {
-			x = t
-		}
-
-		res[idx] = x / f
+		res[idx] = math.Floor(x+0.5) / f
 	}
 
 	return &res
