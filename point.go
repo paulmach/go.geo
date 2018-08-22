@@ -347,11 +347,10 @@ func (p *Point) Round(factor ...int) *Point {
 		f = float64(factor[0])
 	}
 
-	res := Point{}
 	for idx, val := range p {
 		x := val * f
-		res[idx] = math.Floor(x+0.5) / f
+		p[idx] = math.Floor(x+0.5) / f
 	}
 
-	return &res
+	return p
 }
