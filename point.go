@@ -338,3 +338,19 @@ func (p Point) ToWKT() string {
 func (p Point) String() string {
 	return fmt.Sprintf("POINT(%g %g)", p[0], p[1])
 }
+
+// Round returns a point which coordinates are rounded
+// Factor defaults to 1.0e5
+func (p *Point) Round(factor ...int) *Point {
+	f := 1.0e5
+	if len(factor) != 0 {
+		f = float64(factor[0])
+	}
+
+	for idx, val := range p {
+		x := val * f
+		p[idx] = math.Floor(x+0.5) / f
+	}
+
+	return p
+}

@@ -416,3 +416,61 @@ func TestPointString(t *testing.T) {
 		t.Errorf("point, string expected %s, got %s", answer, s)
 	}
 }
+
+func TestPointRound(t *testing.T) {
+	source := NewPoint(44.123456789, 77.987654321)
+	expected := NewPoint(44., 78.)
+	res := source.Round(1)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(44.123456789, 77.987654321)
+	expected = NewPoint(44.1, 78.0)
+	res = source.Round(1.0e1)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(44.123456789, 77.987654321)
+	expected = NewPoint(44.123457, 77.987654)
+	res = source.Round(1.0e6)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(42.6, 73.6)
+	expected = NewPoint(42.6, 73.6)
+	res = source.Round(1.0e8)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(-44.123456789, -77.987654321)
+	expected = NewPoint(-44., -78.)
+	res = source.Round(1)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(-44.123456789, -77.987654321)
+	expected = NewPoint(-44.1, -78.0)
+	res = source.Round(1.0e1)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(-44.123456789, -77.987654321)
+	expected = NewPoint(-44.123457, -77.987654)
+	res = source.Round(1.0e6)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+
+	source = NewPoint(-42.6, -73.6)
+	expected = NewPoint(-42.6, -73.6)
+	res = source.Round(1.0e8)
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+}
