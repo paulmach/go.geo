@@ -474,3 +474,12 @@ func TestPointRound(t *testing.T) {
 		t.Errorf("point, round expected %v == %v", res, expected)
 	}
 }
+
+func TestPointRoundDefault(t *testing.T) {
+	source := NewPoint(44.123456789, 77.987654321)
+	expected := NewPoint(44.12346, 77.98765)
+	res := source.Round()
+	if !res.Equals(expected) {
+		t.Errorf("point, round expected %v == %v", res, expected)
+	}
+}
