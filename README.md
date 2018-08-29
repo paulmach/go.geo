@@ -1,10 +1,15 @@
-go.geo
-======
+go.geo (deprecated)
+===================
 
 Go.geo is a geometry/geography library in [Go](http://golang.org). The primary use
 case is GIS geometry manipulation on the server side vs. in the browser using javascript.
 This may be motivated by memory, computation time or data privacy constraints.
 All objects are defined in a 2D context.
+
+### Important, deprecated
+This package is deprecated. While bugs will be fixed, new features will not be added, at least by me :). 
+I have written a new geometry library [orb](https://github.com/paulmach/orb) that does things much better
+in both a Geo way and a Go way.
 
 #### Imports as package name `geo`:
 
